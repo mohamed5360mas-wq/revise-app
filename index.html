@@ -5,53 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Revise - إدارة المقاولات والحسابات</title>
   <meta name="theme-color" content="#5c0b1e">
-  <link rel="manifest" href="manifest.json">
   <style>
     :root { --primary: #5c0b1e; --gold: #c59b27; --bg: #f4f5f7; --card: #ffffff; --text: #1f2937; --muted: #6b7280; --green: #15803d; --red: #b91c1c; }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 85px; }
     .hidden { display: none !important; }
     header { background: var(--primary); color: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     header h1 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
     .badge { background: var(--gold); color: #111; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
-    .container { padding: 14px; max-width: 600px; margin: auto; }
+    .container { padding: 14px; max-width: 650px; margin: auto; }
     .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    input, select, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 10px; border: 1px solid #d1d5db; font-size: 15px; }
+    input, select, button { width: 100%; padding: 11px; margin-top: 8px; border-radius: 10px; border: 1px solid #d1d5db; font-size: 14px; }
     button { background: var(--primary); color: #fff; border: none; font-weight: bold; cursor: pointer; }
     button.secondary { background: #e5e7eb; color: #111; }
     button.gold { background: var(--gold); color: #111; }
     button.green { background: var(--green); color: #fff; }
     button.red { background: var(--red); color: #fff; }
-    .row { display: flex; gap: 8px; }
+    button.sm { width: auto; padding: 5px 10px; font-size: 12px; margin: 0; }
+    .row { display: flex; gap: 8px; align-items: center; }
     .fav-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; }
-    .fav-chip { background: #fff; border: 1.5px solid var(--gold); color: var(--primary); padding: 8px 14px; border-radius: 20px; white-space: nowrap; font-weight: bold; font-size: 13px; cursor: pointer; }
-    .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .fav-chip { background: #fff; border: 1.5px solid var(--gold); color: var(--primary); padding: 7px 13px; border-radius: 20px; white-space: nowrap; font-weight: bold; font-size: 13px; cursor: pointer; }
+    .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; gap: 8px; }
     .tx-item:last-child { border-bottom: none; }
     .amt-out { color: var(--red); font-weight: bold; }
     .amt-in { color: var(--green); font-weight: bold; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; border-top: 1px solid #e5e7eb; padding: 6px 0; z-index: 20; }
-    .nav-btn { flex: 1; text-align: center; background: none; color: var(--muted); border: none; margin: 0; padding: 6px; font-size: 12px; }
+    .nav-btn { flex: 1; text-align: center; background: none; color: var(--muted); border: none; margin: 0; padding: 6px 2px; font-size: 11px; }
     .nav-btn.active { color: var(--primary); font-weight: bold; }
-    .fab { position: fixed; bottom: 72px; left: 18px; width: 56px; height: 56px; border-radius: 50%; background: var(--gold); color: #111; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); z-index: 15; border: none; padding: 0; margin: 0; }
+    .fab { position: fixed; bottom: 72px; left: 18px; width: 54px; height: 54px; border-radius: 50%; background: var(--gold); color: #111; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); z-index: 15; border: none; padding: 0; margin: 0; }
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; justify-content: center; z-index: 30; }
     .modal-content { background: #fff; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; max-height: 90vh; overflow-y: auto; }
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .stat-box { background: #fff; padding: 14px; border-radius: 12px; text-align: center; border-top: 3px solid var(--gold); }
-    .stat-box small { color: var(--muted); display: block; }
-    .stat-box strong { font-size: 18px; color: var(--primary); }
+    .stat-box { background: #fff; padding: 12px; border-radius: 12px; text-align: center; border-top: 3px solid var(--gold); }
+    .stat-box small { color: var(--muted); display: block; font-size: 12px; }
+    .stat-box strong { font-size: 17px; color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px; text-align: right; }
+    th { background: #f3f4f6; }
+    @media print {
+      header, .bottom-nav, .fab, .no-print { display: none !important; }
+      body { background: #fff; padding: 0; }
+      .card { box-shadow: none; border: none; padding: 0; }
+    }
   </style>
 </head>
 <body>
 
   <!-- شاشة تسجيل الدخول -->
-  <div id="authScreen" class="container" style="margin-top: 40px;">
+  <div id="authScreen" class="container" style="margin-top: 50px;">
     <div class="card" style="text-align:center;">
       <h2 style="color:var(--primary); margin-bottom:4px;">REVISE</h2>
       <p style="color:var(--muted); margin-top:0; font-size:13px;">للمقاولات العامة والتشطيبات</p>
       <input type="text" id="loginId" placeholder="رقم الموبايل أو البريد الإلكتروني">
-      <input type="password" id="loginPass" placeholder="كلمة المرور (6 أرقام أو أكثر)">
+      <input type="password" id="loginPass" placeholder="كلمة المرور">
       <button id="btnLogin">تسجيل الدخول</button>
-      <button id="btnRegister" class="secondary" style="margin-top:8px;">إنشاء حساب المدير (لأول مرة فقط)</button>
       <p id="authMsg" style="color:var(--red); font-size:13px; margin-top:10px;"></p>
     </div>
   </div>
@@ -59,55 +66,109 @@
   <!-- الشاشة الرئيسية للتطبيق -->
   <div id="appScreen" class="hidden">
     <header>
-      <h1>REVISE <span id="roleBadge" class="badge">المدير</span></h1>
-      <button id="btnLogout" style="width:auto; padding:6px 12px; margin:0; background:rgba(255,255,255,0.15); font-size:13px;">خروج</button>
+      <h1>REVISE <span id="roleBadge" class="badge">...</span></h1>
+      <button id="btnLogout" class="sm" style="background:rgba(255,255,255,0.15);">خروج</button>
     </header>
 
     <div class="container">
-      <!-- شريط المفضلة للإدخال السريع -->
-      <div id="favBar" class="fav-bar"></div>
+      <div id="favBar" class="fav-bar no-print"></div>
 
       <!-- تبويب الرئيسية -->
       <div id="tabHome">
-        <div class="stat-grid">
+        <div class="stat-grid no-print">
           <div class="stat-box"><small>إجمالي المصروفات</small><strong id="statOut">0 ج</strong></div>
-          <div class="stat-box"><small>معلق للاعتماد</small><strong id="statPending">0</strong></div>
+          <div class="stat-box"><small>إجمالي الإيرادات</small><strong id="statIn" style="color:var(--green)">0 ج</strong></div>
         </div>
         <div class="card">
-          <h3 style="margin-top:0; font-size:16px;">أحدث العمليات</h3>
-          <div id="txList"><p style="color:var(--muted); text-align:center;">لا توجد عمليات بعد</p></div>
+          <div class="row no-print" style="justify-content:space-between; margin-bottom:8px;">
+            <h3 style="margin:0; font-size:15px;">أحدث العمليات</h3>
+            <span id="statPendingBadge" class="badge">0 معلق</span>
+          </div>
+          <div id="txList"><p style="color:var(--muted); text-align:center;">جاري التحميل...</p></div>
         </div>
       </div>
 
       <!-- تبويب المشاريع -->
       <div id="tabProjects" class="hidden">
-        <div class="card">
-          <h3 style="margin-top:0; font-size:16px;">إضافة مشروع / تصنيف جديد</h3>
+        <div id="addProjBox" class="card">
+          <h3 style="margin-top:0; font-size:15px;">إضافة مشروع جديد</h3>
           <input type="text" id="projName" placeholder="اسم المشروع (مثلاً: عمارة الزمالك)">
           <button id="btnAddProj" class="gold">إضافة المشروع</button>
         </div>
         <div class="card">
-          <h3 style="margin-top:0; font-size:16px;">المشاريع النشطة</h3>
+          <h3 style="margin-top:0; font-size:15px;">المشاريع النشطة</h3>
           <div id="projList"></div>
+        </div>
+      </div>
+
+      <!-- تبويب الفريق والصنايعية (للمدير فقط) -->
+      <div id="tabTeam" class="hidden">
+        <div class="card">
+          <h3 style="margin-top:0; font-size:15px;">إضافة موظف / صنايعي جديد</h3>
+          <input type="text" id="uName" placeholder="الاسم (مثلاً: م. أحمد أو أسطى حسن)">
+          <input type="tel" id="uPhone" placeholder="رقم الموبايل (يُستخدم للدخول)">
+          <input type="password" id="uPass" placeholder="كلمة المرور (6 أرقام أو أكثر)">
+          <select id="uRole">
+            <option value="engineer">مهندس موقع (يسجل مصروفات)</option>
+            <option value="accountant">محاسب (يسجل مصروفات)</option>
+            <option value="worker">صنايعي / مقاول باطن (يرى حسابه فقط)</option>
+            <option value="admin">مدير (صلاحية كاملة)</option>
+          </select>
+          <button id="btnCreateUser" class="gold">إنشاء الحساب</button>
+          <p id="teamMsg" style="font-size:13px; margin-top:8px;"></p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0; font-size:15px;">أعضاء الفريق</h3>
+          <div id="teamList"></div>
+        </div>
+      </div>
+
+      <!-- تبويب التقارير والنسخ الاحتياطي -->
+      <div id="tabReports" class="hidden">
+        <div class="card no-print">
+          <h3 style="margin-top:0; font-size:15px;">استخراج كشف حساب (PDF)</h3>
+          <select id="repFilterType" onchange="updateReportOptions()">
+            <option value="all">كل العمليات المعتمدة</option>
+            <option value="project">حسب المشروع</option>
+            <option value="worker">حسب الصنايعي / الموظف</option>
+          </select>
+          <select id="repFilterVal" class="hidden"></select>
+          <div class="row">
+            <button onclick="generateReport()" class="gold">عرض الكشف</button>
+            <button onclick="window.print()" class="green">طباعة / حفظ PDF</button>
+          </div>
+        </div>
+        <div id="reportArea" class="card hidden"></div>
+        <div id="backupBox" class="card no-print">
+          <h3 style="margin-top:0; font-size:15px;">النسخ الاحتياطي (مجاني)</h3>
+          <p style="font-size:12px; color:var(--muted); margin-top:0;">حمّل نسخة كاملة من كل المشاريع والعمليات على جهازك في أي وقت.</p>
+          <button id="btnBackup" class="secondary">⬇️ تحميل نسخة احتياطية (JSON)</button>
         </div>
       </div>
     </div>
 
-    <button class="fab" id="btnOpenModal">+</button>
+    <button class="fab no-print" id="btnOpenModal">+</button>
 
-    <nav class="bottom-nav">
+    <nav class="bottom-nav no-print">
       <button class="nav-btn active" onclick="switchTab('Home', this)">🏠 الرئيسية</button>
-      <button class="nav-btn" onclick="switchTab('Projects', this)">🏗️ المشاريع</button>
+      <button class="nav-btn" id="navProjects" onclick="switchTab('Projects', this)">🏗️ المشاريع</button>
+      <button class="nav-btn hidden" id="navTeam" onclick="switchTab('Team', this)">👥 الفريق</button>
+      <button class="nav-btn hidden" id="navReports" onclick="switchTab('Reports', this)">📄 التقارير</button>
     </nav>
   </div>
 
-  <!-- نافذة إضافة مصروف سريع -->
+  <!-- نافذة إضافة عملية -->
   <div id="txModal" class="modal hidden">
     <div class="modal-content">
-      <h3 style="margin-top:0; color:var(--primary);">تسجيل مصروف / عملية</h3>
+      <h3 style="margin-top:0; color:var(--primary);">تسجيل عملية جديدة</h3>
+      <select id="txType">
+        <option value="out">مصروف / دفعة (خارج)</option>
+        <option value="in">إيراد / مستخلص (داخل)</option>
+      </select>
       <select id="txProject"></select>
+      <select id="txWorker"><option value="">-- بدون صنايعي محدد --</option></select>
       <input type="number" id="txAmount" placeholder="المبلغ (جنيه)" inputmode="decimal">
-      <input type="text" id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، يومية، نقل)">
+      <input type="text" id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، يومية، سقالات)">
       <div class="row">
         <button id="btnSaveTx" class="green">حفظ العملية</button>
         <button id="btnCloseModal" class="secondary">إلغاء</button>
@@ -118,7 +179,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, setDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB11n-Fi_L0AmTtX8_Vc7v737RWFnXEkZQ",
@@ -132,56 +193,99 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+    const secondaryAuth = getAuth(secondaryApp);
 
     let currentUser = null;
-    let projects = [];
+    let userRole = 'worker';
+    let projects = [], usersList = [], allTxs = [];
 
-    const formatEmail = (val) => val.includes('@') ? val.trim() : `${val.trim()}@revise.app`;
+    const SUPER_ADMINS = ['mohamed5360mas@gmail.com', '01000227438@revise.app'];
+    const formatEmail = (val) => val.includes('@') ? val.trim().toLowerCase() : `${val.trim()}@revise.app`;
+    const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي' };
 
     document.getElementById('btnLogin').onclick = async () => {
       const id = document.getElementById('loginId').value;
       const pass = document.getElementById('loginPass').value;
+      document.getElementById('authMsg').innerText = "جاري الدخول...";
       try {
         await signInWithEmailAndPassword(auth, formatEmail(id), pass);
+        document.getElementById('authMsg').innerText = "";
       } catch (e) {
-        document.getElementById('authMsg').innerText = "خطأ في الدخول: " + e.message;
-      }
-    };
-
-    document.getElementById('btnRegister').onclick = async () => {
-      const id = document.getElementById('loginId').value;
-      const pass = document.getElementById('loginPass').value;
-      try {
-        await createUserWithEmailAndPassword(auth, formatEmail(id), pass);
-      } catch (e) {
-        document.getElementById('authMsg').innerText = "خطأ في إنشاء الحساب: " + e.message;
+        document.getElementById('authMsg').innerText = "بيانات الدخول غير صحيحة";
       }
     };
 
     document.getElementById('btnLogout').onclick = () => signOut(auth);
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       currentUser = user;
-      if (user) {
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.remove('hidden');
-        loadData();
-      } else {
+      if (!user) {
         document.getElementById('authScreen').classList.remove('hidden');
         document.getElementById('appScreen').classList.add('hidden');
+        return;
       }
+
+      if (SUPER_ADMINS.includes(user.email.toLowerCase())) {
+        userRole = 'admin';
+      } else {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (!uDoc.exists() || !uDoc.data().active) {
+          alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
+          await signOut(auth);
+          return;
+        }
+        userRole = uDoc.data().role || 'worker';
+      }
+
+      setupUIForRole();
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+      loadData();
     });
 
-    function loadData() {
-      onSnapshot(collection(db, "projects"), (snap) => {
-        projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderProjects();
-      });
+    function setupUIForRole() {
+      const isAdmin = userRole === 'admin';
+      const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
+      document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
+      document.getElementById('navTeam').classList.toggle('hidden', !isAdmin);
+      document.getElementById('navReports').classList.toggle('hidden', !isAdmin);
+      document.getElementById('navProjects').classList.toggle('hidden', !isStaff);
+      document.getElementById('addProjBox').classList.toggle('hidden', !isAdmin);
+      document.getElementById('btnOpenModal').classList.toggle('hidden', !isStaff);
+    }
 
-      const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+    function loadData() {
+      const isAdmin = userRole === 'admin';
+      const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
+
+      if (isStaff) {
+        onSnapshot(collection(db, "projects"), (snap) => {
+          projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderProjects();
+        });
+      }
+
+      if (isAdmin) {
+        onSnapshot(collection(db, "users"), (snap) => {
+          usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderTeam();
+        });
+      }
+
+      let q;
+      if (isAdmin) {
+        q = collection(db, "transactions");
+      } else if (isStaff) {
+        q = query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid), where("status", "==", "pending"));
+      } else {
+        q = query(collection(db, "transactions"), where("workerId", "==", currentUser.uid));
+      }
+
       onSnapshot(q, (snap) => {
-        const txs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderTxs(txs);
+        allTxs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        renderTxs();
       });
     }
 
@@ -189,7 +293,7 @@
       const list = document.getElementById('projList');
       const sel = document.getElementById('txProject');
       const fav = document.getElementById('favBar');
-      list.innerHTML = projects.length ? '' : '<p style="color:#666">أضف أول مشروع لك</p>';
+      list.innerHTML = projects.length ? '' : '<p style="color:#666">لا توجد مشاريع بعد</p>';
       sel.innerHTML = '<option value="عام">عام</option>';
       fav.innerHTML = '';
 
@@ -200,30 +304,60 @@
       });
     }
 
-    function renderTxs(txs) {
-      const list = document.getElementById('txList');
-      let total = 0, pending = 0;
-      list.innerHTML = txs.length ? '' : '<p style="color:#666; text-align:center;">لا توجد عمليات بعد</p>';
-      txs.forEach(t => {
-        total += Number(t.amount || 0);
-        if (t.status === 'pending') pending++;
-        const approveBtn = t.status === 'pending'
-          ? `<button onclick="approveTx('${t.id}')" style="width:auto; padding:4px 10px; font-size:12px; margin:0;" class="green">اعتماد</button>`
-          : `<span style="font-size:11px; color:var(--green);">✔ معتمد</span>`;
+    function renderTeam() {
+      const list = document.getElementById('teamList');
+      const wSel = document.getElementById('txWorker');
+      list.innerHTML = usersList.length ? '' : '<p style="color:#666">لم يتم إضافة أعضاء بعد</p>';
+      wSel.innerHTML = '<option value="">-- بدون صنايعي محدد --</option>';
+
+      usersList.forEach(u => {
+        wSel.innerHTML += `<option value="${u.id}">${u.name} (${roleLabels[u.role] || u.role})</option>`;
         list.innerHTML += `
           <div class="tx-item">
             <div>
-              <strong>${t.project || 'عام'}</strong> - ${t.note || ''}<br>
-              <small style="color:#666">${t.status === 'pending' ? '⏳ معلق' : '✅ تم الاعتماد'}</small>
+              <strong>${u.name}</strong> <span class="badge">${roleLabels[u.role] || u.role}</span><br>
+              <small style="color:#666">📱 ${u.phone}</small>
+            </div>
+            <button onclick="toggleUser('${u.id}', ${u.active})" class="sm ${u.active ? 'red' : 'green'}">
+              ${u.active ? 'إيقاف' : 'تفعيل'}
+            </button>
+          </div>`;
+      });
+    }
+
+    function renderTxs() {
+      const list = document.getElementById('txList');
+      const isAdmin = userRole === 'admin';
+      let outSum = 0, inSum = 0, pending = 0;
+      list.innerHTML = allTxs.length ? '' : '<p style="color:#666; text-align:center;">لا توجد عمليات</p>';
+
+      allTxs.forEach(t => {
+        const amt = Number(t.amount || 0);
+        if (t.type === 'in') inSum += amt; else outSum += amt;
+        if (t.status === 'pending') pending++;
+
+        const actions = isAdmin ? `
+          <div class="row" style="margin-top:4px; justify-content:flex-end;">
+            ${t.status === 'pending' ? `<button onclick="approveTx('${t.id}')" class="sm green">اعتماد</button>` : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>'}
+            <button onclick="deleteTx('${t.id}')" class="sm secondary" style="color:var(--red);">حذف</button>
+          </div>` : `<small style="color:#666">${t.status === 'pending' ? '⏳ معلق' : '✅ معتمد'}</small>`;
+
+        list.innerHTML += `
+          <div class="tx-item">
+            <div>
+              <strong>${t.project || 'عام'}</strong> ${t.workerName ? `• 👷 ${t.workerName}` : ''}<br>
+              <small style="color:#555">${t.note || ''}</small>
             </div>
             <div style="text-align:left;">
-              <div class="amt-out">${Number(t.amount).toLocaleString()} ج</div>
-              ${approveBtn}
+              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</div>
+              ${actions}
             </div>
           </div>`;
       });
-      document.getElementById('statOut').innerText = total.toLocaleString() + ' ج';
-      document.getElementById('statPending').innerText = pending;
+
+      document.getElementById('statOut').innerText = outSum.toLocaleString() + ' ج';
+      document.getElementById('statIn').innerText = inSum.toLocaleString() + ' ج';
+      document.getElementById('statPendingBadge').innerText = `${pending} معلق`;
     }
 
     document.getElementById('btnAddProj').onclick = async () => {
@@ -231,6 +365,33 @@
       if (!name) return;
       await addDoc(collection(db, "projects"), { name, createdAt: serverTimestamp() });
       document.getElementById('projName').value = '';
+    };
+
+    document.getElementById('btnCreateUser').onclick = async () => {
+      const name = document.getElementById('uName').value.trim();
+      const phone = document.getElementById('uPhone').value.trim();
+      const pass = document.getElementById('uPass').value;
+      const role = document.getElementById('uRole').value;
+      const msg = document.getElementById('teamMsg');
+      if (!name || !phone || pass.length < 6) {
+        msg.style.color = 'var(--red)'; msg.innerText = "أكمل البيانات (كلمة المرور 6 أحرف على الأقل)"; return;
+      }
+      msg.style.color = '#333'; msg.innerText = "جاري إنشاء الحساب...";
+      try {
+        const cred = await createUserWithEmailAndPassword(secondaryAuth, formatEmail(phone), pass);
+        await setDoc(doc(db, "users", cred.user.uid), { name, phone, role, active: true, createdAt: serverTimestamp() });
+        await signOut(secondaryAuth);
+        msg.style.color = 'var(--green)'; msg.innerText = `✅ تم إنشاء حساب ${name} بنجاح`;
+        document.getElementById('uName').value = '';
+        document.getElementById('uPhone').value = '';
+        document.getElementById('uPass').value = '';
+      } catch (e) {
+        msg.style.color = 'var(--red)'; msg.innerText = "خطأ: " + e.message;
+      }
+    };
+
+    window.toggleUser = async (uid, currentStatus) => {
+      await updateDoc(doc(db, "users", uid), { active: !currentStatus });
     };
 
     document.getElementById('btnOpenModal').onclick = () => document.getElementById('txModal').classList.remove('hidden');
@@ -243,12 +404,16 @@
     };
 
     document.getElementById('btnSaveTx').onclick = async () => {
+      const type = document.getElementById('txType').value;
       const project = document.getElementById('txProject').value;
+      const workerId = document.getElementById('txWorker').value;
+      const workerObj = usersList.find(u => u.id === workerId);
       const amount = Number(document.getElementById('txAmount').value);
       const note = document.getElementById('txNote').value.trim();
       if (!amount) return;
       await addDoc(collection(db, "transactions"), {
-        project, amount, note, status: 'pending',
+        type, project, workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
+        amount, note, status: userRole === 'admin' ? 'approved' : 'pending',
         createdBy: currentUser.uid, createdAt: serverTimestamp()
       });
       document.getElementById('txAmount').value = '';
@@ -256,13 +421,60 @@
       document.getElementById('txModal').classList.add('hidden');
     };
 
-    window.approveTx = async (id) => {
-      await updateDoc(doc(db, "transactions", id), { status: 'approved' });
+    window.approveTx = async (id) => await updateDoc(doc(db, "transactions", id), { status: 'approved' });
+    window.deleteTx = async (id) => { if (confirm("حذف هذه العملية نهائياً؟")) await deleteDoc(doc(db, "transactions", id)); };
+
+    window.updateReportOptions = () => {
+      const type = document.getElementById('repFilterType').value;
+      const valSel = document.getElementById('repFilterVal');
+      if (type === 'all') { valSel.classList.add('hidden'); return; }
+      valSel.classList.remove('hidden');
+      valSel.innerHTML = '';
+      if (type === 'project') {
+        projects.forEach(p => valSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+      } else {
+        usersList.forEach(u => valSel.innerHTML += `<option value="${u.id}">${u.name}</option>`);
+      }
+    };
+
+    window.generateReport = () => {
+      const type = document.getElementById('repFilterType').value;
+      const val = document.getElementById('repFilterVal').value;
+      let filtered = allTxs.filter(t => t.status === 'approved');
+      let title = "كشف حساب عام - شركة ريفايس";
+      if (type === 'project') { filtered = filtered.filter(t => t.project === val); title = `كشف حساب مشروع: ${val}`; }
+      if (type === 'worker') {
+        const w = usersList.find(u => u.id === val);
+        filtered = filtered.filter(t => t.workerId === val);
+        title = `كشف حساب: ${w ? w.name : ''}`;
+      }
+      let outS = 0, inS = 0, rows = '';
+      filtered.forEach(t => {
+        const amt = Number(t.amount || 0);
+        if (t.type === 'in') inS += amt; else outS += amt;
+        const dt = t.createdAt ? new Date(t.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : '';
+        rows += `<tr><td>${dt}</td><td>${t.project}</td><td>${t.note || ''}</td><td>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()}</td></tr>`;
+      });
+      const area = document.getElementById('reportArea');
+      area.classList.remove('hidden');
+      area.innerHTML = `
+        <h3 style="text-align:center; color:var(--primary); margin:0;">REVISE للمقاولات العامة</h3>
+        <p style="text-align:center; margin:4px 0 10px; font-size:13px;">${title}</p>
+        <table><thead><tr><th>التاريخ</th><th>المشروع</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>${rows || '<tr><td colspan="4" style="text-align:center">لا توجد عمليات</td></tr>'}</tbody></table>
+        <p style="margin-top:10px; font-weight:bold;">إجمالي المصروفات: ${outS.toLocaleString()} ج | إجمالي الإيرادات: ${inS.toLocaleString()} ج</p>`;
+    };
+
+    document.getElementById('btnBackup').onclick = () => {
+      const data = { date: new Date().toISOString(), projects, users: usersList, transactions: allTxs };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `revise-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
     };
 
     window.switchTab = (tab, btn) => {
-      document.getElementById('tabHome').classList.toggle('hidden', tab !== 'Home');
-      document.getElementById('tabProjects').classList.toggle('hidden', tab !== 'Projects');
+      ['Home', 'Projects', 'Team', 'Reports'].forEach(t => document.getElementById('tab' + t).classList.toggle('hidden', t !== tab));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     };
