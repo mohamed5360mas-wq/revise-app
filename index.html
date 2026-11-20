@@ -70,7 +70,7 @@
   <!-- الشاشة الرئيسية للتطبيق -->
   <div id="appScreen" class="hidden">
     <header>
-      <h1>REVISE <span id="roleBadge" class="badge">...</span></h1>
+      <h1>REVISE <small style="font-size:11px; opacity:0.8;">v5</small> <span id="roleBadge" class="badge">...</span></h1>
       <button id="btnLogout" class="sm" style="background:rgba(255,255,255,0.15);">خروج</button>
     </header>
 
@@ -105,7 +105,7 @@
         </div>
       </div>
 
-      <!-- تبويب الفريق والصنايعية (للمدير فقط) -->
+      <!-- تبويب الفريق والصنايعية -->
       <div id="tabTeam" class="hidden">
         <div class="card">
           <h3 style="margin-top:0; font-size:15px;">إضافة موظف / صنايعي جديد</h3>
@@ -169,7 +169,7 @@
         <option value="out">مصروف / دفعة (خارج)</option>
         <option value="in">إيراد / مستخلص (داخل)</option>
       </select>
-      <select id="txProject"></select>
+      <select id="txProject"><option value="عام">عام</option></select>
       <select id="txWorker"><option value="">-- بدون صنايعي محدد --</option></select>
       <input type="number" id="txAmount" placeholder="المبلغ (جنيه)" inputmode="decimal">
       <input type="text" id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، يومية، سقالات)">
@@ -204,29 +204,56 @@
     const secondaryApp = initializeApp(firebaseConfig, "Secondary");
     const secondaryAuth = getAuth(secondaryApp);
 
-    const updateOnlineStatus = () => {
-      document.getElementById('offlineBanner').classList.toggle('hidden', navigator.onLine);
-    };
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    updateOnlineStatus();
-
     let currentUser = null;
     let userRole = 'worker';
     let dataLoaded = false;
-    let projects = [], usersList = [], allTxs = [];
+    let isSyncing = false;
+
+    // تحميل فوري من الذاكرة المحلية لعرض البيانات أوفلاين بدون انتظار
+    let projects = JSON.parse(localStorage.getItem('revise_cache_projects') || '[]');
+    let usersList = JSON.parse(localStorage.getItem('revise_cache_users') || '[]');
+    let allTxs = JSON.parse(localStorage.getItem('revise_cache_txs') || '[]');
+    let offlineQueue = JSON.parse(localStorage.getItem('revise_offline_queue') || '[]');
 
     const SUPER_ADMINS = ['mohamed5360mas@gmail.com', '01000227438@revise.app'];
     const formatEmail = (val) => val.includes('@') ? val.trim().toLowerCase() : `${val.trim()}@revise.app`;
     const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي' };
 
-    // فتح فوري من الذاكرة المحلية لو المستخدم مسجل دخول مسبقاً
+    async function syncOfflineQueue() {
+      if (!navigator.onLine || isSyncing || !offlineQueue.length || !auth.currentUser) return;
+      isSyncing = true;
+      const remaining = [];
+      for (const item of offlineQueue) {
+        try {
+          const { localId, pendingSync, ...payload } = item;
+          await addDoc(collection(db, "transactions"), { ...payload, createdAt: serverTimestamp() });
+        } catch (e) {
+          remaining.push(item);
+        }
+      }
+      offlineQueue = remaining;
+      localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
+      isSyncing = false;
+      renderTxs();
+    }
+
+    const updateOnlineStatus = () => {
+      document.getElementById('offlineBanner').classList.toggle('hidden', navigator.onLine);
+      if (navigator.onLine) syncOfflineQueue();
+    };
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
     if (localStorage.getItem('revise_uid')) {
       currentUser = { uid: localStorage.getItem('revise_uid') };
       userRole = localStorage.getItem('revise_role') || 'worker';
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
       setupUIForRole();
+      renderProjects();
+      renderTeam();
+      renderTxs();
       loadData();
     } else {
       document.getElementById('authScreen').classList.remove('hidden');
@@ -250,6 +277,7 @@
     };
 
     document.getElementById('btnLogout').onclick = async () => {
+      if (offlineQueue.length && !confirm("يوجد عمليات لم تُرفع بعد، هل تريد الخروج؟")) return;
       localStorage.removeItem('revise_uid');
       localStorage.removeItem('revise_role');
       dataLoaded = false;
@@ -259,7 +287,6 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // حماية أوفلاين: لا تخرج المستخدم لو النت مقطوع وله جلسة محفوظة
         if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
         localStorage.removeItem('revise_uid');
         localStorage.removeItem('revise_role');
@@ -295,6 +322,7 @@
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
       loadData();
+      syncOfflineQueue();
     });
 
     function setupUIForRole() {
@@ -317,6 +345,7 @@
       if (isStaff) {
         onSnapshot(collection(db, "projects"), (snap) => {
           projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          localStorage.setItem('revise_cache_projects', JSON.stringify(projects));
           renderProjects();
         });
       }
@@ -324,6 +353,7 @@
       if (isAdmin) {
         onSnapshot(collection(db, "users"), (snap) => {
           usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
           renderTeam();
         });
       }
@@ -340,6 +370,7 @@
       onSnapshot(q, (snap) => {
         allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
           .sort((a, b) => (b.createdAt?.seconds || Date.now()/1000) - (a.createdAt?.seconds || Date.now()/1000));
+        localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
         renderTxs();
       });
     }
@@ -383,20 +414,21 @@
     function renderTxs() {
       const list = document.getElementById('txList');
       const isAdmin = userRole === 'admin';
+      const combined = [...offlineQueue, ...allTxs];
       let outSum = 0, inSum = 0, pending = 0;
-      list.innerHTML = allTxs.length ? '' : '<p style="color:#666; text-align:center;">لا توجد عمليات</p>';
+      list.innerHTML = combined.length ? '' : '<p style="color:#666; text-align:center;">لا توجد عمليات</p>';
 
-      allTxs.forEach(t => {
+      combined.forEach(t => {
         const amt = Number(t.amount || 0);
         if (t.type === 'in') inSum += amt; else outSum += amt;
         if (t.status === 'pending') pending++;
 
         const syncTag = t.pendingSync ? ' <span style="font-size:10px; color:#b45309;">(⏳ بانتظار النت)</span>' : '';
-        const actions = isAdmin ? `
+        const actions = t.localId ? `<small style="color:#b45309;">محفوظ على الهاتف</small>` : (isAdmin ? `
           <div class="row" style="margin-top:4px; justify-content:flex-end;">
             ${t.status === 'pending' ? `<button onclick="approveTx('${t.id}')" class="sm green">اعتماد</button>` : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>'}
             <button onclick="deleteTx('${t.id}')" class="sm secondary" style="color:var(--red);">حذف</button>
-          </div>` : `<small style="color:#666">${t.status === 'pending' ? '⏳ معلق' : '✅ معتمد'}</small>`;
+          </div>` : `<small style="color:#666">${t.status === 'pending' ? '⏳ معلق' : '✅ معتمد'}</small>`);
 
         list.innerHTML += `
           <div class="tx-item">
@@ -462,17 +494,27 @@
 
     document.getElementById('btnSaveTx').onclick = () => {
       const type = document.getElementById('txType').value;
-      const project = document.getElementById('txProject').value;
+      const project = document.getElementById('txProject').value || 'عام';
       const workerId = document.getElementById('txWorker').value;
       const workerObj = usersList.find(u => u.id === workerId);
       const amount = Number(document.getElementById('txAmount').value);
       const note = document.getElementById('txNote').value.trim();
       if (!amount) return;
-      addDoc(collection(db, "transactions"), {
+
+      const payload = {
         type, project, workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
         amount, note, status: userRole === 'admin' ? 'approved' : 'pending',
-        createdBy: currentUser.uid, createdAt: serverTimestamp()
-      });
+        createdBy: currentUser.uid
+      };
+
+      if (!navigator.onLine || !auth.currentUser) {
+        offlineQueue.unshift({ ...payload, localId: Date.now(), pendingSync: true });
+        localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
+        renderTxs();
+      } else {
+        addDoc(collection(db, "transactions"), { ...payload, createdAt: serverTimestamp() });
+      }
+
       document.getElementById('txAmount').value = '';
       document.getElementById('txNote').value = '';
       document.getElementById('txModal').classList.add('hidden');
