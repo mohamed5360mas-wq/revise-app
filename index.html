@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Revise - إدارة المقاولات والحسابات</title>
   <meta name="theme-color" content="#5c0b1e">
+  <link rel="manifest" href="manifest.json">
   <style>
     :root { --primary: #5c0b1e; --gold: #c59b27; --bg: #f4f5f7; --card: #ffffff; --text: #1f2937; --muted: #6b7280; --green: #15803d; --red: #b91c1c; }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -497,6 +498,10 @@
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     };
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
   </script>
 </body>
 </html>
