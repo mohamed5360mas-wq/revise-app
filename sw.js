@@ -1,4 +1,4 @@
-const CACHE_NAME = 'revise-v3';
+const CACHE_NAME = 'revise-v4';
 const CORE_ASSETS = [
   './',
   './index.html',
