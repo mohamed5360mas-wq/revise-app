@@ -10,6 +10,7 @@
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 85px; }
     .hidden { display: none !important; }
+    #offlineBanner { background: var(--red); color: #fff; text-align: center; padding: 6px; font-size: 12px; font-weight: bold; }
     header { background: var(--primary); color: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     header h1 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
     .badge { background: var(--gold); color: #111; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
@@ -43,13 +44,15 @@
     th, td { border: 1px solid #ddd; padding: 6px; text-align: right; }
     th { background: #f3f4f6; }
     @media print {
-      header, .bottom-nav, .fab, .no-print { display: none !important; }
+      header, .bottom-nav, .fab, .no-print, #offlineBanner { display: none !important; }
       body { background: #fff; padding: 0; }
       .card { box-shadow: none; border: none; padding: 0; }
     }
   </style>
 </head>
 <body>
+
+  <div id="offlineBanner" class="hidden">⚠️ وضع عدم الاتصال: العمليات محفوظة محلياً وستُرفع تلقائياً عند عودة الإنترنت</div>
 
   <!-- شاشة تسجيل الدخول -->
   <div id="authScreen" class="container" style="margin-top: 50px;">
@@ -179,7 +182,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, setDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB11n-Fi_L0AmTtX8_Vc7v737RWFnXEkZQ",
@@ -192,9 +195,18 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db = initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
     const secondaryApp = initializeApp(firebaseConfig, "Secondary");
     const secondaryAuth = getAuth(secondaryApp);
+
+    const updateOnlineStatus = () => {
+      document.getElementById('offlineBanner').classList.toggle('hidden', navigator.onLine);
+    };
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
 
     let currentUser = null;
     let userRole = 'worker';
@@ -229,14 +241,19 @@
       if (SUPER_ADMINS.includes(user.email.toLowerCase())) {
         userRole = 'admin';
       } else {
-        const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (!uDoc.exists() || !uDoc.data().active) {
-          alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
-          await signOut(auth);
-          return;
+        try {
+          const uDoc = await getDoc(doc(db, "users", user.uid));
+          if (!uDoc.exists() || !uDoc.data().active) {
+            alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
+            await signOut(auth);
+            return;
+          }
+          userRole = uDoc.data().role || 'worker';
+        } catch (e) {
+          userRole = localStorage.getItem('revise_role') || 'worker';
         }
-        userRole = uDoc.data().role || 'worker';
       }
+      localStorage.setItem('revise_role', userRole);
 
       setupUIForRole();
       document.getElementById('authScreen').classList.add('hidden');
@@ -283,8 +300,8 @@
       }
 
       onSnapshot(q, (snap) => {
-        allTxs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
+          .sort((a, b) => (b.createdAt?.seconds || Date.now()/1000) - (a.createdAt?.seconds || Date.now()/1000));
         renderTxs();
       });
     }
@@ -336,6 +353,7 @@
         if (t.type === 'in') inSum += amt; else outSum += amt;
         if (t.status === 'pending') pending++;
 
+        const syncTag = t.pendingSync ? ' <span style="font-size:10px; color:#b45309;">(⏳ بانتظار النت)</span>' : '';
         const actions = isAdmin ? `
           <div class="row" style="margin-top:4px; justify-content:flex-end;">
             ${t.status === 'pending' ? `<button onclick="approveTx('${t.id}')" class="sm green">اعتماد</button>` : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>'}
@@ -345,7 +363,7 @@
         list.innerHTML += `
           <div class="tx-item">
             <div>
-              <strong>${t.project || 'عام'}</strong> ${t.workerName ? `• 👷 ${t.workerName}` : ''}<br>
+              <strong>${t.project || 'عام'}</strong> ${t.workerName ? `• 👷 ${t.workerName}` : ''}${syncTag}<br>
               <small style="color:#555">${t.note || ''}</small>
             </div>
             <div style="text-align:left;">
@@ -360,14 +378,15 @@
       document.getElementById('statPendingBadge').innerText = `${pending} معلق`;
     }
 
-    document.getElementById('btnAddProj').onclick = async () => {
+    document.getElementById('btnAddProj').onclick = () => {
       const name = document.getElementById('projName').value.trim();
       if (!name) return;
-      await addDoc(collection(db, "projects"), { name, createdAt: serverTimestamp() });
+      addDoc(collection(db, "projects"), { name, createdAt: serverTimestamp() });
       document.getElementById('projName').value = '';
     };
 
     document.getElementById('btnCreateUser').onclick = async () => {
+      if (!navigator.onLine) { alert("إنشاء حساب جديد يحتاج اتصال بالإنترنت."); return; }
       const name = document.getElementById('uName').value.trim();
       const phone = document.getElementById('uPhone').value.trim();
       const pass = document.getElementById('uPass').value;
@@ -390,8 +409,8 @@
       }
     };
 
-    window.toggleUser = async (uid, currentStatus) => {
-      await updateDoc(doc(db, "users", uid), { active: !currentStatus });
+    window.toggleUser = (uid, currentStatus) => {
+      updateDoc(doc(db, "users", uid), { active: !currentStatus });
     };
 
     document.getElementById('btnOpenModal').onclick = () => document.getElementById('txModal').classList.remove('hidden');
@@ -403,7 +422,7 @@
       document.getElementById('txAmount').focus();
     };
 
-    document.getElementById('btnSaveTx').onclick = async () => {
+    document.getElementById('btnSaveTx').onclick = () => {
       const type = document.getElementById('txType').value;
       const project = document.getElementById('txProject').value;
       const workerId = document.getElementById('txWorker').value;
@@ -411,7 +430,7 @@
       const amount = Number(document.getElementById('txAmount').value);
       const note = document.getElementById('txNote').value.trim();
       if (!amount) return;
-      await addDoc(collection(db, "transactions"), {
+      addDoc(collection(db, "transactions"), {
         type, project, workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
         amount, note, status: userRole === 'admin' ? 'approved' : 'pending',
         createdBy: currentUser.uid, createdAt: serverTimestamp()
@@ -421,8 +440,8 @@
       document.getElementById('txModal').classList.add('hidden');
     };
 
-    window.approveTx = async (id) => await updateDoc(doc(db, "transactions", id), { status: 'approved' });
-    window.deleteTx = async (id) => { if (confirm("حذف هذه العملية نهائياً؟")) await deleteDoc(doc(db, "transactions", id)); };
+    window.approveTx = (id) => updateDoc(doc(db, "transactions", id), { status: 'approved' });
+    window.deleteTx = (id) => { if (confirm("حذف هذه العملية نهائياً؟")) deleteDoc(doc(db, "transactions", id)); };
 
     window.updateReportOptions = () => {
       const type = document.getElementById('repFilterType').value;
@@ -452,7 +471,7 @@
       filtered.forEach(t => {
         const amt = Number(t.amount || 0);
         if (t.type === 'in') inS += amt; else outS += amt;
-        const dt = t.createdAt ? new Date(t.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : '';
+        const dt = t.createdAt?.seconds ? new Date(t.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'اليوم';
         rows += `<tr><td>${dt}</td><td>${t.project}</td><td>${t.note || ''}</td><td>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()}</td></tr>`;
       });
       const area = document.getElementById('reportArea');
