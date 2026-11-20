@@ -56,7 +56,7 @@
   <div id="offlineBanner" class="hidden">⚠️ وضع عدم الاتصال: العمليات محفوظة محلياً وستُرفع تلقائياً عند عودة الإنترنت</div>
 
   <!-- شاشة تسجيل الدخول -->
-  <div id="authScreen" class="container" style="margin-top: 50px;">
+  <div id="authScreen" class="container hidden" style="margin-top: 50px;">
     <div class="card" style="text-align:center;">
       <h2 style="color:var(--primary); margin-bottom:4px;">REVISE</h2>
       <p style="color:var(--muted); margin-top:0; font-size:13px;">للمقاولات العامة والتشطيبات</p>
@@ -182,7 +182,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, onSnapshot, query, where, doc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -196,6 +196,8 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
     const db = initializeFirestore(app, {
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
     });
@@ -211,17 +213,35 @@
 
     let currentUser = null;
     let userRole = 'worker';
+    let dataLoaded = false;
     let projects = [], usersList = [], allTxs = [];
 
     const SUPER_ADMINS = ['mohamed5360mas@gmail.com', '01000227438@revise.app'];
     const formatEmail = (val) => val.includes('@') ? val.trim().toLowerCase() : `${val.trim()}@revise.app`;
     const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي' };
 
+    // فتح فوري من الذاكرة المحلية لو المستخدم مسجل دخول مسبقاً
+    if (localStorage.getItem('revise_uid')) {
+      currentUser = { uid: localStorage.getItem('revise_uid') };
+      userRole = localStorage.getItem('revise_role') || 'worker';
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+      setupUIForRole();
+      loadData();
+    } else {
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
     document.getElementById('btnLogin').onclick = async () => {
+      if (!navigator.onLine) {
+        document.getElementById('authMsg').innerText = "تسجيل الدخول لأول مرة يحتاج إنترنت";
+        return;
+      }
       const id = document.getElementById('loginId').value;
       const pass = document.getElementById('loginPass').value;
       document.getElementById('authMsg').innerText = "جاري الدخول...";
       try {
+        await setPersistence(auth, browserLocalPersistence);
         await signInWithEmailAndPassword(auth, formatEmail(id), pass);
         document.getElementById('authMsg').innerText = "";
       } catch (e) {
@@ -229,15 +249,28 @@
       }
     };
 
-    document.getElementById('btnLogout').onclick = () => signOut(auth);
+    document.getElementById('btnLogout').onclick = async () => {
+      localStorage.removeItem('revise_uid');
+      localStorage.removeItem('revise_role');
+      dataLoaded = false;
+      await signOut(auth);
+      location.reload();
+    };
 
     onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
       if (!user) {
+        // حماية أوفلاين: لا تخرج المستخدم لو النت مقطوع وله جلسة محفوظة
+        if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
+        localStorage.removeItem('revise_uid');
+        localStorage.removeItem('revise_role');
+        dataLoaded = false;
         document.getElementById('authScreen').classList.remove('hidden');
         document.getElementById('appScreen').classList.add('hidden');
         return;
       }
+
+      currentUser = user;
+      localStorage.setItem('revise_uid', user.uid);
 
       if (SUPER_ADMINS.includes(user.email.toLowerCase())) {
         userRole = 'admin';
@@ -246,6 +279,8 @@
           const uDoc = await getDoc(doc(db, "users", user.uid));
           if (!uDoc.exists() || !uDoc.data().active) {
             alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
+            localStorage.removeItem('revise_uid');
+            localStorage.removeItem('revise_role');
             await signOut(auth);
             return;
           }
@@ -274,6 +309,8 @@
     }
 
     function loadData() {
+      if (dataLoaded) return;
+      dataLoaded = true;
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
 
