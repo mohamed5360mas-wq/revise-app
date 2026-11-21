@@ -62,6 +62,7 @@
     .w-box { background: var(--bg); padding: 10px; border-radius: 10px; text-align: center; }
     .w-box small { color: var(--muted); display: block; font-size: 11px; }
     .w-box strong { font-size: 15px; }
+    .custody-card { border-right: 4px solid var(--gold); }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
     th, td { border: 1px solid var(--border); padding: 6px; text-align: right; }
     th { background: var(--bg); }
@@ -119,6 +120,13 @@
           <div class="stat-box"><small>إيراد معتمد</small><strong id="statIn" style="color:var(--green)">0 ج</strong></div>
           <div class="stat-box"><small>معلق للاعتماد</small><strong id="statPend" style="color:#d97706">0 ج</strong></div>
         </div>
+
+        <!-- بطاقة عُهدة المشاريع للمهندس والمدير -->
+        <div id="custodyBox" class="card custody-card hidden no-print">
+          <h3 id="custodyTitle" style="margin:0 0 8px; font-size:14px; color:var(--primary);">💼 أرصدة العُهد حسب المشروع</h3>
+          <div id="custodyList"></div>
+        </div>
+
         <div class="card">
           <div class="row no-print" style="justify-content:space-between; margin-bottom:8px;">
             <h3 id="txListTitle" style="margin:0; font-size:15px;">أحدث العمليات</h3>
@@ -234,19 +242,21 @@
         <option value="general">مصروف عام / خامات (خارج)</option>
         <option value="daily">يومية صنايعي (أيام × سعر اليومية)</option>
         <option value="meters">شغل بالمتر (أمتار × سعر المتر)</option>
+        <option value="lump_sum">شغل مقطوعية لصنايعي (مبلغ ثابت)</option>
         <option value="advance">واصل / سلفة لصنايعي (خارج)</option>
         <option value="deduction">خصم على صنايعي</option>
-        <option value="income">إيراد / مستخلص عميل (داخل)</option>
+        <option value="custody" id="optCustody">تسليم عُهدة لمهندس على مشروع</option>
+        <option value="income" id="optIncome">إيراد / مستخلص عميل (داخل)</option>
       </select>
       <div id="calcBox" class="row hidden">
         <input type="number" id="calcQty" placeholder="العدد (أيام / أمتار)" inputmode="decimal" oninput="calcFromQty()">
         <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()">
       </div>
       <select id="txProject"><option value="general">عام</option></select>
-      <select id="txWorker"><option value="">-- بدون صنايعي محدد --</option></select>
+      <select id="txWorker"><option value="">-- بدون شخص محدد (صنايعي / مهندس) --</option></select>
       <input type="date" id="txDate">
       <input type="number" id="txAmount" placeholder="المبلغ (جنيه)" inputmode="decimal">
-      <input type="text" id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، يومية، خصم إتلاف)">
+      <input type="text" id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، عُهدة موقع، يومية)">
       <label style="display:block; font-size:12px; color:var(--muted); margin-top:8px;">📷 صورة الفاتورة / الإيصال (أقل من 500 ك.ب):</label>
       <input type="file" id="txReceipt" accept="image/*">
       <div class="row">
@@ -330,8 +340,7 @@
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // تنظيف تلقائي للكاش القديم عند كل إصدار جديد لمنع التجمّد
-    const APP_VER = '7.0';
+    const APP_VER = '8.0';
     if (localStorage.getItem('revise_app_ver') !== APP_VER) {
       ['revise_cache_projects', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
       localStorage.setItem('revise_app_ver', APP_VER);
@@ -354,10 +363,9 @@
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     const formatEmail = (val) => val.includes('@') ? val.trim().toLowerCase() : `${val.trim()}@revise.app`;
     const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي' };
-    const catLabels = { general: 'مصروف عام', daily: 'يومية', meters: 'أمتار', advance: 'واصل / سلفة', deduction: 'خصم', income: 'إيراد' };
+    const catLabels = { general: 'مصروف عام', daily: 'يومية', meters: 'أمتار', lump_sum: 'مقطوعية', advance: 'واصل / سلفة', deduction: 'خصم', custody: 'عُهدة مهندس', income: 'إيراد' };
     const projCatLabels = { active: 'مشاريع نشطة', finishing: 'واجهات وتشطيبات', done: 'خالص (منتهي)' };
 
-    // دالة التفقيط العربي للمبالغ
     function tafqeet(n) {
       n = Math.floor(Math.abs(Number(n) || 0));
       if (n === 0) return 'صفر جنيه مصري';
@@ -410,6 +418,7 @@
     let currentUser = null, userRole = 'worker', myAssignedProjects = [];
     let dataLoaded = false, isSyncing = false, showTrash = false, projFilter = 'all', searchQuery = '', unsubs = [];
     let assignTargetUid = null, lastReportRows = [];
+    let staffOwnTxs = [], staffCustodyTxs = [];
 
     const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
     let projects = readJson('revise_cache_projects', []);
@@ -469,15 +478,6 @@
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 
-    if (localStorage.getItem('revise_uid')) {
-      currentUser = { uid: localStorage.getItem('revise_uid') };
-      userRole = localStorage.getItem('revise_role') || 'worker';
-      myAssignedProjects = readJson('revise_assigned', []);
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
-      setupUIForRole(); renderProjects(); renderTeam(); renderTxs(); loadData();
-    }
-
     document.getElementById('btnLogin').onclick = async () => {
       if (!navigator.onLine) { document.getElementById('authMsg').innerText = "تسجيل الدخول لأول مرة يحتاج إنترنت"; return; }
       const id = document.getElementById('loginId').value;
@@ -498,44 +498,14 @@
       location.reload();
     };
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
-        clearListeners();
-        localStorage.removeItem('revise_uid'); localStorage.removeItem('revise_role');
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('appScreen').classList.add('hidden');
-        return;
-      }
-      currentUser = user;
-      localStorage.setItem('revise_uid', user.uid);
-      try {
-        const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (!uDoc.exists() || !uDoc.data().active) {
-          alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
-          clearListeners(); localStorage.removeItem('revise_uid');
-          await signOut(auth); return;
-        }
-        userRole = uDoc.data().role || 'worker';
-        myAssignedProjects = uDoc.data().assignedProjects || [];
-      } catch (e) {
-        userRole = localStorage.getItem('revise_role') || 'worker';
-        myAssignedProjects = readJson('revise_assigned', []);
-      }
-      localStorage.setItem('revise_role', userRole);
-      localStorage.setItem('revise_assigned', JSON.stringify(myAssignedProjects));
-      setupUIForRole();
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
-      loadData(); syncOfflineQueue();
-    });
-
     function setupUIForRole() {
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
       document.getElementById('btnSettings').classList.toggle('hidden', !isAdmin);
       document.getElementById('btnPrivate').classList.toggle('hidden', !isAdmin);
+      document.getElementById('optCustody').classList.toggle('hidden', !isAdmin);
+      document.getElementById('optIncome').classList.toggle('hidden', !isAdmin);
       document.getElementById('navTeam').classList.toggle('hidden', !isAdmin);
       document.getElementById('navReports').classList.toggle('hidden', !isAdmin);
       document.getElementById('navWorkers').classList.toggle('hidden', !isStaff);
@@ -545,6 +515,14 @@
       document.getElementById('btnToggleTrash').classList.toggle('hidden', !isAdmin);
     }
 
+    function mergeStaffTxs() {
+      const map = new Map();
+      [...staffOwnTxs, ...staffCustodyTxs].forEach(t => map.set(t.id, t));
+      allTxs = [...map.values()].sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+      localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
+      renderTxs(); renderWorkerLedger();
+    }
+
     function loadData() {
       if (dataLoaded) return;
       dataLoaded = true;
@@ -552,7 +530,6 @@
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       const onErr = (err) => console.warn("Firestore:", err.message);
 
-      // تحميل إعدادات الشركة وترويسة الـ PDF
       unsubs.push(onSnapshot(doc(db, "settings", "company"), (snap) => {
         if (snap.exists()) {
           companySettings = { ...companySettings, ...snap.data() };
@@ -572,32 +549,90 @@
         unsubs.push(onSnapshot(collection(db, "projects"), (snap) => {
           projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           localStorage.setItem('revise_cache_projects', JSON.stringify(projects));
-          renderProjects();
+          renderProjects(); renderCustodySummary();
         }, onErr));
 
         unsubs.push(onSnapshot(collection(db, "users"), (snap) => {
           usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
-          renderTeam();
+          renderTeam(); renderCustodySummary();
         }, onErr));
       }
 
-      let q;
-      if (isAdmin) q = collection(db, "transactions");
-      else if (isStaff) q = query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid));
-      else q = query(collection(db, "transactions"), where("workerId", "==", currentUser.uid), where("status", "==", "approved"));
-
-      unsubs.push(onSnapshot(q, (snap) => {
-        allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
-          .sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-        localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
-        renderTxs(); renderWorkerLedger();
-      }, (err) => {
-        document.getElementById('txList').innerHTML = `<p style="color:var(--red); text-align:center;">تعذر تحميل البيانات (${esc(err.code)})</p>`;
-      }));
+      if (isAdmin) {
+        unsubs.push(onSnapshot(collection(db, "transactions"), (snap) => {
+          allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
+            .sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+          localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
+          renderTxs(); renderWorkerLedger();
+        }, (err) => {
+          document.getElementById('txList').innerHTML = `<p style="color:var(--red); text-align:center;">تعذر تحميل البيانات (${esc(err.code)})</p>`;
+        }));
+      } else if (isStaff) {
+        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid)), (snap) => {
+          staffOwnTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
+          mergeStaffTxs();
+        }, onErr));
+        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("workerId", "==", currentUser.uid), where("category", "==", "custody")), (snap) => {
+          staffCustodyTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
+          mergeStaffTxs();
+        }, onErr));
+      } else {
+        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("workerId", "==", currentUser.uid), where("status", "==", "approved")), (snap) => {
+          allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
+            .sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+          localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
+          renderTxs(); renderWorkerLedger();
+        }, onErr));
+      }
     }
 
-    // إعدادات الشركة وترويسة الـ PDF
+    // حساب وعرض عُهدة كل مهندس لكل مشروع على حدة
+    function renderCustodySummary() {
+      const box = document.getElementById('custodyBox');
+      const list = document.getElementById('custodyList');
+      if (userRole === 'worker') { box.classList.add('hidden'); return; }
+
+      const activeTxs = allTxs.filter(t => t.deleted !== true && t.status === 'approved');
+      const pairs = new Map();
+
+      activeTxs.forEach(t => {
+        if (t.category === 'custody' && t.workerId) {
+          const key = `${t.workerId}__${t.projectId || 'general'}`;
+          if (!pairs.has(key)) pairs.set(key, { uid: t.workerId, pid: t.projectId || 'general', projName: t.project || 'عام', received: 0, spent: 0 });
+          pairs.get(key).received += Number(t.amount || 0);
+        }
+      });
+
+      activeTxs.forEach(t => {
+        if (t.type === 'out' && t.category !== 'custody' && t.createdBy) {
+          const key = `${t.createdBy}__${t.projectId || 'general'}`;
+          if (pairs.has(key)) pairs.get(key).spent += Number(t.amount || 0);
+        }
+      });
+
+      const entries = [...pairs.values()].filter(e => userRole === 'admin' || e.uid === currentUser?.uid);
+      if (!entries.length) { box.classList.add('hidden'); return; }
+
+      box.classList.remove('hidden');
+      document.getElementById('custodyTitle').innerText = userRole === 'admin' ? '💼 عُهد المهندسين حسب المشروع' : '💼 رصيد عُهدتك المتبقي لكل مشروع';
+      list.innerHTML = entries.map(e => {
+        const uName = usersList.find(u => u.id === e.uid)?.name || 'مهندس';
+        const pName = projects.find(p => p.id === e.pid)?.name || e.projName;
+        const rem = e.received - e.spent;
+        return `<div class="tx-item">
+          <div>
+            <strong>🏗️ ${esc(pName)}</strong> ${userRole === 'admin' ? `<span class="badge">${esc(uName)}</span>` : ''}<br>
+            <small style="color:var(--muted)">مستلم: ${e.received.toLocaleString()} ج • مصروف معتمد: ${e.spent.toLocaleString()} ج</small>
+          </div>
+          <div style="text-align:left;">
+            <strong style="color:${rem < 0 ? 'var(--red)' : 'var(--green)'}; font-size:15px;">${rem.toLocaleString()} ج</strong><br>
+            <small style="color:var(--muted)">متبقي</small>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
     document.getElementById('btnSettings').onclick = () => {
       document.getElementById('setNameAr').value = companySettings.nameAr || '';
       document.getElementById('setNameEn').value = companySettings.nameEn || '';
@@ -643,7 +678,6 @@
       }
     };
 
-    // الحسابات السرية للمدير فقط
     document.getElementById('btnPrivate').onclick = () => {
       renderPrivate();
       document.getElementById('privateModal').classList.remove('hidden');
@@ -737,7 +771,7 @@
       const wSel = document.getElementById('txWorker');
       const ledgerSel = document.getElementById('workerSelect');
       list.innerHTML = usersList.length ? '' : '<p style="color:var(--muted)">لم يتم إضافة أعضاء بعد</p>';
-      wSel.innerHTML = '<option value="">-- بدون صنايعي محدد --</option>';
+      wSel.innerHTML = '<option value="">-- بدون شخص محدد (صنايعي / مهندس) --</option>';
       ledgerSel.innerHTML = '<option value="">-- اختر صنايعي / عامل --</option>';
 
       usersList.forEach(u => {
@@ -769,11 +803,11 @@
       const wid = document.getElementById('workerSelect').value;
       const box = document.getElementById('workerLedgerBox');
       if (!wid) { box.innerHTML = '<p style="color:var(--muted); font-size:13px;">اختر صنايعي لعرض كشف المستحق والسلف والخصومات والباقي.</p>'; return; }
-      const txs = [...offlineQueue, ...allTxs].filter(t => t.workerId === wid && t.deleted !== true && (userRole === 'admin' || t.status === 'approved'));
+      const txs = [...offlineQueue, ...allTxs].filter(t => t.workerId === wid && t.deleted !== true && t.status !== 'rejected' && (userRole === 'admin' || t.status === 'approved'));
       let earned = 0, adv = 0, ded = 0, rows = '';
       txs.forEach(t => {
         const amt = Number(t.amount || 0);
-        if (t.category === 'daily' || t.category === 'meters') earned += amt;
+        if (t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum') earned += amt;
         if (t.category === 'advance') adv += amt;
         if (t.category === 'deduction') ded += amt;
         rows += `<div class="tx-item"><div><strong>${esc(catLabels[t.category] || '')}</strong><br><small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || '')}</small></div><strong>${amt.toLocaleString()} ج</strong></div>`;
@@ -831,8 +865,10 @@
       [...offlineQueue, ...allTxs].filter(t => t.deleted !== true).forEach(t => {
         const amt = Number(t.amount || 0);
         if (t.status === 'pending') { pendingCount++; pendSum += amt; }
-        else if (t.type === 'in') inApproved += amt;
-        else outApproved += amt;
+        else if (t.status === 'approved') {
+          if (t.type === 'in') inApproved += amt;
+          else if (t.category !== 'custody') outApproved += amt;
+        }
       });
 
       list.innerHTML = combined.length ? '' : `<p style="color:var(--muted); text-align:center;">${showTrash ? 'سلة المحذوفات فارغة' : 'لا توجد عمليات'}</p>`;
@@ -843,6 +879,7 @@
         const projLabel = pObj ? pObj.name : (t.project || 'عام');
         const catLabel = catLabels[t.category] || '';
         const syncTag = t.pendingSync ? ' <span style="font-size:10px; color:#d97706;">(⏳ بانتظار النت)</span>' : '';
+        const rejectTag = t.status === 'rejected' ? `<br><small style="color:var(--red)">❌ مرفوض${t.rejectReason ? `: ${esc(t.rejectReason)}` : ''}</small>` : '';
         const receiptBtn = (t.receiptId || t.receiptData) ? `<button onclick="viewReceipt('${esc(t.receiptId || '')}', '${esc(t.localId || '')}')" class="sm secondary">🖼️ فاتورة</button>` : '';
 
         let actions = '';
@@ -852,18 +889,19 @@
         } else if (isAdmin) {
           actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">
             ${receiptBtn}
-            ${t.status === 'pending' ? `<button onclick="approveTx('${esc(t.id)}')" class="sm green">اعتماد</button>` : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>'}
+            ${t.status === 'pending' ? `<button onclick="approveTx('${esc(t.id)}')" class="sm green">اعتماد</button><button onclick="rejectTx('${esc(t.id)}')" class="sm red">رفض</button>` : (t.status === 'rejected' ? '<span style="font-size:11px; color:var(--red);">❌ مرفوض</span>' : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>')}
             <button onclick="softDeleteTx('${esc(t.id)}')" class="sm secondary" style="color:var(--red);">حذف</button>
           </div>`;
         } else {
-          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">${receiptBtn}<small style="color:var(--muted)">${t.status === 'pending' ? '⏳ معلق' : '✅ معتمد'}</small></div>`;
+          const stTxt = t.status === 'pending' ? '⏳ معلق' : (t.status === 'rejected' ? '❌ مرفوض' : '✅ معتمد');
+          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">${receiptBtn}<small style="color:var(--muted)">${stTxt}</small></div>`;
         }
 
         list.innerHTML += `
           <div class="tx-item">
             <div>
               <strong>${esc(projLabel)}</strong> ${catLabel ? `<span class="badge" style="background:var(--border); color:var(--text);">${esc(catLabel)}</span>` : ''}${syncTag}<br>
-              <small style="color:var(--muted)">${t.txDate ? `📅 ${esc(t.txDate)} • ` : ''}${t.workerName ? `👷 ${esc(t.workerName)} • ` : ''}${esc(t.note || '')}</small>
+              <small style="color:var(--muted)">${t.txDate ? `📅 ${esc(t.txDate)} • ` : ''}${t.workerName ? `👤 ${esc(t.workerName)} • ` : ''}${esc(t.note || '')}</small>${rejectTag}
             </div>
             <div style="text-align:left;">
               <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</div>
@@ -876,6 +914,7 @@
       document.getElementById('statIn').innerText = inApproved.toLocaleString() + ' ج';
       document.getElementById('statPend').innerText = pendSum.toLocaleString() + ' ج';
       document.getElementById('statPendingBadge').innerText = `${pendingCount} معلق`;
+      renderCustodySummary();
     }
 
     window.viewReceipt = async (receiptId, localId) => {
@@ -954,6 +993,7 @@
       const note = document.getElementById('txNote').value.trim();
       const file = document.getElementById('txReceipt').files[0];
       if (!amount || amount <= 0) return;
+      if (category === 'custody' && !workerId) { alert("اختر المهندس المستلم للعُهدة أولاً"); return; }
 
       let receiptData = null;
       if (file) {
@@ -993,6 +1033,10 @@
     };
 
     window.approveTx = (id) => updateDoc(doc(db, "transactions", id), { status: 'approved', updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+    window.rejectTx = (id) => {
+      const reason = prompt("سبب رفض المصروف (اختياري):") ?? '';
+      updateDoc(doc(db, "transactions", id), { status: 'rejected', rejectReason: reason.trim(), updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+    };
     window.softDeleteTx = (id) => { if (confirm("نقل العملية إلى سلة المحذوفات؟")) updateDoc(doc(db, "transactions", id), { deleted: true, updatedBy: currentUser.uid, updatedAt: serverTimestamp() }); };
     window.restoreTx = (id) => updateDoc(doc(db, "transactions", id), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
 
@@ -1026,8 +1070,9 @@
       let outS = 0, inS = 0, dueW = 0, advW = 0, dedW = 0, rows = '';
       filtered.forEach(t => {
         const amt = Number(t.amount || 0);
-        if (t.type === 'in') inS += amt; else outS += amt;
-        if (t.category === 'daily' || t.category === 'meters') dueW += amt;
+        if (t.type === 'in') inS += amt;
+        else if (t.category !== 'custody') outS += amt;
+        if (t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum') dueW += amt;
         if (t.category === 'advance') advW += amt;
         if (t.category === 'deduction') dedW += amt;
         const dt = t.txDate || (t.createdAt?.seconds ? new Date(t.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'اليوم');
@@ -1073,7 +1118,7 @@
 
     window.exportCSV = () => {
       if (!lastReportRows.length) generateReport();
-      let csv = "\uFEFFالتاريخ,المشروع,الصنايعي,البند,البيان,المبلغ\n";
+      let csv = "\uFEFFالتاريخ,المشروع,الشخص,البند,البيان,المبلغ\n";
       lastReportRows.forEach(t => {
         const dt = t.txDate || '';
         const row = [dt, t.project || 'عام', t.workerName || '', catLabels[t.category] || '', (t.note || '').replace(/,/g, ' '), (t.type === 'in' ? '' : '-') + (t.amount || 0)];
@@ -1089,7 +1134,7 @@
     window.shareWhatsApp = () => {
       if (!lastReportRows.length) generateReport();
       let outS = 0, inS = 0;
-      lastReportRows.forEach(t => { if (t.type === 'in') inS += Number(t.amount || 0); else outS += Number(t.amount || 0); });
+      lastReportRows.forEach(t => { if (t.type === 'in') inS += Number(t.amount || 0); else if (t.category !== 'custody') outS += Number(t.amount || 0); });
       const txt = `${companySettings.nameAr || 'شركة ريفايس للمقاولات'}\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج\nإجمالي الإيرادات: ${inS.toLocaleString()} ج\nالصافي: ${(inS - outS).toLocaleString()} ج (${tafqeet(inS - outS)})`;
       window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
     };
@@ -1108,6 +1153,50 @@
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     };
+
+    // التشغيل التلقائي للجلسة المحفوظة (بعد تعريف كل الدوال والأزرار لمنع التجمّد)
+    if (localStorage.getItem('revise_uid')) {
+      try {
+        currentUser = { uid: localStorage.getItem('revise_uid') };
+        userRole = localStorage.getItem('revise_role') || 'worker';
+        myAssignedProjects = readJson('revise_assigned', []);
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        setupUIForRole(); renderProjects(); renderTeam(); renderTxs(); loadData();
+      } catch (e) { console.warn(e); }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
+        clearListeners();
+        localStorage.removeItem('revise_uid'); localStorage.removeItem('revise_role');
+        document.getElementById('authScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        return;
+      }
+      currentUser = user;
+      localStorage.setItem('revise_uid', user.uid);
+      try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (!uDoc.exists() || !uDoc.data().active) {
+          alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
+          clearListeners(); localStorage.removeItem('revise_uid');
+          await signOut(auth); return;
+        }
+        userRole = uDoc.data().role || 'worker';
+        myAssignedProjects = uDoc.data().assignedProjects || [];
+      } catch (e) {
+        userRole = localStorage.getItem('revise_role') || 'worker';
+        myAssignedProjects = readJson('revise_assigned', []);
+      }
+      localStorage.setItem('revise_role', userRole);
+      localStorage.setItem('revise_assigned', JSON.stringify(myAssignedProjects));
+      setupUIForRole();
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+      loadData(); syncOfflineQueue();
+    });
   </script>
 
   <script>
