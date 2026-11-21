@@ -8,37 +8,22 @@
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
-      --primary: #1d4ed8;
-      --primary-dark: #1e3a8a;
-      --gold: #eab308;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --green: #15803d;
-      --red: #b91c1c;
+      --primary: #1d4ed8; --primary-dark: #1e3a8a; --gold: #eab308;
+      --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+      --border: #e2e8f0; --green: #15803d; --red: #b91c1c;
     }
     body.dark {
-      --primary: #2563eb;
-      --primary-dark: #172554;
-      --gold: #facc15;
-      --bg: #0b1120;
-      --card: #111827;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --border: #1e293b;
-      --green: #22c55e;
-      --red: #ef4444;
+      --primary: #2563eb; --primary-dark: #172554; --gold: #facc15;
+      --bg: #0b1120; --card: #111827; --text: #f8fafc; --muted: #94a3b8;
+      --border: #1e293b; --green: #22c55e; --red: #ef4444;
     }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 85px; transition: background 0.2s, color 0.2s; }
     .hidden { display: none !important; }
     #offlineBanner { background: var(--red); color: #fff; text-align: center; padding: 6px; font-size: 12px; font-weight: bold; }
-    header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: #fff; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.18); gap: 8px; }
-    header h1 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-    #hdrLogo { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: #fff; display: none; }
-    .hdr-actions { display: flex; align-items: center; gap: 6px; }
+    header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: #fff; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.18); gap: 6px; }
+    header h1 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+    .hdr-actions { display: flex; align-items: center; gap: 5px; }
     .icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 0; margin: 0; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .badge { background: var(--gold); color: #111; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
     .container { padding: 14px; max-width: 680px; margin: auto; }
@@ -52,12 +37,10 @@
     button.red { background: var(--red); color: #fff; }
     button.sm { width: auto; padding: 5px 10px; font-size: 12px; margin: 0; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .fav-section { margin-bottom: 10px; }
-    .fav-title { font-size: 12px; font-weight: bold; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
-    .fav-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
-    .fav-card { min-width: 145px; background: var(--card); border: 1.5px solid var(--gold); border-radius: 14px; padding: 10px 12px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    .fav-card strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 4px; }
-    .fav-card span { font-size: 11px; color: var(--primary); font-weight: bold; }
+    .fav-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; }
+    .fav-card { background: var(--card); border: 1.5px solid var(--gold); border-radius: 14px; padding: 9px 13px; min-width: 140px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .fav-card strong { display: block; font-size: 13px; color: var(--text); white-space: nowrap; }
+    .fav-card small { color: var(--primary); font-weight: bold; font-size: 11px; }
     .filter-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; }
     .filter-chip { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 16px; white-space: nowrap; font-size: 12px; font-weight: bold; cursor: pointer; }
     .filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
@@ -72,21 +55,22 @@
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: flex-end; justify-content: center; z-index: 30; }
     .modal-content { background: var(--card); color: var(--text); width: 100%; max-width: 620px; border-radius: 20px 20px 0 0; padding: 20px; max-height: 90vh; overflow-y: auto; }
     .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-    .stat-box { background: var(--card); padding: 10px 6px; border-radius: 12px; text-align: center; border: 1px solid var(--border); border-top-width: 3px; border-top-color: var(--gold); }
+    .stat-box { background: var(--card); padding: 10px 6px; border-radius: 12px; text-align: center; border: 1px solid var(--border); border-top: 3px solid var(--gold); }
     .stat-box small { color: var(--muted); display: block; font-size: 11px; }
     .stat-box strong { font-size: 14px; color: var(--primary); }
     .worker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
     .w-box { background: var(--bg); padding: 10px; border-radius: 10px; text-align: center; }
     .w-box small { color: var(--muted); display: block; font-size: 11px; }
     .w-box strong { font-size: 15px; }
-    .img-preview { max-height: 55px; max-width: 110px; border-radius: 8px; border: 1px solid var(--border); background: #fff; padding: 2px; object-fit: contain; }
-    .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 12px; gap: 10px; }
-    .pdf-sign-row { display: flex; justify-content: space-around; align-items: flex-end; margin-top: 20px; padding-top: 12px; border-top: 1px dashed var(--border); text-align: center; }
-    .tafqeet-box { background: var(--bg); padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-top: 8px; border-right: 3px solid var(--primary); }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
     th, td { border: 1px solid var(--border); padding: 6px; text-align: right; }
     th { background: var(--bg); }
     .check-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 12px; gap: 10px; }
+    .pdf-header img { max-height: 60px; max-width: 90px; object-fit: contain; }
+    .pdf-footer { display: flex; justify-content: space-around; align-items: center; margin-top: 20px; padding-top: 10px; border-top: 1px dashed var(--border); text-align: center; }
+    .pdf-footer img { max-height: 70px; max-width: 120px; object-fit: contain; display: block; margin: 4px auto; }
+    .tafqeet-box { background: var(--bg); border-right: 3px solid var(--primary); padding: 8px 10px; margin-top: 10px; font-size: 12px; font-weight: bold; }
     @media print {
       header, .bottom-nav, .fab, .no-print, #offlineBanner { display: none !important; }
       body { background: #fff; color: #000; padding: 0; }
@@ -114,12 +98,9 @@
   <!-- الشاشة الرئيسية -->
   <div id="appScreen" class="hidden">
     <header>
-      <h1>
-        <img id="hdrLogo" alt="logo">
-        <span id="hdrBrand">REVISE</span>
-        <span id="roleBadge" class="badge">...</span>
-      </h1>
+      <h1>REVISE <span id="roleBadge" class="badge">...</span></h1>
       <div class="hdr-actions no-print">
+        <button class="icon-btn hidden" id="btnPrivate" title="الحساب السري للمدير">🔒</button>
         <button class="icon-btn hidden" id="btnSettings" title="بيانات الشركة والـ PDF">⚙️</button>
         <button class="icon-btn" id="btnTheme" title="الوضع الليلي">🌙</button>
         <button class="icon-btn" id="btnQuickPdf" title="طباعة PDF">📄</button>
@@ -128,11 +109,7 @@
     </header>
 
     <div class="container">
-      <div id="favSection" class="fav-section no-print hidden">
-        <div class="fav-title"><span>⚡ المفضلة — إدخال مصروف سريع</span></div>
-        <div id="favBar" class="fav-bar"></div>
-      </div>
-
+      <div id="favBar" class="fav-bar no-print"></div>
       <input type="search" id="searchBox" class="no-print" placeholder="🔍 بحث في المشاريع أو التفاصيل أو الصنايعية..." style="margin-top:0; margin-bottom:10px;">
 
       <!-- تبويب الرئيسية -->
@@ -194,7 +171,7 @@
       <div id="tabTeam" class="hidden">
         <div class="card">
           <h3 style="margin-top:0; font-size:15px;">إضافة ملف موظف / صنايعي</h3>
-          <p style="font-size:12px; color:var(--muted); margin:0 0 8px;">أدخل UID المستخدم من Firebase Auth لربط صلاحياته ومشاريعه في قاعدة البيانات.</p>
+          <p style="font-size:12px; color:var(--muted); margin:0 0 8px;">أدخل UID المستخدم من Firebase Auth لربط صلاحياته ومشاريعه.</p>
           <input type="text" id="uUid" placeholder="UID المستخدم من Firebase Auth">
           <input type="text" id="uName" placeholder="الاسم (مثلاً: م. أحمد أو أسطى كريم)">
           <input type="tel" id="uPhone" placeholder="رقم الموبايل">
@@ -249,50 +226,6 @@
     </nav>
   </div>
 
-  <!-- نافذة إعدادات الشركة وترويسة الـ PDF -->
-  <div id="settingsModal" class="modal hidden">
-    <div class="modal-content">
-      <h3 style="margin-top:0; color:var(--primary);">🏢 بيانات الشركة وترويسة الـ PDF</h3>
-      <input type="text" id="setNameAr" placeholder="اسم الشركة (عربي)">
-      <input type="text" id="setNameEn" placeholder="Company Name (English)">
-      <input type="text" id="setAddrAr" placeholder="العنوان (عربي)">
-      <input type="text" id="setAddrEn" placeholder="Address (English)">
-      <div class="row">
-        <input type="tel" id="setPhone" placeholder="رقم الهاتف" style="flex:1;">
-        <input type="email" id="setEmail" placeholder="البريد الإلكتروني" style="flex:1;">
-      </div>
-
-      <label style="display:block; font-size:12px; color:var(--muted); margin-top:10px;">شعار الشركة (Logo):</label>
-      <div class="row">
-        <input type="file" id="inLogo" accept="image/*" style="flex:1;">
-        <img id="prevLogo" class="img-preview hidden">
-        <button type="button" class="sm red" onclick="clearBrandImg('logo')">حذف</button>
-      </div>
-
-      <label style="display:block; font-size:12px; color:var(--muted); margin-top:10px;">صورة الختم (Stamp):</label>
-      <div class="row">
-        <input type="file" id="inStamp" accept="image/*" style="flex:1;">
-        <img id="prevStamp" class="img-preview hidden">
-        <button type="button" class="sm red" onclick="clearBrandImg('stamp')">حذف</button>
-      </div>
-      <label class="check-row" style="border:none; padding:4px 0;"><input type="checkbox" id="setShowStamp" checked><span>إظهار الختم في الـ PDF</span></label>
-
-      <label style="display:block; font-size:12px; color:var(--muted); margin-top:6px;">صورة التوقيع (Signature):</label>
-      <div class="row">
-        <input type="file" id="inSign" accept="image/*" style="flex:1;">
-        <img id="prevSign" class="img-preview hidden">
-        <button type="button" class="sm red" onclick="clearBrandImg('signature')">حذف</button>
-      </div>
-      <label class="check-row" style="border:none; padding:4px 0;"><input type="checkbox" id="setShowSign" checked><span>إظهار التوقيع في الـ PDF</span></label>
-
-      <p id="setMsg" style="font-size:12px; margin:6px 0;"></p>
-      <div class="row" style="margin-top:8px;">
-        <button id="btnSaveSettings" class="green">حفظ على التطبيق (سحابي)</button>
-        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="secondary">إغلاق</button>
-      </div>
-    </div>
-  </div>
-
   <!-- نافذة إضافة عملية -->
   <div id="txModal" class="modal hidden">
     <div class="modal-content">
@@ -306,8 +239,8 @@
         <option value="income">إيراد / مستخلص عميل (داخل)</option>
       </select>
       <div id="calcBox" class="row hidden">
-        <input type="number" id="calcQty" placeholder="العدد (أيام / أمتار)" inputmode="decimal" oninput="calcFromQty()" style="flex:1;">
-        <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()" style="flex:1;">
+        <input type="number" id="calcQty" placeholder="العدد (أيام / أمتار)" inputmode="decimal" oninput="calcFromQty()">
+        <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()">
       </div>
       <select id="txProject"><option value="general">عام</option></select>
       <select id="txWorker"><option value="">-- بدون صنايعي محدد --</option></select>
@@ -320,6 +253,54 @@
         <button id="btnSaveTx" class="green">حفظ العملية</button>
         <button id="btnCloseModal" class="secondary">إلغاء</button>
       </div>
+    </div>
+  </div>
+
+  <!-- نافذة إعدادات الشركة وترويسة PDF -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="margin-top:0; color:var(--primary);">⚙️ بيانات الشركة وترويسة الـ PDF</h3>
+      <input type="text" id="setNameAr" placeholder="الاسم (عربي) - مثلاً: شركة ريفايس للمقاولات">
+      <input type="text" id="setNameEn" placeholder="الاسم (إنجليزي) - Revise">
+      <input type="text" id="setAddrAr" placeholder="العنوان (عربي)">
+      <input type="text" id="setAddrEn" placeholder="العنوان (إنجليزي)">
+      <input type="tel" id="setPhone" placeholder="رقم الهاتف">
+      <input type="email" id="setEmail" placeholder="البريد الإلكتروني">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:8px;">🖼️ شعار الشركة (Logo):</label>
+      <input type="file" id="setLogoFile" accept="image/*">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:8px;">🔏 صورة الختم (Stamp):</label>
+      <input type="file" id="setStampFile" accept="image/*">
+      <label class="check-row" style="border:none;"><input type="checkbox" id="setShowStamp" checked><span>إظهار الختم في الـ PDF</span></label>
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:4px;">✍️ صورة التوقيع (Signature):</label>
+      <input type="file" id="setSigFile" accept="image/*">
+      <label class="check-row" style="border:none;"><input type="checkbox" id="setShowSig" checked><span>إظهار التوقيع في الـ PDF</span></label>
+      <p id="setMsg" style="font-size:12px; margin:6px 0;"></p>
+      <div class="row">
+        <button id="btnSaveSettings" class="green">حفظ بيانات الشركة</button>
+        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="secondary">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة الحسابات السرية للمدير فقط -->
+  <div id="privateModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="margin-top:0; color:var(--primary);">🔒 الحسابات السرية (للمدير فقط)</h3>
+      <div class="worker-grid">
+        <div class="w-box"><small>وارد سري</small><strong id="privIn" style="color:var(--green)">0 ج</strong></div>
+        <div class="w-box"><small>مصروف سري</small><strong id="privOut" style="color:var(--red)">0 ج</strong></div>
+      </div>
+      <select id="privType">
+        <option value="out">مصروف شخصي / سري (خارج)</option>
+        <option value="in">وارد شخصي / سري (داخل)</option>
+      </select>
+      <input type="number" id="privAmount" placeholder="المبلغ (جنيه)" inputmode="decimal">
+      <input type="text" id="privNote" placeholder="التفاصيل (لا يراها غير المدير)">
+      <div class="row">
+        <button id="btnAddPrivate" class="gold">إضافة للحساب السري</button>
+        <button onclick="document.getElementById('privateModal').classList.add('hidden')" class="secondary">إغلاق</button>
+      </div>
+      <div id="privateList" style="margin-top:12px;"></div>
     </div>
   </div>
 
@@ -347,13 +328,13 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // تنظيف تلقائي للكاش القديم عند كل إصدار جديد مع الحفاظ على طابور الأوفلاين
-    const APP_VERSION = '7.0';
-    if (localStorage.getItem('revise_app_ver') !== APP_VERSION) {
-      ['revise_cache_projects', 'revise_cache_users', 'revise_cache_txs', 'revise_cache_company'].forEach(k => localStorage.removeItem(k));
-      localStorage.setItem('revise_app_ver', APP_VERSION);
+    // تنظيف تلقائي للكاش القديم عند كل إصدار جديد لمنع التجمّد
+    const APP_VER = '7.0';
+    if (localStorage.getItem('revise_app_ver') !== APP_VER) {
+      ['revise_cache_projects', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
+      localStorage.setItem('revise_app_ver', APP_VER);
     }
 
     const firebaseConfig = {
@@ -376,53 +357,43 @@
     const catLabels = { general: 'مصروف عام', daily: 'يومية', meters: 'أمتار', advance: 'واصل / سلفة', deduction: 'خصم', income: 'إيراد' };
     const projCatLabels = { active: 'مشاريع نشطة', finishing: 'واجهات وتشطيبات', done: 'خالص (منتهي)' };
 
-    // التفقيط العربي للمبالغ
-    function tafqeet(num) {
-      const n = Math.round(Math.abs(Number(num) || 0));
+    // دالة التفقيط العربي للمبالغ
+    function tafqeet(n) {
+      n = Math.floor(Math.abs(Number(n) || 0));
       if (n === 0) return 'صفر جنيه مصري';
-      const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
-      const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
-      const tens = ['', 'عشرة', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
-      const hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
-      const under1000 = (x) => {
-        const h = Math.floor(x / 100), r = x % 100, parts = [];
-        if (h) parts.push(hundreds[h]);
-        if (r >= 10 && r <= 19) parts.push(teens[r - 10]);
-        else {
-          const o = r % 10, t = Math.floor(r / 10);
-          if (o) parts.push(ones[o]);
-          if (t) parts.push(tens[t]);
-        }
-        return parts.join(' و');
+      const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+      const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+      const hunds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+      const sub = (x) => {
+        let p = [];
+        if (x >= 100) { p.push(hunds[Math.floor(x / 100)]); x %= 100; }
+        if (x >= 20) { const o = x % 10; if (o) p.push(ones[o] + ' و' + tens[Math.floor(x / 10)]); else p.push(tens[Math.floor(x / 10)]); }
+        else if (x > 0) p.push(ones[x]);
+        return p.join(' و');
       };
-      const parts = [];
-      const m = Math.floor(n / 1000000);
-      const th = Math.floor((n % 1000000) / 1000);
-      const rem = n % 1000;
-      if (m) parts.push(m === 1 ? 'مليون' : m === 2 ? 'مليونان' : (m <= 10 ? under1000(m) + ' ملايين' : under1000(m) + ' مليون'));
-      if (th) parts.push(th === 1 ? 'ألف' : th === 2 ? 'ألفان' : (th <= 10 ? under1000(th) + ' آلاف' : under1000(th) + ' ألف'));
-      if (rem) parts.push(under1000(rem));
+      let parts = [];
+      const m = Math.floor(n / 1000000); n %= 1000000;
+      const k = Math.floor(n / 1000); n %= 1000;
+      if (m) parts.push(m === 1 ? 'مليون' : m === 2 ? 'مليونان' : (m <= 10 ? sub(m) + ' ملايين' : sub(m) + ' مليون'));
+      if (k) parts.push(k === 1 ? 'ألف' : k === 2 ? 'ألفان' : (k <= 10 ? sub(k) + ' آلاف' : sub(k) + ' ألف'));
+      if (n) parts.push(sub(n));
       return 'فقط ' + parts.join(' و') + ' جنيه مصري لا غير';
     }
 
-    // ضغط الصور (خلفية بيضاء لتفادي سواد الشفافية)
-    function compressImage(file, maxW = 800, maxBytes = 470000) {
+    function compressImage(file, maxW = 800, maxLen = 470000) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
-            let quality = 0.65;
+            let quality = 0.6;
             const canvas = document.createElement('canvas');
             const scale = img.width > maxW ? maxW / img.width : 1;
             canvas.width = Math.round(img.width * scale);
             canvas.height = Math.round(img.height * scale);
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
             let out = canvas.toDataURL('image/jpeg', quality);
-            while (out.length > maxBytes && quality > 0.2) {
+            while (out.length > maxLen && quality > 0.2) {
               quality -= 0.1;
               out = canvas.toDataURL('image/jpeg', quality);
             }
@@ -436,24 +407,22 @@
       });
     }
 
-    const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
-    const defaultCompany = {
-      nameAr: 'شركة ريفايس للمقاولات العامة', nameEn: 'Revise',
-      addressAr: 'القاهرة - جمهورية مصر العربية', addressEn: 'Cairo, Egypt',
-      phone: '', email: '', logo: '', stamp: '', signature: '',
-      showStamp: true, showSignature: true
-    };
-
     let currentUser = null, userRole = 'worker', myAssignedProjects = [];
     let dataLoaded = false, isSyncing = false, showTrash = false, projFilter = 'all', searchQuery = '', unsubs = [];
     let assignTargetUid = null, lastReportRows = [];
-    let companySettings = { ...defaultCompany, ...readJson('revise_cache_company', {}) };
-    let draftBrand = { logo: '', stamp: '', signature: '' };
 
+    const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
     let projects = readJson('revise_cache_projects', []);
     let usersList = readJson('revise_cache_users', []);
     let allTxs = readJson('revise_cache_txs', []);
     let offlineQueue = readJson('revise_offline_queue', []);
+    let privateTxs = [];
+    let companySettings = readJson('revise_company_settings', {
+      nameAr: 'شركة ريفايس للمقاولات العامة', nameEn: 'Revise Contracting',
+      addressAr: 'القاهرة - جمهورية مصر العربية', addressEn: 'Cairo, Egypt',
+      phone: '01000227438', email: 'mohamed5360mas@gmail.com',
+      logo: '', stamp: '', signature: '', showStamp: true, showSignature: true
+    });
 
     const savedDark = localStorage.getItem('revise_dark') === '1';
     if (savedDark) document.body.classList.add('dark');
@@ -466,81 +435,6 @@
     document.getElementById('btnTheme').innerText = savedDark ? '☀️' : '🌙';
     document.getElementById('btnQuickPdf').onclick = () => { generateReport(); window.print(); };
     document.getElementById('searchBox').oninput = (e) => { searchQuery = e.target.value.trim().toLowerCase(); renderTxs(); renderProjects(); };
-
-    function applyCompanyBranding() {
-      const img = document.getElementById('hdrLogo');
-      const brand = document.getElementById('hdrBrand');
-      brand.innerText = companySettings.nameEn || 'REVISE';
-      if (companySettings.logo) { img.src = companySettings.logo; img.style.display = 'inline-block'; }
-      else { img.style.display = 'none'; }
-    }
-    applyCompanyBranding();
-
-    // إعدادات الشركة السحابية
-    document.getElementById('btnSettings').onclick = () => {
-      document.getElementById('setNameAr').value = companySettings.nameAr || '';
-      document.getElementById('setNameEn').value = companySettings.nameEn || '';
-      document.getElementById('setAddrAr').value = companySettings.addressAr || '';
-      document.getElementById('setAddrEn').value = companySettings.addressEn || '';
-      document.getElementById('setPhone').value = companySettings.phone || '';
-      document.getElementById('setEmail').value = companySettings.email || '';
-      document.getElementById('setShowStamp').checked = companySettings.showStamp !== false;
-      document.getElementById('setShowSign').checked = companySettings.showSignature !== false;
-      draftBrand = { logo: companySettings.logo || '', stamp: companySettings.stamp || '', signature: companySettings.signature || '' };
-      updateBrandPreviews();
-      document.getElementById('setMsg').innerText = '';
-      document.getElementById('settingsModal').classList.remove('hidden');
-    };
-
-    function updateBrandPreviews() {
-      [['logo', 'prevLogo'], ['stamp', 'prevStamp'], ['signature', 'prevSign']].forEach(([k, id]) => {
-        const el = document.getElementById(id);
-        if (draftBrand[k]) { el.src = draftBrand[k]; el.classList.remove('hidden'); }
-        else { el.src = ''; el.classList.add('hidden'); }
-      });
-    }
-
-    window.clearBrandImg = (key) => { draftBrand[key] = ''; updateBrandPreviews(); };
-
-    [['inLogo', 'logo'], ['inStamp', 'stamp'], ['inSign', 'signature']].forEach(([inputId, key]) => {
-      document.getElementById(inputId).onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-          draftBrand[key] = await compressImage(file, 380, 140000);
-          updateBrandPreviews();
-        } catch { alert("تعذر ضغط الصورة"); }
-      };
-    });
-
-    document.getElementById('btnSaveSettings').onclick = async () => {
-      if (!navigator.onLine) { alert("حفظ إعدادات الشركة سحابياً يحتاج اتصال بالإنترنت."); return; }
-      const msg = document.getElementById('setMsg');
-      msg.style.color = 'var(--muted)'; msg.innerText = 'جاري الحفظ...';
-      const payload = {
-        nameAr: document.getElementById('setNameAr').value.trim() || defaultCompany.nameAr,
-        nameEn: document.getElementById('setNameEn').value.trim() || 'Revise',
-        addressAr: document.getElementById('setAddrAr').value.trim(),
-        addressEn: document.getElementById('setAddrEn').value.trim(),
-        phone: document.getElementById('setPhone').value.trim(),
-        email: document.getElementById('setEmail').value.trim(),
-        logo: draftBrand.logo || '',
-        stamp: draftBrand.stamp || '',
-        signature: draftBrand.signature || '',
-        showStamp: document.getElementById('setShowStamp').checked,
-        showSignature: document.getElementById('setShowSign').checked,
-        updatedAt: serverTimestamp()
-      };
-      try {
-        await setDoc(doc(db, "settings", "company"), payload);
-        companySettings = { ...payload };
-        localStorage.setItem('revise_cache_company', JSON.stringify(companySettings));
-        applyCompanyBranding();
-        msg.style.color = 'var(--green)'; msg.innerText = '✅ تم حفظ بيانات الشركة على التطبيق بنجاح';
-      } catch (e) {
-        msg.style.color = 'var(--red)'; msg.innerText = 'خطأ: ' + e.message;
-      }
-    };
 
     const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch {} }); unsubs = []; dataLoaded = false; };
 
@@ -641,6 +535,7 @@
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
       document.getElementById('btnSettings').classList.toggle('hidden', !isAdmin);
+      document.getElementById('btnPrivate').classList.toggle('hidden', !isAdmin);
       document.getElementById('navTeam').classList.toggle('hidden', !isAdmin);
       document.getElementById('navReports').classList.toggle('hidden', !isAdmin);
       document.getElementById('navWorkers').classList.toggle('hidden', !isStaff);
@@ -657,14 +552,21 @@
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       const onErr = (err) => console.warn("Firestore:", err.message);
 
-      // مزامنة إعدادات الشركة السحابية
+      // تحميل إعدادات الشركة وترويسة الـ PDF
       unsubs.push(onSnapshot(doc(db, "settings", "company"), (snap) => {
         if (snap.exists()) {
-          companySettings = { ...defaultCompany, ...snap.data() };
-          localStorage.setItem('revise_cache_company', JSON.stringify(companySettings));
-          applyCompanyBranding();
+          companySettings = { ...companySettings, ...snap.data() };
+          localStorage.setItem('revise_company_settings', JSON.stringify(companySettings));
         }
       }, onErr));
+
+      if (isAdmin) {
+        unsubs.push(onSnapshot(collection(db, "private_ledger"), (snap) => {
+          privateTxs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+          renderPrivate();
+        }, onErr));
+      }
 
       if (isStaff) {
         unsubs.push(onSnapshot(collection(db, "projects"), (snap) => {
@@ -695,6 +597,89 @@
       }));
     }
 
+    // إعدادات الشركة وترويسة الـ PDF
+    document.getElementById('btnSettings').onclick = () => {
+      document.getElementById('setNameAr').value = companySettings.nameAr || '';
+      document.getElementById('setNameEn').value = companySettings.nameEn || '';
+      document.getElementById('setAddrAr').value = companySettings.addressAr || '';
+      document.getElementById('setAddrEn').value = companySettings.addressEn || '';
+      document.getElementById('setPhone').value = companySettings.phone || '';
+      document.getElementById('setEmail').value = companySettings.email || '';
+      document.getElementById('setShowStamp').checked = companySettings.showStamp !== false;
+      document.getElementById('setShowSig').checked = companySettings.showSignature !== false;
+      document.getElementById('setLogoFile').value = '';
+      document.getElementById('setStampFile').value = '';
+      document.getElementById('setSigFile').value = '';
+      document.getElementById('setMsg').innerText = '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    };
+
+    document.getElementById('btnSaveSettings').onclick = async () => {
+      const msg = document.getElementById('setMsg');
+      msg.style.color = 'var(--muted)'; msg.innerText = 'جاري الحفظ وضغط الصور...';
+      try {
+        const fLogo = document.getElementById('setLogoFile').files[0];
+        const fStamp = document.getElementById('setStampFile').files[0];
+        const fSig = document.getElementById('setSigFile').files[0];
+        const logo = fLogo ? await compressImage(fLogo, 350, 120000) : (companySettings.logo || '');
+        const stamp = fStamp ? await compressImage(fStamp, 350, 120000) : (companySettings.stamp || '');
+        const signature = fSig ? await compressImage(fSig, 350, 120000) : (companySettings.signature || '');
+        const payload = {
+          nameAr: document.getElementById('setNameAr').value.trim(),
+          nameEn: document.getElementById('setNameEn').value.trim(),
+          addressAr: document.getElementById('setAddrAr').value.trim(),
+          addressEn: document.getElementById('setAddrEn').value.trim(),
+          phone: document.getElementById('setPhone').value.trim(),
+          email: document.getElementById('setEmail').value.trim(),
+          logo, stamp, signature,
+          showStamp: document.getElementById('setShowStamp').checked,
+          showSignature: document.getElementById('setShowSig').checked,
+          updatedAt: serverTimestamp()
+        };
+        await setDoc(doc(db, "settings", "company"), payload);
+        msg.style.color = 'var(--green)'; msg.innerText = '✅ تم حفظ بيانات الشركة بنجاح';
+      } catch (e) {
+        msg.style.color = 'var(--red)'; msg.innerText = 'خطأ في الحفظ: ' + e.message;
+      }
+    };
+
+    // الحسابات السرية للمدير فقط
+    document.getElementById('btnPrivate').onclick = () => {
+      renderPrivate();
+      document.getElementById('privateModal').classList.remove('hidden');
+    };
+
+    function renderPrivate() {
+      let inS = 0, outS = 0, html = '';
+      privateTxs.forEach(p => {
+        const amt = Number(p.amount || 0);
+        if (p.type === 'in') inS += amt; else outS += amt;
+        html += `<div class="tx-item">
+          <div><strong>${esc(p.note || 'حركة سرية')}</strong><br><small style="color:var(--muted)">${esc(p.txDate || '')}</small></div>
+          <div class="row">
+            <span class="${p.type === 'in' ? 'amt-in' : 'amt-out'}">${p.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</span>
+            <button onclick="delPrivate('${esc(p.id)}')" class="sm secondary" style="color:var(--red);">حذف</button>
+          </div>
+        </div>`;
+      });
+      document.getElementById('privIn').innerText = inS.toLocaleString() + ' ج';
+      document.getElementById('privOut').innerText = outS.toLocaleString() + ' ج';
+      document.getElementById('privateList').innerHTML = html || '<p style="color:var(--muted); text-align:center;">لا توجد حركات سرية</p>';
+    }
+
+    document.getElementById('btnAddPrivate').onclick = async () => {
+      const amount = Number(document.getElementById('privAmount').value);
+      const note = document.getElementById('privNote').value.trim();
+      const type = document.getElementById('privType').value;
+      if (!amount || amount <= 0) return;
+      await addDoc(collection(db, "private_ledger"), {
+        type, amount, note, txDate: new Date().toISOString().slice(0, 10), createdAt: serverTimestamp()
+      });
+      document.getElementById('privAmount').value = '';
+      document.getElementById('privNote').value = '';
+    };
+    window.delPrivate = (id) => { if (confirm("حذف هذه الحركة السرية؟")) deleteDoc(doc(db, "private_ledger", id)); };
+
     function getVisibleProjects() {
       if (userRole === 'admin') return projects;
       return projects.filter(p => myAssignedProjects.includes(p.id));
@@ -707,17 +692,14 @@
       renderProjects();
     };
 
-    window.toggleFav = async (pid, currentFav) => {
-      if (userRole !== 'admin') return;
-      try { await updateDoc(doc(db, "projects", pid), { isFavorite: !currentFav }); }
-      catch (e) { alert("تعذر تحديث المفضلة: " + e.message); }
+    window.toggleFav = (pid, currentFav) => {
+      if (userRole === 'admin') updateDoc(doc(db, "projects", pid), { isFavorite: !currentFav });
     };
 
     function renderProjects() {
       const list = document.getElementById('projList');
       const sel = document.getElementById('txProject');
       const fav = document.getElementById('favBar');
-      const favSec = document.getElementById('favSection');
       const visible = getVisibleProjects();
       const filtered = visible.filter(p => {
         const catOk = projFilter === 'all' || (p.category || 'active') === projFilter;
@@ -729,15 +711,12 @@
       sel.innerHTML = userRole === 'admin' ? '<option value="general">عام</option>' : '';
       fav.innerHTML = '';
 
-      let favCount = 0;
       visible.forEach(p => {
         sel.innerHTML += `<option value="${esc(p.id)}">${esc(p.name)}</option>`;
         if (p.isFavorite) {
-          favCount++;
-          fav.innerHTML += `<div class="fav-card" onclick="quickAdd('${esc(p.id)}')"><strong>⭐ ${esc(p.name)}</strong><span>+ مصروف فوري</span></div>`;
+          fav.innerHTML += `<div class="fav-card" onclick="quickAdd('${esc(p.id)}')"><strong>⭐ ${esc(p.name)}</strong><small>+ مصروف فوري</small></div>`;
         }
       });
-      favSec.classList.toggle('hidden', favCount === 0);
       if (!sel.innerHTML) sel.innerHTML = '<option value="general">عام</option>';
 
       filtered.forEach(p => {
@@ -807,7 +786,7 @@
           <div class="w-box"><small>الخصومات</small><strong style="color:var(--red)">${ded.toLocaleString()} ج</strong></div>
           <div class="w-box"><small>الصافي الباقي له</small><strong style="color:var(--primary)">${net.toLocaleString()} ج</strong></div>
         </div>
-        <div class="tafqeet-box">الصافي بالحروف: ${esc(tafqeet(net))}</div>
+        <div class="tafqeet-box">${esc(tafqeet(net))}</div>
         ${rows || '<p style="color:var(--muted); text-align:center;">لا توجد حركات مسجلة</p>'}`;
     };
 
@@ -869,9 +848,7 @@
         let actions = '';
         if (t.localId) actions = `<small style="color:#d97706;">محفوظ على الهاتف</small>`;
         else if (isAdmin && showTrash) {
-          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">
-            <button onclick="restoreTx('${esc(t.id)}')" class="sm green">استعادة</button>
-          </div>`;
+          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;"><button onclick="restoreTx('${esc(t.id)}')" class="sm green">استعادة</button></div>`;
         } else if (isAdmin) {
           actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">
             ${receiptBtn}
@@ -922,10 +899,8 @@
       const category = document.getElementById('projCat').value;
       const isFavorite = document.getElementById('projFav').checked;
       if (!name) return;
-      try {
-        await addDoc(collection(db, "projects"), { name, category, isFavorite, createdAt: serverTimestamp() });
-        document.getElementById('projName').value = '';
-      } catch (e) { alert("تعذر إضافة المشروع: " + e.message); }
+      await addDoc(collection(db, "projects"), { name, category, isFavorite, createdAt: serverTimestamp() });
+      document.getElementById('projName').value = '';
     };
 
     document.getElementById('btnCreateUser').onclick = async () => {
@@ -1035,7 +1010,7 @@
       const type = document.getElementById('repFilterType').value;
       const val = document.getElementById('repFilterVal').value;
       let filtered = allTxs.filter(t => t.status === 'approved' && t.deleted !== true);
-      let title = `كشف حساب عام - ${companySettings.nameAr}`;
+      let title = "كشف حساب عام";
       if (type === 'project') {
         const p = projects.find(x => x.id === val);
         filtered = filtered.filter(t => t.projectId === val || t.project === p?.name);
@@ -1059,43 +1034,41 @@
         rows += `<tr><td>${esc(dt)}</td><td>${esc(t.project || 'عام')}</td><td>${esc(catLabels[t.category] || '')}</td><td>${esc(t.note || '')}</td><td>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()}</td></tr>`;
       });
 
-      const netW = dueW - advW - dedW;
-      const workerSummary = type === 'worker' ? `
-        <div class="tafqeet-box">
-          المستحق: ${dueW.toLocaleString()} ج | السلف: ${advW.toLocaleString()} ج | الخصومات: ${dedW.toLocaleString()} ج<br>
-          الصافي الباقي: ${netW.toLocaleString()} ج (${esc(tafqeet(netW))})
+      const netVal = type === 'worker' ? (dueW - advW - dedW) : (inS - outS);
+      const workerSummary = type === 'worker' ? `<p style="background:var(--bg); padding:8px; border-radius:8px; font-size:13px;">
+        المستحق: <strong>${dueW.toLocaleString()} ج</strong> | السلف: <strong>${advW.toLocaleString()} ج</strong> | الخصومات: <strong>${dedW.toLocaleString()} ج</strong><br>
+        الباقي: <strong style="color:var(--primary); font-size:15px;">${netVal.toLocaleString()} ج</strong></p>` : '';
+
+      const s = companySettings;
+      const pdfHeader = `
+        <div class="pdf-header">
+          <div>
+            <strong style="color:var(--primary); font-size:16px;">${esc(s.nameAr || 'شركة ريفايس للمقاولات')}</strong><br>
+            <small style="color:var(--muted)">${esc(s.addressAr || '')} • ${esc(s.phone || '')}</small>
+          </div>
+          ${s.logo ? `<img src="${s.logo}" alt="Logo">` : ''}
+          <div style="text-align:left;">
+            <strong style="font-size:13px;">${esc(s.nameEn || 'Revise')}</strong><br>
+            <small style="color:var(--muted)">${esc(s.email || '')}</small>
+          </div>
+        </div>`;
+
+      const pdfFooter = (s.showStamp || s.showSignature) ? `
+        <div class="pdf-footer">
+          ${s.showSignature ? `<div><small>التوقيع</small>${s.signature ? `<img src="${s.signature}">` : '<br>__________'}</div>` : ''}
+          ${s.showStamp ? `<div><small>ختم الشركة</small>${s.stamp ? `<img src="${s.stamp}">` : '<br>__________'}</div>` : ''}
         </div>` : '';
-
-      const mainTotalText = type === 'worker'
-        ? ''
-        : `<div class="tafqeet-box">إجمالي المصروفات: ${outS.toLocaleString()} ج (${esc(tafqeet(outS))})<br>إجمالي الإيرادات: ${inS.toLocaleString()} ج (${esc(tafqeet(inS))})</div>`;
-
-      const logoHtml = companySettings.logo ? `<img src="${companySettings.logo}" style="height:55px; max-width:110px; object-fit:contain;">` : '';
-      const stampHtml = (companySettings.showStamp && companySettings.stamp) ? `<div><img src="${companySettings.stamp}" style="height:65px; object-fit:contain;"><br><small>ختم الشركة</small></div>` : '';
-      const signHtml = (companySettings.showSignature && companySettings.signature) ? `<div><img src="${companySettings.signature}" style="height:55px; object-fit:contain;"><br><small>توقيع المدير التنفيذي</small></div>` : '';
-      const footerSigns = (stampHtml || signHtml) ? `<div class="pdf-sign-row">${signHtml}${stampHtml}</div>` : '';
 
       const area = document.getElementById('reportArea');
       area.classList.remove('hidden');
       area.innerHTML = `
-        <div class="pdf-header">
-          <div>
-            <strong style="font-size:15px; color:var(--primary);">${esc(companySettings.nameAr)}</strong><br>
-            <small>${esc(companySettings.addressAr || '')}</small><br>
-            <small>${esc(companySettings.phone || '')} ${companySettings.email ? '• ' + esc(companySettings.email) : ''}</small>
-          </div>
-          ${logoHtml}
-          <div style="text-align:left;">
-            <strong style="font-size:14px;">${esc(companySettings.nameEn || '')}</strong><br>
-            <small>${esc(companySettings.addressEn || '')}</small><br>
-            <small>${new Date().toLocaleDateString('ar-EG')}</small>
-          </div>
-        </div>
-        <p style="text-align:center; font-weight:bold; margin:4px 0 8px; font-size:14px;">${esc(title)}</p>
+        ${pdfHeader}
+        <p style="text-align:center; margin:4px 0 10px; font-weight:bold; font-size:14px;">${esc(title)}</p>
         <table><thead><tr><th>التاريخ</th><th>المشروع</th><th>البند</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>${rows || '<tr><td colspan="5" style="text-align:center">لا توجد عمليات</td></tr>'}</tbody></table>
         ${workerSummary}
-        ${mainTotalText}
-        ${footerSigns}`;
+        <p style="margin-top:10px; font-weight:bold;">إجمالي المصروفات: ${outS.toLocaleString()} ج | إجمالي الإيرادات: ${inS.toLocaleString()} ج</p>
+        <div class="tafqeet-box">الصافي بالحروف: ${esc(tafqeet(netVal))}</div>
+        ${pdfFooter}`;
     };
 
     window.exportCSV = () => {
@@ -1117,12 +1090,12 @@
       if (!lastReportRows.length) generateReport();
       let outS = 0, inS = 0;
       lastReportRows.forEach(t => { if (t.type === 'in') inS += Number(t.amount || 0); else outS += Number(t.amount || 0); });
-      const txt = `${companySettings.nameAr}\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج (${tafqeet(outS)})\nإجمالي الإيرادات: ${inS.toLocaleString()} ج (${tafqeet(inS)})`;
+      const txt = `${companySettings.nameAr || 'شركة ريفايس للمقاولات'}\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج\nإجمالي الإيرادات: ${inS.toLocaleString()} ج\nالصافي: ${(inS - outS).toLocaleString()} ج (${tafqeet(inS - outS)})`;
       window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
     };
 
     document.getElementById('btnBackup').onclick = () => {
-      const data = { date: new Date().toISOString(), company: companySettings, projects, users: usersList, transactions: allTxs };
+      const data = { date: new Date().toISOString(), companySettings, projects, users: usersList, transactions: allTxs, privateTxs };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
