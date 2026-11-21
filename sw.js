@@ -1,42 +1,50 @@
-const CACHE_NAME = 'revise-v6';
-const CORE_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'
-];
+const CACHE_NAME = 'revise-cache-v12';
+const CORE_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(CORE_ASSETS)));
+self.addEventListener('install', (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS).catch(() => {}))
+  );
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  const url = e.request.url;
-  if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit.googleapis.com')) return;
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
 
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => {
-        if (res && (res.status === 200 || res.type === 'opaque')) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
-        }
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
+  // استراتيجية الشبكة أولاً لملف التطبيق لضمان وصول التحديثات فوراً
+  if (req.mode === 'navigate' || url.pathname.endsWith('index.html') || url.pathname === '/') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req).then((r) => r || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      const net = fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((c) => c.put(req, copy));
         return res;
-      })
-      .catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
+      }).catch(() => cached);
+      return cached || net;
+    })
   );
 });
