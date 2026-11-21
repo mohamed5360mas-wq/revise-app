@@ -36,7 +36,8 @@
     .hidden { display: none !important; }
     #offlineBanner { background: var(--red); color: #fff; text-align: center; padding: 6px; font-size: 12px; font-weight: bold; }
     header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: #fff; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.18); gap: 8px; }
-    header h1 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 6px; }
+    header h1 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    #hdrLogo { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: #fff; display: none; }
     .hdr-actions { display: flex; align-items: center; gap: 6px; }
     .icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 0; margin: 0; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .badge { background: var(--gold); color: #111; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
@@ -51,8 +52,12 @@
     button.red { background: var(--red); color: #fff; }
     button.sm { width: auto; padding: 5px 10px; font-size: 12px; margin: 0; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .fav-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; }
-    .fav-chip { background: var(--card); border: 1.5px solid var(--gold); color: var(--text); padding: 7px 13px; border-radius: 20px; white-space: nowrap; font-weight: bold; font-size: 12px; cursor: pointer; }
+    .fav-section { margin-bottom: 10px; }
+    .fav-title { font-size: 12px; font-weight: bold; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .fav-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+    .fav-card { min-width: 145px; background: var(--card); border: 1.5px solid var(--gold); border-radius: 14px; padding: 10px 12px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .fav-card strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+    .fav-card span { font-size: 11px; color: var(--primary); font-weight: bold; }
     .filter-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; }
     .filter-chip { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 16px; white-space: nowrap; font-size: 12px; font-weight: bold; cursor: pointer; }
     .filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
@@ -74,6 +79,10 @@
     .w-box { background: var(--bg); padding: 10px; border-radius: 10px; text-align: center; }
     .w-box small { color: var(--muted); display: block; font-size: 11px; }
     .w-box strong { font-size: 15px; }
+    .img-preview { max-height: 55px; max-width: 110px; border-radius: 8px; border: 1px solid var(--border); background: #fff; padding: 2px; object-fit: contain; }
+    .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 12px; gap: 10px; }
+    .pdf-sign-row { display: flex; justify-content: space-around; align-items: flex-end; margin-top: 20px; padding-top: 12px; border-top: 1px dashed var(--border); text-align: center; }
+    .tafqeet-box { background: var(--bg); padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-top: 8px; border-right: 3px solid var(--primary); }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
     th, td { border: 1px solid var(--border); padding: 6px; text-align: right; }
     th { background: var(--bg); }
@@ -82,6 +91,7 @@
       header, .bottom-nav, .fab, .no-print, #offlineBanner { display: none !important; }
       body { background: #fff; color: #000; padding: 0; }
       .card { box-shadow: none; border: none; padding: 0; background: #fff; color: #000; }
+      .tafqeet-box { background: #f8fafc; color: #000; }
     }
   </style>
 </head>
@@ -104,8 +114,13 @@
   <!-- الشاشة الرئيسية -->
   <div id="appScreen" class="hidden">
     <header>
-      <h1>REVISE <span id="roleBadge" class="badge">...</span></h1>
+      <h1>
+        <img id="hdrLogo" alt="logo">
+        <span id="hdrBrand">REVISE</span>
+        <span id="roleBadge" class="badge">...</span>
+      </h1>
       <div class="hdr-actions no-print">
+        <button class="icon-btn hidden" id="btnSettings" title="بيانات الشركة والـ PDF">⚙️</button>
         <button class="icon-btn" id="btnTheme" title="الوضع الليلي">🌙</button>
         <button class="icon-btn" id="btnQuickPdf" title="طباعة PDF">📄</button>
         <button id="btnLogout" class="sm" style="background:rgba(255,255,255,0.18); color:#fff;">خروج</button>
@@ -113,7 +128,11 @@
     </header>
 
     <div class="container">
-      <div id="favBar" class="fav-bar no-print"></div>
+      <div id="favSection" class="fav-section no-print hidden">
+        <div class="fav-title"><span>⚡ المفضلة — إدخال مصروف سريع</span></div>
+        <div id="favBar" class="fav-bar"></div>
+      </div>
+
       <input type="search" id="searchBox" class="no-print" placeholder="🔍 بحث في المشاريع أو التفاصيل أو الصنايعية..." style="margin-top:0; margin-bottom:10px;">
 
       <!-- تبويب الرئيسية -->
@@ -230,6 +249,50 @@
     </nav>
   </div>
 
+  <!-- نافذة إعدادات الشركة وترويسة الـ PDF -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="margin-top:0; color:var(--primary);">🏢 بيانات الشركة وترويسة الـ PDF</h3>
+      <input type="text" id="setNameAr" placeholder="اسم الشركة (عربي)">
+      <input type="text" id="setNameEn" placeholder="Company Name (English)">
+      <input type="text" id="setAddrAr" placeholder="العنوان (عربي)">
+      <input type="text" id="setAddrEn" placeholder="Address (English)">
+      <div class="row">
+        <input type="tel" id="setPhone" placeholder="رقم الهاتف" style="flex:1;">
+        <input type="email" id="setEmail" placeholder="البريد الإلكتروني" style="flex:1;">
+      </div>
+
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:10px;">شعار الشركة (Logo):</label>
+      <div class="row">
+        <input type="file" id="inLogo" accept="image/*" style="flex:1;">
+        <img id="prevLogo" class="img-preview hidden">
+        <button type="button" class="sm red" onclick="clearBrandImg('logo')">حذف</button>
+      </div>
+
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:10px;">صورة الختم (Stamp):</label>
+      <div class="row">
+        <input type="file" id="inStamp" accept="image/*" style="flex:1;">
+        <img id="prevStamp" class="img-preview hidden">
+        <button type="button" class="sm red" onclick="clearBrandImg('stamp')">حذف</button>
+      </div>
+      <label class="check-row" style="border:none; padding:4px 0;"><input type="checkbox" id="setShowStamp" checked><span>إظهار الختم في الـ PDF</span></label>
+
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:6px;">صورة التوقيع (Signature):</label>
+      <div class="row">
+        <input type="file" id="inSign" accept="image/*" style="flex:1;">
+        <img id="prevSign" class="img-preview hidden">
+        <button type="button" class="sm red" onclick="clearBrandImg('signature')">حذف</button>
+      </div>
+      <label class="check-row" style="border:none; padding:4px 0;"><input type="checkbox" id="setShowSign" checked><span>إظهار التوقيع في الـ PDF</span></label>
+
+      <p id="setMsg" style="font-size:12px; margin:6px 0;"></p>
+      <div class="row" style="margin-top:8px;">
+        <button id="btnSaveSettings" class="green">حفظ على التطبيق (سحابي)</button>
+        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="secondary">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- نافذة إضافة عملية -->
   <div id="txModal" class="modal hidden">
     <div class="modal-content">
@@ -243,8 +306,8 @@
         <option value="income">إيراد / مستخلص عميل (داخل)</option>
       </select>
       <div id="calcBox" class="row hidden">
-        <input type="number" id="calcQty" placeholder="العدد (أيام / أمتار)" inputmode="decimal" oninput="calcFromQty()">
-        <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()">
+        <input type="number" id="calcQty" placeholder="العدد (أيام / أمتار)" inputmode="decimal" oninput="calcFromQty()" style="flex:1;">
+        <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()" style="flex:1;">
       </div>
       <select id="txProject"><option value="general">عام</option></select>
       <select id="txWorker"><option value="">-- بدون صنايعي محدد --</option></select>
@@ -286,6 +349,13 @@
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    // تنظيف تلقائي للكاش القديم عند كل إصدار جديد مع الحفاظ على طابور الأوفلاين
+    const APP_VERSION = '7.0';
+    if (localStorage.getItem('revise_app_ver') !== APP_VERSION) {
+      ['revise_cache_projects', 'revise_cache_users', 'revise_cache_txs', 'revise_cache_company'].forEach(k => localStorage.removeItem(k));
+      localStorage.setItem('revise_app_ver', APP_VERSION);
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyB11n-Fi_L0AmTtX8_Vc7v737RWFnXEkZQ",
       authDomain: "revise-app-7d181.firebaseapp.com",
@@ -306,20 +376,53 @@
     const catLabels = { general: 'مصروف عام', daily: 'يومية', meters: 'أمتار', advance: 'واصل / سلفة', deduction: 'خصم', income: 'إيراد' };
     const projCatLabels = { active: 'مشاريع نشطة', finishing: 'واجهات وتشطيبات', done: 'خالص (منتهي)' };
 
-    function compressImage(file) {
+    // التفقيط العربي للمبالغ
+    function tafqeet(num) {
+      const n = Math.round(Math.abs(Number(num) || 0));
+      if (n === 0) return 'صفر جنيه مصري';
+      const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+      const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+      const tens = ['', 'عشرة', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+      const hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+      const under1000 = (x) => {
+        const h = Math.floor(x / 100), r = x % 100, parts = [];
+        if (h) parts.push(hundreds[h]);
+        if (r >= 10 && r <= 19) parts.push(teens[r - 10]);
+        else {
+          const o = r % 10, t = Math.floor(r / 10);
+          if (o) parts.push(ones[o]);
+          if (t) parts.push(tens[t]);
+        }
+        return parts.join(' و');
+      };
+      const parts = [];
+      const m = Math.floor(n / 1000000);
+      const th = Math.floor((n % 1000000) / 1000);
+      const rem = n % 1000;
+      if (m) parts.push(m === 1 ? 'مليون' : m === 2 ? 'مليونان' : (m <= 10 ? under1000(m) + ' ملايين' : under1000(m) + ' مليون'));
+      if (th) parts.push(th === 1 ? 'ألف' : th === 2 ? 'ألفان' : (th <= 10 ? under1000(th) + ' آلاف' : under1000(th) + ' ألف'));
+      if (rem) parts.push(under1000(rem));
+      return 'فقط ' + parts.join(' و') + ' جنيه مصري لا غير';
+    }
+
+    // ضغط الصور (خلفية بيضاء لتفادي سواد الشفافية)
+    function compressImage(file, maxW = 800, maxBytes = 470000) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
-            let maxW = 800, quality = 0.6;
+            let quality = 0.65;
             const canvas = document.createElement('canvas');
             const scale = img.width > maxW ? maxW / img.width : 1;
             canvas.width = Math.round(img.width * scale);
             canvas.height = Math.round(img.height * scale);
-            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             let out = canvas.toDataURL('image/jpeg', quality);
-            while (out.length > 470000 && quality > 0.25) {
+            while (out.length > maxBytes && quality > 0.2) {
               quality -= 0.1;
               out = canvas.toDataURL('image/jpeg', quality);
             }
@@ -333,13 +436,21 @@
       });
     }
 
+    const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
+    const defaultCompany = {
+      nameAr: 'شركة ريفايس للمقاولات العامة', nameEn: 'Revise',
+      addressAr: 'القاهرة - جمهورية مصر العربية', addressEn: 'Cairo, Egypt',
+      phone: '', email: '', logo: '', stamp: '', signature: '',
+      showStamp: true, showSignature: true
+    };
+
     let currentUser = null, userRole = 'worker', myAssignedProjects = [];
     let dataLoaded = false, isSyncing = false, showTrash = false, projFilter = 'all', searchQuery = '', unsubs = [];
     let assignTargetUid = null, lastReportRows = [];
+    let companySettings = { ...defaultCompany, ...readJson('revise_cache_company', {}) };
+    let draftBrand = { logo: '', stamp: '', signature: '' };
 
-    const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
     let projects = readJson('revise_cache_projects', []);
-    let favIds = readJson('revise_fav_projects', []);
     let usersList = readJson('revise_cache_users', []);
     let allTxs = readJson('revise_cache_txs', []);
     let offlineQueue = readJson('revise_offline_queue', []);
@@ -355,6 +466,81 @@
     document.getElementById('btnTheme').innerText = savedDark ? '☀️' : '🌙';
     document.getElementById('btnQuickPdf').onclick = () => { generateReport(); window.print(); };
     document.getElementById('searchBox').oninput = (e) => { searchQuery = e.target.value.trim().toLowerCase(); renderTxs(); renderProjects(); };
+
+    function applyCompanyBranding() {
+      const img = document.getElementById('hdrLogo');
+      const brand = document.getElementById('hdrBrand');
+      brand.innerText = companySettings.nameEn || 'REVISE';
+      if (companySettings.logo) { img.src = companySettings.logo; img.style.display = 'inline-block'; }
+      else { img.style.display = 'none'; }
+    }
+    applyCompanyBranding();
+
+    // إعدادات الشركة السحابية
+    document.getElementById('btnSettings').onclick = () => {
+      document.getElementById('setNameAr').value = companySettings.nameAr || '';
+      document.getElementById('setNameEn').value = companySettings.nameEn || '';
+      document.getElementById('setAddrAr').value = companySettings.addressAr || '';
+      document.getElementById('setAddrEn').value = companySettings.addressEn || '';
+      document.getElementById('setPhone').value = companySettings.phone || '';
+      document.getElementById('setEmail').value = companySettings.email || '';
+      document.getElementById('setShowStamp').checked = companySettings.showStamp !== false;
+      document.getElementById('setShowSign').checked = companySettings.showSignature !== false;
+      draftBrand = { logo: companySettings.logo || '', stamp: companySettings.stamp || '', signature: companySettings.signature || '' };
+      updateBrandPreviews();
+      document.getElementById('setMsg').innerText = '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    };
+
+    function updateBrandPreviews() {
+      [['logo', 'prevLogo'], ['stamp', 'prevStamp'], ['signature', 'prevSign']].forEach(([k, id]) => {
+        const el = document.getElementById(id);
+        if (draftBrand[k]) { el.src = draftBrand[k]; el.classList.remove('hidden'); }
+        else { el.src = ''; el.classList.add('hidden'); }
+      });
+    }
+
+    window.clearBrandImg = (key) => { draftBrand[key] = ''; updateBrandPreviews(); };
+
+    [['inLogo', 'logo'], ['inStamp', 'stamp'], ['inSign', 'signature']].forEach(([inputId, key]) => {
+      document.getElementById(inputId).onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          draftBrand[key] = await compressImage(file, 380, 140000);
+          updateBrandPreviews();
+        } catch { alert("تعذر ضغط الصورة"); }
+      };
+    });
+
+    document.getElementById('btnSaveSettings').onclick = async () => {
+      if (!navigator.onLine) { alert("حفظ إعدادات الشركة سحابياً يحتاج اتصال بالإنترنت."); return; }
+      const msg = document.getElementById('setMsg');
+      msg.style.color = 'var(--muted)'; msg.innerText = 'جاري الحفظ...';
+      const payload = {
+        nameAr: document.getElementById('setNameAr').value.trim() || defaultCompany.nameAr,
+        nameEn: document.getElementById('setNameEn').value.trim() || 'Revise',
+        addressAr: document.getElementById('setAddrAr').value.trim(),
+        addressEn: document.getElementById('setAddrEn').value.trim(),
+        phone: document.getElementById('setPhone').value.trim(),
+        email: document.getElementById('setEmail').value.trim(),
+        logo: draftBrand.logo || '',
+        stamp: draftBrand.stamp || '',
+        signature: draftBrand.signature || '',
+        showStamp: document.getElementById('setShowStamp').checked,
+        showSignature: document.getElementById('setShowSign').checked,
+        updatedAt: serverTimestamp()
+      };
+      try {
+        await setDoc(doc(db, "settings", "company"), payload);
+        companySettings = { ...payload };
+        localStorage.setItem('revise_cache_company', JSON.stringify(companySettings));
+        applyCompanyBranding();
+        msg.style.color = 'var(--green)'; msg.innerText = '✅ تم حفظ بيانات الشركة على التطبيق بنجاح';
+      } catch (e) {
+        msg.style.color = 'var(--red)'; msg.innerText = 'خطأ: ' + e.message;
+      }
+    };
 
     const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch {} }); unsubs = []; dataLoaded = false; };
 
@@ -454,6 +640,7 @@
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
+      document.getElementById('btnSettings').classList.toggle('hidden', !isAdmin);
       document.getElementById('navTeam').classList.toggle('hidden', !isAdmin);
       document.getElementById('navReports').classList.toggle('hidden', !isAdmin);
       document.getElementById('navWorkers').classList.toggle('hidden', !isStaff);
@@ -469,6 +656,15 @@
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       const onErr = (err) => console.warn("Firestore:", err.message);
+
+      // مزامنة إعدادات الشركة السحابية
+      unsubs.push(onSnapshot(doc(db, "settings", "company"), (snap) => {
+        if (snap.exists()) {
+          companySettings = { ...defaultCompany, ...snap.data() };
+          localStorage.setItem('revise_cache_company', JSON.stringify(companySettings));
+          applyCompanyBranding();
+        }
+      }, onErr));
 
       if (isStaff) {
         unsubs.push(onSnapshot(collection(db, "projects"), (snap) => {
@@ -511,17 +707,17 @@
       renderProjects();
     };
 
-    window.toggleFav = (pid) => {
-      if (favIds.includes(pid)) favIds = favIds.filter(x => x !== pid);
-      else favIds.push(pid);
-      localStorage.setItem('revise_fav_projects', JSON.stringify(favIds));
-      renderProjects();
+    window.toggleFav = async (pid, currentFav) => {
+      if (userRole !== 'admin') return;
+      try { await updateDoc(doc(db, "projects", pid), { isFavorite: !currentFav }); }
+      catch (e) { alert("تعذر تحديث المفضلة: " + e.message); }
     };
 
     function renderProjects() {
       const list = document.getElementById('projList');
       const sel = document.getElementById('txProject');
       const fav = document.getElementById('favBar');
+      const favSec = document.getElementById('favSection');
       const visible = getVisibleProjects();
       const filtered = visible.filter(p => {
         const catOk = projFilter === 'all' || (p.category || 'active') === projFilter;
@@ -533,23 +729,26 @@
       sel.innerHTML = userRole === 'admin' ? '<option value="general">عام</option>' : '';
       fav.innerHTML = '';
 
+      let favCount = 0;
       visible.forEach(p => {
         sel.innerHTML += `<option value="${esc(p.id)}">${esc(p.name)}</option>`;
-        if (favIds.includes(p.id)) {
-          fav.innerHTML += `<div class="fav-chip" onclick="quickAdd('${esc(p.id)}')">⭐ ${esc(p.name)} +</div>`;
+        if (p.isFavorite) {
+          favCount++;
+          fav.innerHTML += `<div class="fav-card" onclick="quickAdd('${esc(p.id)}')"><strong>⭐ ${esc(p.name)}</strong><span>+ مصروف فوري</span></div>`;
         }
       });
+      favSec.classList.toggle('hidden', favCount === 0);
       if (!sel.innerHTML) sel.innerHTML = '<option value="general">عام</option>';
 
       filtered.forEach(p => {
-        const isF = favIds.includes(p.id);
+        const isF = !!p.isFavorite;
         list.innerHTML += `
           <div class="tx-item">
             <div>
               <strong>🏗️ ${esc(p.name)}</strong><br>
               <small style="color:var(--muted)">${esc(projCatLabels[p.category || 'active'] || 'مشاريع نشطة')}</small>
             </div>
-            <button onclick="toggleFav('${esc(p.id)}')" class="sm secondary">${isF ? '⭐ مفضلة' : '☆ تثبيت'}</button>
+            ${userRole === 'admin' ? `<button onclick="toggleFav('${esc(p.id)}', ${isF})" class="sm secondary">${isF ? '⭐ مفضلة' : '☆ تثبيت'}</button>` : ''}
           </div>`;
       });
     }
@@ -608,6 +807,7 @@
           <div class="w-box"><small>الخصومات</small><strong style="color:var(--red)">${ded.toLocaleString()} ج</strong></div>
           <div class="w-box"><small>الصافي الباقي له</small><strong style="color:var(--primary)">${net.toLocaleString()} ج</strong></div>
         </div>
+        <div class="tafqeet-box">الصافي بالحروف: ${esc(tafqeet(net))}</div>
         ${rows || '<p style="color:var(--muted); text-align:center;">لا توجد حركات مسجلة</p>'}`;
     };
 
@@ -720,14 +920,12 @@
     document.getElementById('btnAddProj').onclick = async () => {
       const name = document.getElementById('projName').value.trim();
       const category = document.getElementById('projCat').value;
-      const isFav = document.getElementById('projFav').checked;
+      const isFavorite = document.getElementById('projFav').checked;
       if (!name) return;
-      const ref = await addDoc(collection(db, "projects"), { name, category, createdAt: serverTimestamp() });
-      if (isFav && !favIds.includes(ref.id)) {
-        favIds.push(ref.id);
-        localStorage.setItem('revise_fav_projects', JSON.stringify(favIds));
-      }
-      document.getElementById('projName').value = '';
+      try {
+        await addDoc(collection(db, "projects"), { name, category, isFavorite, createdAt: serverTimestamp() });
+        document.getElementById('projName').value = '';
+      } catch (e) { alert("تعذر إضافة المشروع: " + e.message); }
     };
 
     document.getElementById('btnCreateUser').onclick = async () => {
@@ -785,7 +983,7 @@
       let receiptData = null;
       if (file) {
         try {
-          receiptData = await compressImage(file);
+          receiptData = await compressImage(file, 800, 470000);
           if (receiptData.length >= 495000) { alert("حجم الصورة بعد الضغط ما زال كبيراً، اختر صورة أصغر."); return; }
         } catch (e) { alert("تعذر ضغط الصورة"); return; }
       }
@@ -837,7 +1035,7 @@
       const type = document.getElementById('repFilterType').value;
       const val = document.getElementById('repFilterVal').value;
       let filtered = allTxs.filter(t => t.status === 'approved' && t.deleted !== true);
-      let title = "كشف حساب عام - شركة ريفايس للمقاولات العامة";
+      let title = `كشف حساب عام - ${companySettings.nameAr}`;
       if (type === 'project') {
         const p = projects.find(x => x.id === val);
         filtered = filtered.filter(t => t.projectId === val || t.project === p?.name);
@@ -861,18 +1059,43 @@
         rows += `<tr><td>${esc(dt)}</td><td>${esc(t.project || 'عام')}</td><td>${esc(catLabels[t.category] || '')}</td><td>${esc(t.note || '')}</td><td>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()}</td></tr>`;
       });
 
-      const workerSummary = type === 'worker' ? `<p style="background:var(--bg); padding:8px; border-radius:8px; font-size:13px;">
-        المستحق: <strong>${dueW.toLocaleString()} ج</strong> | السلف: <strong>${advW.toLocaleString()} ج</strong> | الخصومات: <strong>${dedW.toLocaleString()} ج</strong><br>
-        الباقي: <strong style="color:var(--primary); font-size:15px;">${(dueW - advW - dedW).toLocaleString()} ج</strong></p>` : '';
+      const netW = dueW - advW - dedW;
+      const workerSummary = type === 'worker' ? `
+        <div class="tafqeet-box">
+          المستحق: ${dueW.toLocaleString()} ج | السلف: ${advW.toLocaleString()} ج | الخصومات: ${dedW.toLocaleString()} ج<br>
+          الصافي الباقي: ${netW.toLocaleString()} ج (${esc(tafqeet(netW))})
+        </div>` : '';
+
+      const mainTotalText = type === 'worker'
+        ? ''
+        : `<div class="tafqeet-box">إجمالي المصروفات: ${outS.toLocaleString()} ج (${esc(tafqeet(outS))})<br>إجمالي الإيرادات: ${inS.toLocaleString()} ج (${esc(tafqeet(inS))})</div>`;
+
+      const logoHtml = companySettings.logo ? `<img src="${companySettings.logo}" style="height:55px; max-width:110px; object-fit:contain;">` : '';
+      const stampHtml = (companySettings.showStamp && companySettings.stamp) ? `<div><img src="${companySettings.stamp}" style="height:65px; object-fit:contain;"><br><small>ختم الشركة</small></div>` : '';
+      const signHtml = (companySettings.showSignature && companySettings.signature) ? `<div><img src="${companySettings.signature}" style="height:55px; object-fit:contain;"><br><small>توقيع المدير التنفيذي</small></div>` : '';
+      const footerSigns = (stampHtml || signHtml) ? `<div class="pdf-sign-row">${signHtml}${stampHtml}</div>` : '';
 
       const area = document.getElementById('reportArea');
       area.classList.remove('hidden');
       area.innerHTML = `
-        <h3 style="text-align:center; color:var(--primary); margin:0;">REVISE للمقاولات العامة</h3>
-        <p style="text-align:center; margin:4px 0 10px; font-size:13px;">${esc(title)}</p>
+        <div class="pdf-header">
+          <div>
+            <strong style="font-size:15px; color:var(--primary);">${esc(companySettings.nameAr)}</strong><br>
+            <small>${esc(companySettings.addressAr || '')}</small><br>
+            <small>${esc(companySettings.phone || '')} ${companySettings.email ? '• ' + esc(companySettings.email) : ''}</small>
+          </div>
+          ${logoHtml}
+          <div style="text-align:left;">
+            <strong style="font-size:14px;">${esc(companySettings.nameEn || '')}</strong><br>
+            <small>${esc(companySettings.addressEn || '')}</small><br>
+            <small>${new Date().toLocaleDateString('ar-EG')}</small>
+          </div>
+        </div>
+        <p style="text-align:center; font-weight:bold; margin:4px 0 8px; font-size:14px;">${esc(title)}</p>
         <table><thead><tr><th>التاريخ</th><th>المشروع</th><th>البند</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>${rows || '<tr><td colspan="5" style="text-align:center">لا توجد عمليات</td></tr>'}</tbody></table>
         ${workerSummary}
-        <p style="margin-top:10px; font-weight:bold;">إجمالي المصروفات: ${outS.toLocaleString()} ج | إجمالي الإيرادات: ${inS.toLocaleString()} ج</p>`;
+        ${mainTotalText}
+        ${footerSigns}`;
     };
 
     window.exportCSV = () => {
@@ -894,12 +1117,12 @@
       if (!lastReportRows.length) generateReport();
       let outS = 0, inS = 0;
       lastReportRows.forEach(t => { if (t.type === 'in') inS += Number(t.amount || 0); else outS += Number(t.amount || 0); });
-      const txt = `تقرير شركة ريفايس للمقاولات\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج\nإجمالي الإيرادات: ${inS.toLocaleString()} ج`;
+      const txt = `${companySettings.nameAr}\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج (${tafqeet(outS)})\nإجمالي الإيرادات: ${inS.toLocaleString()} ج (${tafqeet(inS)})`;
       window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
     };
 
     document.getElementById('btnBackup').onclick = () => {
-      const data = { date: new Date().toISOString(), projects, users: usersList, transactions: allTxs };
+      const data = { date: new Date().toISOString(), company: companySettings, projects, users: usersList, transactions: allTxs };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
