@@ -26,7 +26,7 @@
     .hdr-actions { display: flex; align-items: center; gap: 5px; }
     .icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 0; margin: 0; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .badge { background: var(--gold); color: #111; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
-    .container { padding: 14px; max-width: 680px; margin: auto; }
+    .container { padding: 14px; max-width: 720px; margin: auto; }
     .card { background: var(--card); border-radius: 14px; padding: 15px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     input, select, button { width: 100%; padding: 11px; margin-top: 8px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; }
     input[type="checkbox"] { width: auto; margin: 0 0 0 8px; }
@@ -49,6 +49,13 @@
     .tx-clickable { flex: 1; cursor: pointer; }
     .amt-out { color: var(--red); font-weight: bold; }
     .amt-in { color: var(--green); font-weight: bold; }
+    .summary-bar { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; font-size: 12px; }
+    .summary-bar strong { display: block; font-size: 14px; margin-top: 2px; }
+    .ledger-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+    .ledger-table th, .ledger-table td { border: 1px solid var(--border); padding: 7px 6px; text-align: right; }
+    .ledger-table th { background: var(--primary-dark); color: #fff; }
+    .cell-in { background: rgba(21, 128, 61, 0.14); color: var(--green); font-weight: bold; }
+    .cell-out { background: rgba(185, 28, 28, 0.14); color: var(--red); font-weight: bold; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; border-top: 1px solid var(--border); padding: 6px 0; z-index: 20; }
     .nav-btn { flex: 1; text-align: center; background: none; color: var(--muted); border: none; margin: 0; padding: 6px 2px; font-size: 11px; }
     .nav-btn.active { color: var(--primary); font-weight: bold; }
@@ -112,11 +119,11 @@
 
     <div class="container">
       <div id="favBar" class="fav-bar no-print"></div>
-      <input type="search" id="searchBox" class="no-print" placeholder="🔍 بحث في المشاريع أو التفاصيل أو الصنايعية..." style="margin-top:0; margin-bottom:10px;">
+      <input type="search" id="searchBox" class="no-print" placeholder="🔍 بحث في المشاريع أو الحسابات أو التفاصيل..." style="margin-top:0; margin-bottom:10px;">
 
       <!-- تبويب الرئيسية -->
       <div id="tabHome">
-        <div class="stat-grid no-print">
+        <div id="adminStats" class="stat-grid no-print">
           <div class="stat-box"><small>مصروف معتمد</small><strong id="statOut">0 ج</strong></div>
           <div class="stat-box"><small>إيراد معتمد</small><strong id="statIn" style="color:var(--green)">0 ج</strong></div>
           <div class="stat-box"><small>معلق للاعتماد</small><strong id="statPend" style="color:#d97706">0 ج</strong></div>
@@ -139,30 +146,67 @@
         </div>
       </div>
 
-      <!-- تبويب المشاريع -->
+      <!-- تبويب المشاريع والحسابات الفرعية والجدول التراكمي -->
       <div id="tabProjects" class="hidden">
-        <div id="addProjBox" class="card">
-          <h3 style="margin-top:0; font-size:15px;">إضافة مشروع جديد</h3>
-          <input type="text" id="projName" placeholder="اسم المشروع (مثلاً: عمارة الزمالك)">
-          <select id="projCat">
-            <option value="active">مشاريع نشطة</option>
-            <option value="finishing">واجهات وتشطيبات</option>
-            <option value="done">خالص (منتهي)</option>
-          </select>
-          <label class="check-row" style="border:none; padding:6px 0 0;">
-            <input type="checkbox" id="projFav" checked>
-            <span>تثبيت في المفضلة السريعة ⭐</span>
-          </label>
-          <button id="btnAddProj" class="gold">إضافة المشروع</button>
-        </div>
-        <div class="card">
-          <div class="filter-bar" id="projFilters">
-            <button class="filter-chip active" data-f="all" onclick="setProjFilter('all', this)">الكل</button>
-            <button class="filter-chip" data-f="active" onclick="setProjFilter('active', this)">مشاريع نشطة</button>
-            <button class="filter-chip" data-f="finishing" onclick="setProjFilter('finishing', this)">واجهات وتشطيبات</button>
-            <button class="filter-chip" data-f="done" onclick="setProjFilter('done', this)">خالص (منتهي)</button>
+        <!-- المستوى 1: قائمة المشاريع -->
+        <div id="projLevel1">
+          <div id="addProjBox" class="card">
+            <h3 style="margin-top:0; font-size:15px;">إضافة مشروع جديد</h3>
+            <input type="text" id="projName" placeholder="اسم المشروع (مثلاً: واجهات جامعة الزقازيق)">
+            <select id="projCat">
+              <option value="active">مشاريع نشطة</option>
+              <option value="finishing">واجهات وتشطيبات</option>
+              <option value="done">خالص (منتهي)</option>
+            </select>
+            <label class="check-row" style="border:none; padding:6px 0 0;">
+              <input type="checkbox" id="projFav" checked>
+              <span>تثبيت في المفضلة السريعة ⭐</span>
+            </label>
+            <button id="btnAddProj" class="gold">إضافة المشروع</button>
           </div>
-          <div id="projList"></div>
+          <div class="card">
+            <div class="filter-bar" id="projFilters">
+              <button class="filter-chip active" data-f="all" onclick="setProjFilter('all', this)">الكل</button>
+              <button class="filter-chip" data-f="active" onclick="setProjFilter('active', this)">مشاريع نشطة</button>
+              <button class="filter-chip" data-f="finishing" onclick="setProjFilter('finishing', this)">واجهات وتشطيبات</button>
+              <button class="filter-chip" data-f="done" onclick="setProjFilter('done', this)">خالص (منتهي)</button>
+            </div>
+            <div id="projList"></div>
+          </div>
+        </div>
+
+        <!-- المستوى 2: الحسابات داخل المشروع -->
+        <div id="projLevel2" class="hidden">
+          <div class="card">
+            <div class="row" style="justify-content:space-between;">
+              <button onclick="backToProjects()" class="sm secondary">← المشاريع</button>
+              <strong id="curProjTitle" style="color:var(--primary);"></strong>
+              <button id="btnQuickAddInProj" onclick="openTxModalForCurrent()" class="sm gold">+ حركة</button>
+            </div>
+            <div id="addAccBox" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+              <input type="text" id="accName" placeholder="إضافة حساب فرعي (مقاول، معرض، مصاريف، مهندس)">
+              <label class="check-row" style="border:none; padding:4px 0;">
+                <input type="checkbox" id="accHiddenStaff">
+                <span>🔒 مخفي عن المهندسين</span>
+              </label>
+              <button id="btnAddAcc" class="secondary">+ إضافة الحساب للمشروع</button>
+            </div>
+            <div id="accList" style="margin-top:10px;"></div>
+            <div id="projSummaryBar" class="summary-bar hidden"></div>
+          </div>
+        </div>
+
+        <!-- المستوى 3: جدول الحركات والرصيد التراكمي داخل الحساب -->
+        <div id="projLevel3" class="hidden">
+          <div class="card">
+            <div class="row" style="justify-content:space-between;">
+              <button onclick="backToAccounts()" class="sm secondary">← الحسابات</button>
+              <strong id="curAccTitle" style="color:var(--primary);"></strong>
+              <button onclick="openTxModalForCurrent()" class="sm gold">+ حركة</button>
+            </div>
+            <div id="accLedgerBox" style="overflow-x:auto; margin-top:8px;"></div>
+            <div id="accSummaryBar" class="summary-bar"></div>
+          </div>
         </div>
       </div>
 
@@ -252,7 +296,8 @@
         <input type="number" id="calcQty" placeholder="العدد (أيام / أمتار)" inputmode="decimal" oninput="calcFromQty()">
         <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()">
       </div>
-      <select id="txProject"><option value="general">عام</option></select>
+      <select id="txProject" onchange="populateAccountSelect()"><option value="general">عام</option></select>
+      <select id="txAccount"><option value="">-- الحساب الفرعي داخل المشروع --</option></select>
       <select id="txWorker"><option value="">-- بدون شخص محدد (صنايعي / مهندس) --</option></select>
       <input type="date" id="txDate">
       <input type="number" id="txAmount" placeholder="المبلغ (جنيه)" inputmode="decimal">
@@ -340,9 +385,9 @@
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '8.1';
+    const APP_VER = '9.0';
     if (localStorage.getItem('revise_app_ver') !== APP_VER) {
-      ['revise_cache_projects', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
+      ['revise_cache_projects', 'revise_cache_accounts', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
       localStorage.setItem('revise_app_ver', APP_VER);
     }
 
@@ -365,6 +410,12 @@
     const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي' };
     const catLabels = { general: 'مصروف عام', daily: 'يومية', meters: 'أمتار', lump_sum: 'مقطوعية', advance: 'واصل / سلفة', deduction: 'خصم', custody: 'عُهدة مهندس', income: 'إيراد' };
     const projCatLabels = { active: 'مشاريع نشطة', finishing: 'واجهات وتشطيبات', done: 'خالص (منتهي)' };
+
+    function fmtTime(ts) {
+      if (!ts?.seconds) return '';
+      const d = new Date(ts.seconds * 1000);
+      return `${d.toISOString().slice(0, 10)} ${d.toTimeString().slice(0, 5)}`;
+    }
 
     function tafqeet(n) {
       n = Math.floor(Math.abs(Number(n) || 0));
@@ -415,13 +466,15 @@
       });
     }
 
-    let currentUser = null, userRole = 'worker', myAssignedProjects = [];
+    let currentUser = null, currentUserName = 'المدير', userRole = 'worker', myAssignedProjects = [], myCanAdd = true;
     let dataLoaded = false, isSyncing = false, showTrash = false, projFilter = 'all', searchQuery = '', unsubs = [];
-    let assignTargetUid = null, lastReportRows = [], editingTxId = null;
+    let assignTargetUid = null, lastReportRows = [], editingTxId = null, editingOrigAmount = null;
+    let currentProjId = null, currentAccId = null;
     let staffOwnTxs = [], staffCustodyTxs = [];
 
     const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
     let projects = readJson('revise_cache_projects', []);
+    let accounts = readJson('revise_cache_accounts', []);
     let usersList = readJson('revise_cache_users', []);
     let allTxs = readJson('revise_cache_txs', []);
     let offlineQueue = readJson('revise_offline_queue', []);
@@ -443,7 +496,7 @@
     };
     document.getElementById('btnTheme').innerText = savedDark ? '☀️' : '🌙';
     document.getElementById('btnQuickPdf').onclick = () => { generateReport(); window.print(); };
-    document.getElementById('searchBox').oninput = (e) => { searchQuery = e.target.value.trim().toLowerCase(); renderTxs(); renderProjects(); };
+    document.getElementById('searchBox').oninput = (e) => { searchQuery = e.target.value.trim().toLowerCase(); renderTxs(); renderProjects(); renderAccounts(); };
 
     const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch {} }); unsubs = []; dataLoaded = false; };
 
@@ -501,9 +554,11 @@
     function setupUIForRole() {
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
+      const allowFab = isAdmin || (isStaff && myCanAdd);
       document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
       document.getElementById('btnSettings').classList.toggle('hidden', !isAdmin);
       document.getElementById('btnPrivate').classList.toggle('hidden', !isAdmin);
+      document.getElementById('adminStats').classList.toggle('hidden', !isAdmin);
       document.getElementById('optCustody').classList.toggle('hidden', !isAdmin);
       document.getElementById('optIncome').classList.toggle('hidden', !isAdmin);
       document.getElementById('navTeam').classList.toggle('hidden', !isAdmin);
@@ -511,7 +566,9 @@
       document.getElementById('navWorkers').classList.toggle('hidden', !isStaff);
       document.getElementById('navProjects').classList.toggle('hidden', !isStaff);
       document.getElementById('addProjBox').classList.toggle('hidden', !isAdmin);
-      document.getElementById('btnOpenModal').classList.toggle('hidden', !isStaff);
+      document.getElementById('addAccBox').classList.toggle('hidden', !isAdmin);
+      document.getElementById('btnOpenModal').classList.toggle('hidden', !allowFab);
+      document.getElementById('btnQuickAddInProj').classList.toggle('hidden', !allowFab);
       document.getElementById('btnToggleTrash').classList.toggle('hidden', !isAdmin);
     }
 
@@ -520,7 +577,7 @@
       [...staffOwnTxs, ...staffCustodyTxs].forEach(t => map.set(t.id, t));
       allTxs = [...map.values()].sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
       localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
-      renderTxs(); renderWorkerLedger();
+      renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger();
     }
 
     function loadData() {
@@ -552,6 +609,12 @@
           renderProjects(); renderCustodySummary();
         }, onErr));
 
+        unsubs.push(onSnapshot(collection(db, "accounts"), (snap) => {
+          accounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          localStorage.setItem('revise_cache_accounts', JSON.stringify(accounts));
+          renderAccounts(); populateAccountSelect();
+        }, onErr));
+
         unsubs.push(onSnapshot(collection(db, "users"), (snap) => {
           usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
@@ -564,7 +627,7 @@
           allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
             .sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
           localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
-          renderTxs(); renderWorkerLedger();
+          renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger();
         }, (err) => {
           document.getElementById('txList').innerHTML = `<p style="color:var(--red); text-align:center;">تعذر تحميل البيانات (${esc(err.code)})</p>`;
         }));
@@ -714,8 +777,8 @@
     window.delPrivate = (id) => { if (confirm("حذف هذه الحركة السرية؟")) deleteDoc(doc(db, "private_ledger", id)); };
 
     function getVisibleProjects() {
-      if (userRole === 'admin') return projects;
-      return projects.filter(p => myAssignedProjects.includes(p.id));
+      const base = userRole === 'admin' ? projects : projects.filter(p => myAssignedProjects.includes(p.id));
+      return userRole === 'admin' ? base : base.filter(p => p.visible !== false);
     }
 
     window.setProjFilter = (f, btn) => {
@@ -727,6 +790,9 @@
 
     window.toggleFav = (pid, currentFav) => {
       if (userRole === 'admin') updateDoc(doc(db, "projects", pid), { isFavorite: !currentFav });
+    };
+    window.toggleProjVis = (pid, currentVis) => {
+      if (userRole === 'admin') updateDoc(doc(db, "projects", pid), { visible: currentVis === false ? true : false });
     };
 
     function renderProjects() {
@@ -754,497 +820,42 @@
 
       filtered.forEach(p => {
         const isF = !!p.isFavorite;
+        const isVis = p.visible !== false;
+        const accCount = accounts.filter(a => a.projectId === p.id && (userRole === 'admin' || !a.hiddenFromStaff)).length;
         list.innerHTML += `
           <div class="tx-item">
-            <div>
-              <strong>🏗️ ${esc(p.name)}</strong><br>
-              <small style="color:var(--muted)">${esc(projCatLabels[p.category || 'active'] || 'مشاريع نشطة')}</small>
+            <div class="tx-clickable" onclick="openProjectAccounts('${esc(p.id)}')">
+              <strong>🏗️ ${esc(p.name)}</strong> <span class="badge">${accCount} حساب</span><br>
+              <small style="color:var(--muted)">${esc(projCatLabels[p.category || 'active'] || 'مشاريع نشطة')}${!isVis ? ' • مخفي عن الفريق' : ''}</small>
             </div>
-            ${userRole === 'admin' ? `<button onclick="toggleFav('${esc(p.id)}', ${isF})" class="sm secondary">${isF ? '⭐ مفضلة' : '☆ تثبيت'}</button>` : ''}
+            ${userRole === 'admin' ? `<div class="row">
+              <button onclick="toggleProjVis('${esc(p.id)}', ${isVis})" class="sm secondary">${isVis ? '👁️ نشط' : '🚫 مخفي'}</button>
+              <button onclick="toggleFav('${esc(p.id)}', ${isF})" class="sm secondary">${isF ? '⭐' : '☆'}</button>
+            </div>` : ''}
           </div>`;
       });
+      populateAccountSelect();
     }
 
-    function renderTeam() {
-      const list = document.getElementById('teamList');
-      const wSel = document.getElementById('txWorker');
-      const ledgerSel = document.getElementById('workerSelect');
-      list.innerHTML = usersList.length ? '' : '<p style="color:var(--muted)">لم يتم إضافة أعضاء بعد</p>';
-      wSel.innerHTML = '<option value="">-- بدون شخص محدد (صنايعي / مهندس) --</option>';
-      ledgerSel.innerHTML = '<option value="">-- اختر صنايعي / عامل --</option>';
-
-      usersList.forEach(u => {
-        wSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)} (${esc(roleLabels[u.role] || u.role)})</option>`;
-        if (u.role === 'worker' || userRole === 'admin') {
-          ledgerSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)}</option>`;
-        }
-        if (userRole === 'admin') {
-          const canAssign = u.role === 'engineer' || u.role === 'accountant';
-          const isSelf = u.id === currentUser?.uid;
-          const count = (u.assignedProjects || []).length;
-          list.innerHTML += `
-            <div class="tx-item">
-              <div>
-                <strong>${esc(u.name)}</strong> <span class="badge">${esc(roleLabels[u.role] || u.role)}</span><br>
-                <small style="color:var(--muted)">📱 ${esc(u.phone)}${canAssign ? ` • 🏗️ ${count} مشروع` : ''}</small>
-              </div>
-              <div class="row">
-                ${canAssign ? `<button onclick="openAssign('${esc(u.id)}')" class="sm gold">مشاريع</button>` : ''}
-                ${!isSelf ? `<button onclick="toggleUser('${esc(u.id)}', ${!!u.active})" class="sm ${u.active ? 'red' : 'green'}">${u.active ? 'إيقاف' : 'تفعيل'}</button>` : '<small style="color:var(--muted)">حسابك</small>'}
-              </div>
-            </div>`;
-        }
-      });
-      renderWorkerLedger();
+    function showProjLevel(lvl) {
+      document.getElementById('projLevel1').classList.toggle('hidden', lvl !== 1);
+      document.getElementById('projLevel2').classList.toggle('hidden', lvl !== 2);
+      document.getElementById('projLevel3').classList.toggle('hidden', lvl !== 3);
     }
 
-    window.renderWorkerLedger = () => {
-      const wid = document.getElementById('workerSelect').value;
-      const box = document.getElementById('workerLedgerBox');
-      if (!wid) { box.innerHTML = '<p style="color:var(--muted); font-size:13px;">اختر صنايعي لعرض كشف المستحق والسلف والخصومات والباقي.</p>'; return; }
-      const txs = [...offlineQueue, ...allTxs].filter(t => t.workerId === wid && t.deleted !== true && t.status !== 'rejected' && (userRole === 'admin' || t.status === 'approved'));
-      let earned = 0, adv = 0, ded = 0, rows = '';
-      txs.forEach(t => {
-        const amt = Number(t.amount || 0);
-        if (t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum') earned += amt;
-        if (t.category === 'advance') adv += amt;
-        if (t.category === 'deduction') ded += amt;
-        rows += `<div class="tx-item"><div><strong>${esc(catLabels[t.category] || '')}</strong><br><small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || '')}</small></div><strong>${amt.toLocaleString()} ج</strong></div>`;
-      });
-      const net = earned - adv - ded;
-      box.innerHTML = `
-        <div class="worker-grid">
-          <div class="w-box"><small>إجمالي الشغل (له)</small><strong style="color:var(--green)">${earned.toLocaleString()} ج</strong></div>
-          <div class="w-box"><small>الواصل / السلف</small><strong style="color:var(--red)">${adv.toLocaleString()} ج</strong></div>
-          <div class="w-box"><small>الخصومات</small><strong style="color:var(--red)">${ded.toLocaleString()} ج</strong></div>
-          <div class="w-box"><small>الصافي الباقي له</small><strong style="color:var(--primary)">${net.toLocaleString()} ج</strong></div>
-        </div>
-        <div class="tafqeet-box">${esc(tafqeet(net))}</div>
-        ${rows || '<p style="color:var(--muted); text-align:center;">لا توجد حركات مسجلة</p>'}`;
+    window.openProjectAccounts = (pid) => {
+      currentProjId = pid; currentAccId = null;
+      const p = projects.find(x => x.id === pid);
+      document.getElementById('curProjTitle').innerText = `🏗️ ${p?.name || 'مشروع'}`;
+      showProjLevel(2);
+      renderAccounts();
     };
+    window.backToProjects = () => { currentProjId = null; currentAccId = null; showProjLevel(1); };
 
-    window.openAssign = (uid) => {
-      assignTargetUid = uid;
-      const u = usersList.find(x => x.id === uid);
-      const assigned = u?.assignedProjects || [];
-      document.getElementById('assignTitle').innerText = `مشاريع: ${u?.name || ''}`;
-      const box = document.getElementById('assignList');
-      box.innerHTML = projects.length ? projects.map(p => `
-        <label class="check-row">
-          <input type="checkbox" value="${esc(p.id)}" ${assigned.includes(p.id) ? 'checked' : ''}>
-          <span>🏗️ ${esc(p.name)}</span>
-        </label>`).join('') : '<p style="color:var(--muted)">أضف مشاريع أولاً</p>';
-      document.getElementById('assignModal').classList.remove('hidden');
-    };
-
-    document.getElementById('btnSaveAssign').onclick = async () => {
-      if (!assignTargetUid) return;
-      const selected = [...document.querySelectorAll('#assignList input:checked')].map(i => i.value);
-      await updateDoc(doc(db, "users", assignTargetUid), { assignedProjects: selected });
-      document.getElementById('assignModal').classList.add('hidden');
-    };
-
-    document.getElementById('btnToggleTrash').onclick = () => {
-      showTrash = !showTrash;
-      document.getElementById('txListTitle').innerText = showTrash ? '🗑️ سلة المحذوفات' : 'أحدث العمليات';
-      document.getElementById('btnToggleTrash').innerText = showTrash ? '↩️ العودة' : '🗑️ السلة';
-      renderTxs();
-    };
-
-    function renderTxs() {
-      const list = document.getElementById('txList');
-      const isAdmin = userRole === 'admin';
-      const combined = [...offlineQueue, ...allTxs].filter(t => {
-        const trashOk = showTrash ? t.deleted === true : t.deleted !== true;
-        const sOk = !searchQuery || `${t.project || ''} ${t.note || ''} ${t.workerName || ''}`.toLowerCase().includes(searchQuery);
-        return trashOk && sOk;
-      });
-
-      let outApproved = 0, inApproved = 0, pendSum = 0, pendingCount = 0;
-      [...offlineQueue, ...allTxs].filter(t => t.deleted !== true).forEach(t => {
-        const amt = Number(t.amount || 0);
-        if (t.status === 'pending') { pendingCount++; pendSum += amt; }
-        else if (t.status === 'approved') {
-          if (t.type === 'in') inApproved += amt;
-          else if (t.category !== 'custody') outApproved += amt;
-        }
-      });
-
-      list.innerHTML = combined.length ? '' : `<p style="color:var(--muted); text-align:center;">${showTrash ? 'سلة المحذوفات فارغة' : 'لا توجد عمليات'}</p>`;
-
-      combined.forEach(t => {
-        const amt = Number(t.amount || 0);
-        const pObj = projects.find(p => p.id === t.projectId);
-        const projLabel = pObj ? pObj.name : (t.project || 'عام');
-        const catLabel = catLabels[t.category] || '';
-        const syncTag = t.pendingSync ? ' <span style="font-size:10px; color:#d97706;">(⏳ بانتظار النت)</span>' : '';
-        const rejectTag = t.status === 'rejected' ? `<br><small style="color:var(--red)">❌ مرفوض${t.rejectReason ? `: ${esc(t.rejectReason)}` : ''}</small>` : '';
-        const receiptBtn = (t.receiptId || t.receiptData) ? `<button onclick="viewReceipt('${esc(t.receiptId || '')}', '${esc(t.localId || '')}')" class="sm secondary">🖼️ فاتورة</button>` : '';
-        const canEdit = isAdmin && !showTrash && !t.localId;
-
-        let actions = '';
-        if (t.localId) actions = `<small style="color:#d97706;">محفوظ على الهاتف</small>`;
-        else if (isAdmin && showTrash) {
-          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;"><button onclick="restoreTx('${esc(t.id)}')" class="sm green">استعادة</button></div>`;
-        } else if (isAdmin) {
-          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">
-            ${receiptBtn}
-            ${t.status === 'pending' ? `<button onclick="approveTx('${esc(t.id)}')" class="sm green">اعتماد</button><button onclick="rejectTx('${esc(t.id)}')" class="sm red">رفض</button>` : (t.status === 'rejected' ? '<span style="font-size:11px; color:var(--red);">❌ مرفوض</span>' : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>')}
-            <button onclick="softDeleteTx('${esc(t.id)}')" class="sm secondary" style="color:var(--red);">حذف</button>
-          </div>`;
-        } else {
-          const stTxt = t.status === 'pending' ? '⏳ معلق' : (t.status === 'rejected' ? '❌ مرفوض' : '✅ معتمد');
-          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">${receiptBtn}<small style="color:var(--muted)">${stTxt}</small></div>`;
-        }
-
-        list.innerHTML += `
-          <div class="tx-item">
-            <div ${canEdit ? `class="tx-clickable" onclick="editTx('${esc(t.id)}')"` : ''}>
-              <strong>${esc(projLabel)}</strong> ${catLabel ? `<span class="badge" style="background:var(--border); color:var(--text);">${esc(catLabel)}</span>` : ''}${syncTag}<br>
-              <small style="color:var(--muted)">${t.txDate ? `📅 ${esc(t.txDate)} • ` : ''}${t.workerName ? `👤 ${esc(t.workerName)} • ` : ''}${esc(t.note || '')}</small>${rejectTag}
-            </div>
-            <div style="text-align:left;">
-              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}" ${canEdit ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</div>
-              ${actions}
-            </div>
-          </div>`;
-      });
-
-      document.getElementById('statOut').innerText = outApproved.toLocaleString() + ' ج';
-      document.getElementById('statIn').innerText = inApproved.toLocaleString() + ' ج';
-      document.getElementById('statPend').innerText = pendSum.toLocaleString() + ' ج';
-      document.getElementById('statPendingBadge').innerText = `${pendingCount} معلق`;
-      renderCustodySummary();
-    }
-
-    window.editTx = (id) => {
-      if (userRole !== 'admin') return;
-      const t = allTxs.find(x => x.id === id);
-      if (!t) return;
-      editingTxId = id;
-      document.getElementById('txModalTitle').innerText = 'تعديل المعاملة';
-      document.getElementById('btnSaveTx').innerText = 'حفظ التعديلات';
-      document.getElementById('txCategory').value = t.category || 'general';
-      document.getElementById('txProject').value = t.projectId || 'general';
-      document.getElementById('txWorker').value = t.workerId || '';
-      document.getElementById('txDate').value = t.txDate || new Date().toISOString().slice(0, 10);
-      document.getElementById('txAmount').value = t.amount || '';
-      document.getElementById('txNote').value = t.note || '';
-      document.getElementById('txReceipt').value = '';
-      document.getElementById('calcQty').value = '';
-      document.getElementById('calcRate').value = '';
-      toggleCalcFields();
-      document.getElementById('txModal').classList.remove('hidden');
-    };
-
-    window.viewReceipt = async (receiptId, localId) => {
-      const modal = document.getElementById('receiptModal');
-      const box = document.getElementById('receiptImgBox');
-      modal.classList.remove('hidden');
-      box.innerHTML = 'جاري تحميل الفاتورة...';
-      if (localId) {
-        const item = offlineQueue.find(x => String(x.localId) === String(localId));
-        box.innerHTML = item?.receiptData ? `<img src="${item.receiptData}" style="max-width:100%; border-radius:10px;">` : 'غير متوفرة';
-        return;
-      }
-      try {
-        const snap = await getDoc(doc(db, "receipts", receiptId));
-        box.innerHTML = snap.exists() ? `<img src="${snap.data().imageData}" style="max-width:100%; border-radius:10px;">` : 'الفاتورة غير موجودة';
-      } catch (e) { box.innerHTML = 'تعذر تحميل الفاتورة'; }
-    };
-
-    document.getElementById('btnAddProj').onclick = async () => {
-      const name = document.getElementById('projName').value.trim();
-      const category = document.getElementById('projCat').value;
-      const isFavorite = document.getElementById('projFav').checked;
+    document.getElementById('btnAddAcc').onclick = async () => {
+      if (!currentProjId || userRole !== 'admin') return;
+      const name = document.getElementById('accName').value.trim();
+      const hiddenFromStaff = document.getElementById('accHiddenStaff').checked;
       if (!name) return;
-      await addDoc(collection(db, "projects"), { name, category, isFavorite, createdAt: serverTimestamp() });
-      document.getElementById('projName').value = '';
-    };
-
-    document.getElementById('btnCreateUser').onclick = async () => {
-      if (!navigator.onLine) { alert("حفظ المستخدم يحتاج اتصال بالإنترنت."); return; }
-      const uid = document.getElementById('uUid').value.trim();
-      const name = document.getElementById('uName').value.trim();
-      const phone = document.getElementById('uPhone').value.trim();
-      const role = document.getElementById('uRole').value;
-      const msg = document.getElementById('teamMsg');
-      if (!uid || !name || !phone) { msg.style.color = 'var(--red)'; msg.innerText = "أدخل UID والاسم ورقم الموبايل"; return; }
-      try {
-        await setDoc(doc(db, "users", uid), { name, phone, role, active: true, assignedProjects: [], createdAt: serverTimestamp() });
-        msg.style.color = 'var(--green)'; msg.innerText = `✅ تم حفظ ملف ${name} بنجاح`;
-        document.getElementById('uUid').value = ''; document.getElementById('uName').value = ''; document.getElementById('uPhone').value = '';
-      } catch (e) { msg.style.color = 'var(--red)'; msg.innerText = "خطأ: " + e.message; }
-    };
-
-    window.toggleUser = (uid, currentStatus) => updateDoc(doc(db, "users", uid), { active: !currentStatus });
-
-    window.toggleCalcFields = () => {
-      const c = document.getElementById('txCategory').value;
-      document.getElementById('calcBox').classList.toggle('hidden', c !== 'daily' && c !== 'meters');
-    };
-    window.calcFromQty = () => {
-      const q = Number(document.getElementById('calcQty').value || 0);
-      const r = Number(document.getElementById('calcRate').value || 0);
-      if (q > 0 && r > 0) document.getElementById('txAmount').value = q * r;
-    };
-
-    const openTxModal = () => {
-      editingTxId = null;
-      document.getElementById('txModalTitle').innerText = 'تسجيل عملية جديدة';
-      document.getElementById('btnSaveTx').innerText = 'حفظ العملية';
-      document.getElementById('txDate').value = new Date().toISOString().slice(0, 10);
-      document.getElementById('txAmount').value = '';
-      document.getElementById('txNote').value = '';
-      document.getElementById('txReceipt').value = '';
-      document.getElementById('calcQty').value = '';
-      document.getElementById('calcRate').value = '';
-      toggleCalcFields();
-      document.getElementById('txModal').classList.remove('hidden');
-    };
-    document.getElementById('btnOpenModal').onclick = openTxModal;
-    document.getElementById('btnCloseModal').onclick = () => { editingTxId = null; document.getElementById('txModal').classList.add('hidden'); };
-    window.quickAdd = (projId) => { openTxModal(); document.getElementById('txProject').value = projId; document.getElementById('txAmount').focus(); };
-
-    document.getElementById('btnSaveTx').onclick = async () => {
-      const category = document.getElementById('txCategory').value;
-      const type = category === 'income' ? 'in' : 'out';
-      const projectId = document.getElementById('txProject').value || 'general';
-      const pObj = projects.find(p => p.id === projectId);
-      const workerId = document.getElementById('txWorker').value;
-      const workerObj = usersList.find(u => u.id === workerId);
-      const txDate = document.getElementById('txDate').value || new Date().toISOString().slice(0, 10);
-      const amount = Number(document.getElementById('txAmount').value);
-      const note = document.getElementById('txNote').value.trim();
-      const file = document.getElementById('txReceipt').files[0];
-      if (!amount || amount <= 0) return;
-      if (category === 'custody' && !workerId) { alert("اختر المهندس المستلم للعُهدة أولاً"); return; }
-
-      let receiptData = null;
-      if (file) {
-        try {
-          receiptData = await compressImage(file, 800, 470000);
-          if (receiptData.length >= 495000) { alert("حجم الصورة بعد الضغط ما زال كبيراً، اختر صورة أصغر."); return; }
-        } catch (e) { alert("تعذر ضغط الصورة"); return; }
-      }
-
-      try {
-        if (editingTxId) {
-          const updateData = {
-            type, category, projectId, project: pObj ? pObj.name : 'عام',
-            workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
-            txDate, amount, note,
-            updatedBy: currentUser.uid, updatedAt: serverTimestamp()
-          };
-          if (receiptData) {
-            const rRef = await addDoc(collection(db, "receipts"), {
-              imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
-            });
-            updateData.receiptId = rRef.id;
-            updateData.hasReceipt = true;
-          }
-          await updateDoc(doc(db, "transactions", editingTxId), updateData);
-          editingTxId = null;
-        } else {
-          const payload = {
-            type, category, projectId, project: pObj ? pObj.name : 'عام',
-            workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
-            txDate, amount, note, deleted: false,
-            status: userRole === 'admin' ? 'approved' : 'pending',
-            createdBy: currentUser.uid
-          };
-          if (!navigator.onLine || !auth.currentUser) {
-            offlineQueue.unshift({ ...payload, receiptData, localId: Date.now(), pendingSync: true });
-            localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
-            renderTxs();
-          } else {
-            let receiptId = null;
-            if (receiptData) {
-              const rRef = await addDoc(collection(db, "receipts"), {
-                imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
-              });
-              receiptId = rRef.id;
-            }
-            await addDoc(collection(db, "transactions"), { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() });
-          }
-        }
-        document.getElementById('txAmount').value = '';
-        document.getElementById('txNote').value = '';
-        document.getElementById('txReceipt').value = '';
-        document.getElementById('txModal').classList.add('hidden');
-      } catch (e) {
-        alert("تعذر الحفظ: " + e.message);
-      }
-    };
-
-    window.approveTx = (id) => updateDoc(doc(db, "transactions", id), { status: 'approved', updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
-    window.rejectTx = (id) => {
-      const reason = prompt("سبب رفض المصروف (اختياري):") ?? '';
-      updateDoc(doc(db, "transactions", id), { status: 'rejected', rejectReason: reason.trim(), updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
-    };
-    window.softDeleteTx = (id) => { if (confirm("نقل العملية إلى سلة المحذوفات؟")) updateDoc(doc(db, "transactions", id), { deleted: true, updatedBy: currentUser.uid, updatedAt: serverTimestamp() }); };
-    window.restoreTx = (id) => updateDoc(doc(db, "transactions", id), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
-
-    window.updateReportOptions = () => {
-      const type = document.getElementById('repFilterType').value;
-      const valSel = document.getElementById('repFilterVal');
-      if (type === 'all') { valSel.classList.add('hidden'); return; }
-      valSel.classList.remove('hidden');
-      valSel.innerHTML = type === 'project'
-        ? projects.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('')
-        : usersList.map(u => `<option value="${esc(u.id)}">${esc(u.name)}</option>`).join('');
-    };
-
-    window.generateReport = () => {
-      const type = document.getElementById('repFilterType').value;
-      const val = document.getElementById('repFilterVal').value;
-      let filtered = allTxs.filter(t => t.status === 'approved' && t.deleted !== true);
-      let title = "كشف حساب عام";
-      if (type === 'project') {
-        const p = projects.find(x => x.id === val);
-        filtered = filtered.filter(t => t.projectId === val || t.project === p?.name);
-        title = `كشف حساب مشروع: ${p?.name || ''}`;
-      }
-      if (type === 'worker') {
-        const w = usersList.find(u => u.id === val);
-        filtered = filtered.filter(t => t.workerId === val);
-        title = `كشف حساب: ${w?.name || ''}`;
-      }
-
-      lastReportRows = filtered;
-      let outS = 0, inS = 0, dueW = 0, advW = 0, dedW = 0, rows = '';
-      filtered.forEach(t => {
-        const amt = Number(t.amount || 0);
-        if (t.type === 'in') inS += amt;
-        else if (t.category !== 'custody') outS += amt;
-        if (t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum') dueW += amt;
-        if (t.category === 'advance') advW += amt;
-        if (t.category === 'deduction') dedW += amt;
-        const dt = t.txDate || (t.createdAt?.seconds ? new Date(t.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'اليوم');
-        rows += `<tr><td>${esc(dt)}</td><td>${esc(t.project || 'عام')}</td><td>${esc(catLabels[t.category] || '')}</td><td>${esc(t.note || '')}</td><td>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()}</td></tr>`;
-      });
-
-      const netVal = type === 'worker' ? (dueW - advW - dedW) : (inS - outS);
-      const workerSummary = type === 'worker' ? `<p style="background:var(--bg); padding:8px; border-radius:8px; font-size:13px;">
-        المستحق: <strong>${dueW.toLocaleString()} ج</strong> | السلف: <strong>${advW.toLocaleString()} ج</strong> | الخصومات: <strong>${dedW.toLocaleString()} ج</strong><br>
-        الباقي: <strong style="color:var(--primary); font-size:15px;">${netVal.toLocaleString()} ج</strong></p>` : '';
-
-      const s = companySettings;
-      const pdfHeader = `
-        <div class="pdf-header">
-          <div>
-            <strong style="color:var(--primary); font-size:16px;">${esc(s.nameAr || 'شركة ريفايس للمقاولات')}</strong><br>
-            <small style="color:var(--muted)">${esc(s.addressAr || '')} • ${esc(s.phone || '')}</small>
-          </div>
-          ${s.logo ? `<img src="${s.logo}" alt="Logo">` : ''}
-          <div style="text-align:left;">
-            <strong style="font-size:13px;">${esc(s.nameEn || 'Revise')}</strong><br>
-            <small style="color:var(--muted)">${esc(s.email || '')}</small>
-          </div>
-        </div>`;
-
-      const pdfFooter = (s.showStamp || s.showSignature) ? `
-        <div class="pdf-footer">
-          ${s.showSignature ? `<div><small>التوقيع</small>${s.signature ? `<img src="${s.signature}">` : '<br>__________'}</div>` : ''}
-          ${s.showStamp ? `<div><small>ختم الشركة</small>${s.stamp ? `<img src="${s.stamp}">` : '<br>__________'}</div>` : ''}
-        </div>` : '';
-
-      const area = document.getElementById('reportArea');
-      area.classList.remove('hidden');
-      area.innerHTML = `
-        ${pdfHeader}
-        <p style="text-align:center; margin:4px 0 10px; font-weight:bold; font-size:14px;">${esc(title)}</p>
-        <table><thead><tr><th>التاريخ</th><th>المشروع</th><th>البند</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>${rows || '<tr><td colspan="5" style="text-align:center">لا توجد عمليات</td></tr>'}</tbody></table>
-        ${workerSummary}
-        <p style="margin-top:10px; font-weight:bold;">إجمالي المصروفات: ${outS.toLocaleString()} ج | إجمالي الإيرادات: ${inS.toLocaleString()} ج</p>
-        <div class="tafqeet-box">الصافي بالحروف: ${esc(tafqeet(netVal))}</div>
-        ${pdfFooter}`;
-    };
-
-    window.exportCSV = () => {
-      if (!lastReportRows.length) generateReport();
-      let csv = "\uFEFFالتاريخ,المشروع,الشخص,البند,البيان,المبلغ\n";
-      lastReportRows.forEach(t => {
-        const dt = t.txDate || '';
-        const row = [dt, t.project || 'عام', t.workerName || '', catLabels[t.category] || '', (t.note || '').replace(/,/g, ' '), (t.type === 'in' ? '' : '-') + (t.amount || 0)];
-        csv += row.join(',') + "\n";
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `revise-report-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-    };
-
-    window.shareWhatsApp = () => {
-      if (!lastReportRows.length) generateReport();
-      let outS = 0, inS = 0;
-      lastReportRows.forEach(t => { if (t.type === 'in') inS += Number(t.amount || 0); else if (t.category !== 'custody') outS += Number(t.amount || 0); });
-      const txt = `${companySettings.nameAr || 'شركة ريفايس للمقاولات'}\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج\nإجمالي الإيرادات: ${inS.toLocaleString()} ج\nالصافي: ${(inS - outS).toLocaleString()} ج (${tafqeet(inS - outS)})`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
-    };
-
-    document.getElementById('btnBackup').onclick = () => {
-      const data = { date: new Date().toISOString(), companySettings, projects, users: usersList, transactions: allTxs, privateTxs };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `revise-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-    };
-
-    window.switchTab = (tab, btn) => {
-      ['Home', 'Projects', 'Workers', 'Team', 'Reports'].forEach(t => document.getElementById('tab' + t).classList.toggle('hidden', t !== tab));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    };
-
-    if (localStorage.getItem('revise_uid')) {
-      try {
-        currentUser = { uid: localStorage.getItem('revise_uid') };
-        userRole = localStorage.getItem('revise_role') || 'worker';
-        myAssignedProjects = readJson('revise_assigned', []);
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.remove('hidden');
-        setupUIForRole(); renderProjects(); renderTeam(); renderTxs(); loadData();
-      } catch (e) { console.warn(e); }
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
-        clearListeners();
-        localStorage.removeItem('revise_uid'); localStorage.removeItem('revise_role');
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('appScreen').classList.add('hidden');
-        return;
-      }
-      currentUser = user;
-      localStorage.setItem('revise_uid', user.uid);
-      try {
-        const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (!uDoc.exists() || !uDoc.data().active) {
-          alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
-          clearListeners(); localStorage.removeItem('revise_uid');
-          await signOut(auth); return;
-        }
-        userRole = uDoc.data().role || 'worker';
-        myAssignedProjects = uDoc.data().assignedProjects || [];
-      } catch (e) {
-        userRole = localStorage.getItem('revise_role') || 'worker';
-        myAssignedProjects = readJson('revise_assigned', []);
-      }
-      localStorage.setItem('revise_role', userRole);
-      localStorage.setItem('revise_assigned', JSON.stringify(myAssignedProjects));
-      setupUIForRole();
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
-      loadData(); syncOfflineQueue();
-    });
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
-  </script>
-</body>
-</html>
+      await addDoc(collection(db, "accounts"), { projectId: currentProjId, name, hiddenFromStaff, createdAt: serverTimestamp() });
+      document.getElementById
