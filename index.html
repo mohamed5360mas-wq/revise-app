@@ -380,16 +380,25 @@
     </div>
   </div>
 
+  <script>
+    window.addEventListener('error', function(e) {
+      var m = document.getElementById('authMsg');
+      if (m) m.innerText = 'خطأ برمجي: ' + (e.message || 'غير معروف');
+    });
+  </script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '9.0';
-    if (localStorage.getItem('revise_app_ver') !== APP_VER) {
-      ['revise_cache_projects', 'revise_cache_accounts', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
-      localStorage.setItem('revise_app_ver', APP_VER);
-    }
+    const APP_VER = '9.1';
+    try {
+      if (localStorage.getItem('revise_app_ver') !== APP_VER) {
+        ['revise_cache_projects', 'revise_cache_accounts', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('revise_app_ver', APP_VER);
+      }
+    } catch (e) {}
 
     const firebaseConfig = {
       apiKey: "AIzaSyB11n-Fi_L0AmTtX8_Vc7v737RWFnXEkZQ",
@@ -403,7 +412,13 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     setPersistence(auth, browserLocalPersistence).catch(() => {});
-    const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+
+    let db;
+    try {
+      db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+    } catch (e) {
+      db = getFirestore(app);
+    }
 
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     const formatEmail = (val) => val.includes('@') ? val.trim().toLowerCase() : `${val.trim()}@revise.app`;
@@ -412,9 +427,9 @@
     const projCatLabels = { active: 'مشاريع نشطة', finishing: 'واجهات وتشطيبات', done: 'خالص (منتهي)' };
 
     function fmtTime(ts) {
-      if (!ts?.seconds) return '';
+      if (!ts || !ts.seconds) return '';
       const d = new Date(ts.seconds * 1000);
-      return `${d.toISOString().slice(0, 10)} ${d.toTimeString().slice(0, 5)}`;
+      return d.toISOString().slice(0, 10) + ' ' + d.toTimeString().slice(0, 5);
     }
 
     function tafqeet(n) {
@@ -472,7 +487,7 @@
     let currentProjId = null, currentAccId = null;
     let staffOwnTxs = [], staffCustodyTxs = [];
 
-    const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
+    const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch (e) { return def; } };
     let projects = readJson('revise_cache_projects', []);
     let accounts = readJson('revise_cache_accounts', []);
     let usersList = readJson('revise_cache_users', []);
@@ -498,7 +513,7 @@
     document.getElementById('btnQuickPdf').onclick = () => { generateReport(); window.print(); };
     document.getElementById('searchBox').oninput = (e) => { searchQuery = e.target.value.trim().toLowerCase(); renderTxs(); renderProjects(); renderAccounts(); };
 
-    const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch {} }); unsubs = []; dataLoaded = false; };
+    const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch (e) {} }); unsubs = []; dataLoaded = false; };
 
     async function syncOfflineQueue() {
       if (!navigator.onLine || isSyncing || !offlineQueue.length || !auth.currentUser) return;
@@ -535,12 +550,15 @@
       if (!navigator.onLine) { document.getElementById('authMsg').innerText = "تسجيل الدخول لأول مرة يحتاج إنترنت"; return; }
       const id = document.getElementById('loginId').value;
       const pass = document.getElementById('loginPass').value;
+      if (!id || !pass) { document.getElementById('authMsg').innerText = "أدخل البريد الإلكتروني وكلمة المرور"; return; }
       document.getElementById('authMsg').innerText = "جاري الدخول...";
       try {
-        await setPersistence(auth, browserLocalPersistence);
+        await setPersistence(auth, browserLocalPersistence).catch(() => {});
         await signInWithEmailAndPassword(auth, formatEmail(id), pass);
         document.getElementById('authMsg').innerText = "";
-      } catch (e) { document.getElementById('authMsg').innerText = "بيانات الدخول غير صحيحة"; }
+      } catch (e) {
+        document.getElementById('authMsg').innerText = "بيانات الدخول غير صحيحة (" + (e.code || e.message) + ")";
+      }
     };
 
     document.getElementById('btnLogout').onclick = async () => {
@@ -858,4 +876,655 @@
       const hiddenFromStaff = document.getElementById('accHiddenStaff').checked;
       if (!name) return;
       await addDoc(collection(db, "accounts"), { projectId: currentProjId, name, hiddenFromStaff, createdAt: serverTimestamp() });
-      document.getElementById
+      document.getElementById('accName').value = '';
+      document.getElementById('accHiddenStaff').checked = false;
+    };
+
+    window.toggleAccHidden = (aid, cur) => {
+      if (userRole === 'admin') updateDoc(doc(db, "accounts", aid), { hiddenFromStaff: !cur });
+    };
+
+    window.deleteAcc = async (aid) => {
+      if (userRole !== 'admin') return;
+      const hasTxs = allTxs.some(t => t.accountId === aid && t.deleted !== true);
+      if (hasTxs) { alert("لا يمكن حذف حساب يحتوي على عمليات مالية نشطة."); return; }
+      if (confirm("حذف هذا الحساب الفرعي؟")) await deleteDoc(doc(db, "accounts", aid));
+    };
+
+    function getAccountStats(aid, pid) {
+      if (userRole !== 'admin') return { count: 0, inSum: 0, outSum: 0, net: 0 };
+      const txs = allTxs.filter(t => t.deleted !== true && t.status === 'approved' && t.projectId === pid && (aid === '__general__' ? !t.accountId : t.accountId === aid));
+      let inSum = 0, outSum = 0;
+      txs.forEach(t => { const a = Number(t.amount || 0); if (t.type === 'in') inSum += a; else if (t.category !== 'custody') outSum += a; });
+      return { count: txs.length, inSum, outSum, net: inSum - outSum };
+    }
+
+    function renderAccounts() {
+      if (!currentProjId) return;
+      const list = document.getElementById('accList');
+      const sumBar = document.getElementById('projSummaryBar');
+      const pAccs = accounts.filter(a => a.projectId === currentProjId && (userRole === 'admin' || !a.hiddenFromStaff) && (!searchQuery || a.name.toLowerCase().includes(searchQuery)));
+
+      let html = '';
+      if (userRole === 'admin') {
+        const genSt = getAccountStats('__general__', currentProjId);
+        html += `<div class="tx-item">
+          <div class="tx-clickable" onclick="openAccountLedger('__general__', 'حركات عامة بالمشروع')">
+            <strong>📁 حركات عامة بالمشروع</strong> <span class="badge">${genSt.count}</span><br>
+            <small style="color:var(--muted)">الصافي: <strong style="color:${genSt.net < 0 ? 'var(--red)' : 'var(--green)'}">${genSt.net.toLocaleString()} ج</strong></small>
+          </div>
+          <button onclick="openTxModalForCurrent('__general__')" class="sm secondary">+</button>
+        </div>`;
+      }
+
+      let projIn = 0, projOut = 0;
+      pAccs.forEach(a => {
+        const st = getAccountStats(a.id, currentProjId);
+        projIn += st.inSum; projOut += st.outSum;
+        html += `<div class="tx-item">
+          <div class="tx-clickable" onclick="openAccountLedger('${esc(a.id)}', '${esc(a.name)}')">
+            <strong>${a.hiddenFromStaff ? '🔒 ' : '📂 '}${esc(a.name)}</strong> ${userRole === 'admin' ? `<span class="badge">${st.count}</span>` : ''}<br>
+            ${userRole === 'admin' ? `<small style="color:var(--muted)">الصافي: <strong style="color:${st.net < 0 ? 'var(--red)' : 'var(--green)'}">${st.net.toLocaleString()} ج</strong></small>` : '<small style="color:var(--muted)">اضغط لتسجيل حركة</small>'}
+          </div>
+          <div class="row">
+            <button onclick="openTxModalForCurrent('${esc(a.id)}')" class="sm secondary">+</button>
+            ${userRole === 'admin' ? `<button onclick="toggleAccHidden('${esc(a.id)}', ${!!a.hiddenFromStaff})" class="sm secondary">${a.hiddenFromStaff ? '🔒' : '👁️'}</button>
+            <button onclick="deleteAcc('${esc(a.id)}')" class="sm secondary" style="color:var(--red);">×</button>` : ''}
+          </div>
+        </div>`;
+      });
+
+      list.innerHTML = html || '<p style="color:var(--muted); text-align:center;">لا توجد حسابات فرعية بعد</p>';
+      if (userRole === 'admin') {
+        sumBar.classList.remove('hidden');
+        sumBar.innerHTML = `<div>له (إيراد)<strong style="color:var(--green)">${projIn.toLocaleString()} ج</strong></div><div>عليه (مصروف)<strong style="color:var(--red)">${projOut.toLocaleString()} ج</strong></div><div>الرصيد<strong style="color:var(--primary)">${(projIn - projOut).toLocaleString()} ج</strong></div>`;
+      } else {
+        sumBar.classList.add('hidden');
+      }
+    }
+
+    window.openAccountLedger = (aid, title) => {
+      currentAccId = aid;
+      document.getElementById('curAccTitle').innerText = `📂 ${title}`;
+      showProjLevel(3);
+      renderLedger();
+    };
+    window.backToAccounts = () => { currentAccId = null; showProjLevel(2); renderAccounts(); };
+
+    function renderLedger() {
+      if (!currentProjId || !currentAccId) return;
+      const box = document.getElementById('accLedgerBox');
+      const sumBar = document.getElementById('accSummaryBar');
+
+      const txs = allTxs.filter(t => t.deleted !== true && t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId) && (userRole === 'admin' || t.createdBy === currentUser?.uid));
+      const approvedAsc = [...txs].filter(t => t.status === 'approved' && t.category !== 'custody').sort((a, b) => (a.txDate || '').localeCompare(b.txDate || '') || ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
+
+      let running = 0, inSum = 0, outSum = 0;
+      const runMap = new Map();
+      approvedAsc.forEach(t => {
+        const amt = Number(t.amount || 0);
+        if (t.type === 'in') { running += amt; inSum += amt; }
+        else { running -= amt; outSum += amt; }
+        runMap.set(t.id, running);
+      });
+
+      const rowsDesc = [...txs].sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+      const trs = rowsDesc.map(t => {
+        const amt = Number(t.amount || 0);
+        const isIn = t.type === 'in';
+        const stTag = t.status === 'pending' ? ' (⏳ معلق)' : (t.status === 'rejected' ? ' (❌ مرفوض)' : '');
+        const byTag = t.createdByName ? ' • ' + esc(t.createdByName) : '';
+        const balTxt = (userRole === 'admin' && runMap.has(t.id)) ? `${runMap.get(t.id).toLocaleString()} ج` : '—';
+        return `<tr ${userRole === 'admin' ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>
+          <td>${esc(t.txDate || '')}</td>
+          <td class="${isIn ? 'cell-in' : 'cell-out'}">${isIn ? '+' : '-'}${amt.toLocaleString()}</td>
+          <td>${esc(t.note || catLabels[t.category] || '')}${byTag}${stTag}</td>
+          <td>${balTxt}</td>
+        </tr>`;
+      }).join('');
+
+      box.innerHTML = `<table class="ledger-table"><thead><tr><th>التاريخ</th><th>المبلغ</th><th>التفاصيل</th><th>الرصيد</th></tr></thead><tbody>${trs || '<tr><td colspan="4" style="text-align:center">لا توجد حركات</td></tr>'}</tbody></table>`;
+      if (userRole === 'admin') {
+        sumBar.innerHTML = `<div>له (إيراد)<strong style="color:var(--green)">${inSum.toLocaleString()} ج</strong></div><div>عليه (مصروف)<strong style="color:var(--red)">${outSum.toLocaleString()} ج</strong></div><div>الرصيد<strong style="color:var(--primary)">${(inSum - outSum).toLocaleString()} ج</strong></div>`;
+      } else {
+        sumBar.innerHTML = `<div style="grid-column:1/-1; color:var(--muted);">كشف الحساب التفصيلي والأرصدة ظاهر للمدير فقط</div>`;
+      }
+    }
+
+    function populateAccountSelect(selectedAccId = '') {
+      const pid = document.getElementById('txProject').value;
+      const sel = document.getElementById('txAccount');
+      const list = accounts.filter(a => a.projectId === pid && (userRole === 'admin' || !a.hiddenFromStaff));
+      sel.innerHTML = '<option value="">-- بدون حساب فرعي --</option>' + list.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+      if (selectedAccId) sel.value = selectedAccId;
+    }
+    window.populateAccountSelect = populateAccountSelect;
+
+    function renderTeam() {
+      const list = document.getElementById('teamList');
+      const wSel = document.getElementById('txWorker');
+      const ledgerSel = document.getElementById('workerSelect');
+      list.innerHTML = usersList.length ? '' : '<p style="color:var(--muted)">لم يتم إضافة أعضاء بعد</p>';
+      wSel.innerHTML = '<option value="">-- بدون شخص محدد (صنايعي / مهندس) --</option>';
+      ledgerSel.innerHTML = '<option value="">-- اختر صنايعي / عامل --</option>';
+
+      usersList.forEach(u => {
+        wSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)} (${esc(roleLabels[u.role] || u.role)})</option>`;
+        if (u.role === 'worker' || userRole === 'admin') {
+          ledgerSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)}</option>`;
+        }
+        if (userRole === 'admin') {
+          const canAssign = u.role === 'engineer' || u.role === 'accountant';
+          const isSelf = u.id === currentUser?.uid;
+          const count = (u.assignedProjects || []).length;
+          const addOn = u.canAddExpenses !== false;
+          list.innerHTML += `
+            <div class="tx-item">
+              <div>
+                <strong>${esc(u.name)}</strong> <span class="badge">${esc(roleLabels[u.role] || u.role)}</span><br>
+                <small style="color:var(--muted)">📱 ${esc(u.phone)}${canAssign ? ` • 🏗️ ${count} مشروع • ${addOn ? '✍️ يضيف' : '🚫 ممنوع الإضافة'}` : ''}</small>
+              </div>
+              <div class="row">
+                ${canAssign ? `<button onclick="toggleCanAdd('${esc(u.id)}', ${addOn})" class="sm ${addOn ? 'secondary' : 'gold'}">${addOn ? 'إيقاف الإضافة' : 'السماح بالإضافة'}</button><button onclick="openAssign('${esc(u.id)}')" class="sm gold">مشاريع</button>` : ''}
+                ${!isSelf ? `<button onclick="toggleUser('${esc(u.id)}', ${!!u.active})" class="sm ${u.active ? 'red' : 'green'}">${u.active ? 'إيقاف' : 'تفعيل'}</button>` : '<small style="color:var(--muted)">حسابك</small>'}
+              </div>
+            </div>`;
+        }
+      });
+      renderWorkerLedger();
+    }
+
+    window.toggleCanAdd = (uid, cur) => {
+      if (userRole === 'admin') updateDoc(doc(db, "users", uid), { canAddExpenses: cur === false ? true : false });
+    };
+
+    window.renderWorkerLedger = () => {
+      const wid = document.getElementById('workerSelect').value;
+      const box = document.getElementById('workerLedgerBox');
+      if (!wid) { box.innerHTML = '<p style="color:var(--muted); font-size:13px;">اختر صنايعي لعرض كشف المستحق والسلف والخصومات والباقي.</p>'; return; }
+      const txs = [...offlineQueue, ...allTxs].filter(t => t.workerId === wid && t.deleted !== true && t.status !== 'rejected' && (userRole === 'admin' || t.status === 'approved'));
+      let earned = 0, adv = 0, ded = 0, rows = '';
+      txs.forEach(t => {
+        const amt = Number(t.amount || 0);
+        if (t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum') earned += amt;
+        if (t.category === 'advance') adv += amt;
+        if (t.category === 'deduction') ded += amt;
+        rows += `<div class="tx-item"><div><strong>${esc(catLabels[t.category] || '')}</strong><br><small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || '')}</small></div><strong>${amt.toLocaleString()} ج</strong></div>`;
+      });
+      const net = earned - adv - ded;
+      box.innerHTML = `
+        <div class="worker-grid">
+          <div class="w-box"><small>إجمالي الشغل (له)</small><strong style="color:var(--green)">${earned.toLocaleString()} ج</strong></div>
+          <div class="w-box"><small>الواصل / السلف</small><strong style="color:var(--red)">${adv.toLocaleString()} ج</strong></div>
+          <div class="w-box"><small>الخصومات</small><strong style="color:var(--red)">${ded.toLocaleString()} ج</strong></div>
+          <div class="w-box"><small>الصافي الباقي له</small><strong style="color:var(--primary)">${net.toLocaleString()} ج</strong></div>
+        </div>
+        <div class="tafqeet-box">${esc(tafqeet(net))}</div>
+        ${rows || '<p style="color:var(--muted); text-align:center;">لا توجد حركات مسجلة</p>'}`;
+    };
+
+    window.openAssign = (uid) => {
+      assignTargetUid = uid;
+      const u = usersList.find(x => x.id === uid);
+      const assigned = u?.assignedProjects || [];
+      document.getElementById('assignTitle').innerText = `مشاريع: ${u?.name || ''}`;
+      const box = document.getElementById('assignList');
+      box.innerHTML = projects.length ? projects.map(p => `
+        <label class="check-row">
+          <input type="checkbox" value="${esc(p.id)}" ${assigned.includes(p.id) ? 'checked' : ''}>
+          <span>🏗️ ${esc(p.name)}</span>
+        </label>`).join('') : '<p style="color:var(--muted)">أضف مشاريع أولاً</p>';
+      document.getElementById('assignModal').classList.remove('hidden');
+    };
+
+    document.getElementById('btnSaveAssign').onclick = async () => {
+      if (!assignTargetUid) return;
+      const selected = [...document.querySelectorAll('#assignList input:checked')].map(i => i.value);
+      await updateDoc(doc(db, "users", assignTargetUid), { assignedProjects: selected });
+      document.getElementById('assignModal').classList.add('hidden');
+    };
+
+    document.getElementById('btnToggleTrash').onclick = () => {
+      showTrash = !showTrash;
+      document.getElementById('txListTitle').innerText = showTrash ? '🗑️ سلة المحذوفات' : 'أحدث العمليات';
+      document.getElementById('btnToggleTrash').innerText = showTrash ? '↩️ العودة' : '🗑️ السلة';
+      renderTxs();
+    };
+
+    function renderTxs() {
+      const list = document.getElementById('txList');
+      const isAdmin = userRole === 'admin';
+      const combined = [...offlineQueue, ...allTxs].filter(t => {
+        const trashOk = showTrash ? t.deleted === true : t.deleted !== true;
+        const sOk = !searchQuery || `${t.project || ''} ${t.accountName || ''} ${t.note || ''} ${t.workerName || ''} ${t.createdByName || ''}`.toLowerCase().includes(searchQuery);
+        return trashOk && sOk;
+      });
+
+      let outApproved = 0, inApproved = 0, pendSum = 0, pendingCount = 0;
+      [...offlineQueue, ...allTxs].filter(t => t.deleted !== true).forEach(t => {
+        const amt = Number(t.amount || 0);
+        if (t.status === 'pending') { pendingCount++; pendSum += amt; }
+        else if (t.status === 'approved') {
+          if (t.type === 'in') inApproved += amt;
+          else if (t.category !== 'custody') outApproved += amt;
+        }
+      });
+
+      list.innerHTML = combined.length ? '' : `<p style="color:var(--muted); text-align:center;">${showTrash ? 'سلة المحذوفات فارغة' : 'لا توجد عمليات'}</p>`;
+
+      combined.forEach(t => {
+        const amt = Number(t.amount || 0);
+        const pObj = projects.find(p => p.id === t.projectId);
+        const projLabel = pObj ? pObj.name : (t.project || 'عام');
+        const accLabel = t.accountName ? ' • 📂 ' + t.accountName : '';
+        const catLabel = catLabels[t.category] || '';
+        const syncTag = t.pendingSync ? ' <span style="font-size:10px; color:#d97706;">(⏳ بانتظار النت)</span>' : '';
+        const byTag = t.createdByName ? ' • ✍️ ' + esc(t.createdByName) : '';
+        const timeStr = fmtTime(t.createdAt);
+        const timeTag = timeStr ? ' (' + esc(timeStr) + ')' : '';
+        const delByTag = (showTrash && t.deletedByName) ? '<br><small style="color:var(--red)">🗑️ حذفها: ' + esc(t.deletedByName) + '</small>' : '';
+        const prevTxt = t.prevAmount != null ? ' — كان: ' + Number(t.prevAmount).toLocaleString() + ' ج' : '';
+        const editTag = t.editedByStaff ? '<br><small style="color:#d97706; font-weight:bold;">✏️ تم التعديل' + prevTxt + '</small>' : '';
+        const rejectTag = t.status === 'rejected' ? '<br><small style="color:var(--red)">❌ مرفوض' + (t.rejectReason ? ': ' + esc(t.rejectReason) : '') + '</small>' : '';
+        const receiptBtn = (t.receiptId || t.receiptData) ? `<button onclick="viewReceipt('${esc(t.receiptId || '')}', '${esc(t.localId || '')}')" class="sm secondary">🖼️ فاتورة</button>` : '';
+        const canEditAdmin = isAdmin && !showTrash && !t.localId;
+        const canEditStaff = !isAdmin && !showTrash && !t.localId && t.status === 'pending' && t.createdBy === currentUser?.uid && myCanAdd;
+        const canEditAny = canEditAdmin || canEditStaff;
+
+        let actions = '';
+        if (t.localId) actions = `<small style="color:#d97706;">محفوظ على الهاتف</small>`;
+        else if (isAdmin && showTrash) {
+          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;"><button onclick="restoreTx('${esc(t.id)}')" class="sm green">استعادة</button></div>`;
+        } else if (isAdmin) {
+          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">
+            ${receiptBtn}
+            ${t.status === 'pending' ? `<button onclick="approveTx('${esc(t.id)}')" class="sm green">اعتماد</button><button onclick="rejectTx('${esc(t.id)}')" class="sm red">رفض</button>` : (t.status === 'rejected' ? '<span style="font-size:11px; color:var(--red);">❌ مرفوض</span>' : '<span style="font-size:11px; color:var(--green);">✔ معتمد</span>')}
+            <button onclick="softDeleteTx('${esc(t.id)}')" class="sm secondary" style="color:var(--red);">حذف</button>
+          </div>`;
+        } else {
+          const stTxt = t.status === 'pending' ? '⏳ معلق' : (t.status === 'rejected' ? '❌ مرفوض' : '✅ معتمد');
+          const staffDelBtn = (t.status === 'pending' && myCanAdd) ? `<button onclick="staffDeletePending('${esc(t.id)}')" class="sm secondary" style="color:var(--red);">حذف</button>` : '';
+          actions = `<div class="row" style="margin-top:4px; justify-content:flex-end;">${receiptBtn}${staffDelBtn}<small style="color:var(--muted)">${stTxt}</small></div>`;
+        }
+
+        list.innerHTML += `
+          <div class="tx-item">
+            <div ${canEditAny ? `class="tx-clickable" onclick="editTx('${esc(t.id)}')"` : ''}>
+              <strong>${esc(projLabel)}${esc(accLabel)}</strong> ${catLabel ? `<span class="badge" style="background:var(--border); color:var(--text);">${esc(catLabel)}</span>` : ''}${syncTag}<br>
+              <small style="color:var(--muted)">${t.txDate ? `📅 ${esc(t.txDate)} • ` : ''}${t.workerName ? `👤 ${esc(t.workerName)} • ` : ''}${esc(t.note || '')}${byTag}${timeTag}</small>${editTag}${rejectTag}${delByTag}
+            </div>
+            <div style="text-align:left;">
+              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}" ${canEditAny ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</div>
+              ${actions}
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('statOut').innerText = outApproved.toLocaleString() + ' ج';
+      document.getElementById('statIn').innerText = inApproved.toLocaleString() + ' ج';
+      document.getElementById('statPend').innerText = pendSum.toLocaleString() + ' ج';
+      document.getElementById('statPendingBadge').innerText = `${pendingCount} معلق`;
+      renderCustodySummary();
+    }
+
+    window.editTx = (id) => {
+      const t = allTxs.find(x => x.id === id);
+      if (!t) return;
+      if (userRole !== 'admin' && (t.status !== 'pending' || t.createdBy !== currentUser?.uid || !myCanAdd)) return;
+      editingTxId = id;
+      editingOrigAmount = t.prevAmount != null ? t.prevAmount : Number(t.amount || 0);
+      document.getElementById('txModalTitle').innerText = 'تعديل المعاملة';
+      document.getElementById('btnSaveTx').innerText = 'حفظ التعديلات';
+      document.getElementById('txCategory').value = t.category || 'general';
+      document.getElementById('txProject').value = t.projectId || 'general';
+      populateAccountSelect(t.accountId || '');
+      document.getElementById('txWorker').value = t.workerId || '';
+      document.getElementById('txDate').value = t.txDate || new Date().toISOString().slice(0, 10);
+      document.getElementById('txAmount').value = t.amount || '';
+      document.getElementById('txNote').value = t.note || '';
+      document.getElementById('txReceipt').value = '';
+      document.getElementById('calcQty').value = '';
+      document.getElementById('calcRate').value = '';
+      toggleCalcFields();
+      document.getElementById('txModal').classList.remove('hidden');
+    };
+
+    window.staffDeletePending = async (id) => {
+      if (!myCanAdd) return;
+      if (confirm("نقل العملية المعلقة إلى سلة المحذوفات؟")) {
+        await updateDoc(doc(db, "transactions", id), { deleted: true, deletedByName: currentUserName, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+      }
+    };
+
+    window.viewReceipt = async (receiptId, localId) => {
+      const modal = document.getElementById('receiptModal');
+      const box = document.getElementById('receiptImgBox');
+      modal.classList.remove('hidden');
+      box.innerHTML = 'جاري تحميل الفاتورة...';
+      if (localId) {
+        const item = offlineQueue.find(x => String(x.localId) === String(localId));
+        box.innerHTML = item?.receiptData ? `<img src="${item.receiptData}" style="max-width:100%; border-radius:10px;">` : 'غير متوفرة';
+        return;
+      }
+      try {
+        const snap = await getDoc(doc(db, "receipts", receiptId));
+        box.innerHTML = snap.exists() ? `<img src="${snap.data().imageData}" style="max-width:100%; border-radius:10px;">` : 'الفاتورة غير موجودة';
+      } catch (e) { box.innerHTML = 'تعذر تحميل الفاتورة'; }
+    };
+
+    document.getElementById('btnAddProj').onclick = async () => {
+      const name = document.getElementById('projName').value.trim();
+      const category = document.getElementById('projCat').value;
+      const isFavorite = document.getElementById('projFav').checked;
+      if (!name) return;
+      await addDoc(collection(db, "projects"), { name, category, isFavorite, visible: true, createdAt: serverTimestamp() });
+      document.getElementById('projName').value = '';
+    };
+
+    document.getElementById('btnCreateUser').onclick = async () => {
+      if (!navigator.onLine) { alert("حفظ المستخدم يحتاج اتصال بالإنترنت."); return; }
+      const uid = document.getElementById('uUid').value.trim();
+      const name = document.getElementById('uName').value.trim();
+      const phone = document.getElementById('uPhone').value.trim();
+      const role = document.getElementById('uRole').value;
+      const msg = document.getElementById('teamMsg');
+      if (!uid || !name || !phone) { msg.style.color = 'var(--red)'; msg.innerText = "أدخل UID والاسم ورقم الموبايل"; return; }
+      try {
+        await setDoc(doc(db, "users", uid), { name, phone, role, active: true, canAddExpenses: true, assignedProjects: [], createdAt: serverTimestamp() });
+        msg.style.color = 'var(--green)'; msg.innerText = `✅ تم حفظ ملف ${name} بنجاح`;
+        document.getElementById('uUid').value = ''; document.getElementById('uName').value = ''; document.getElementById('uPhone').value = '';
+      } catch (e) { msg.style.color = 'var(--red)'; msg.innerText = "خطأ: " + e.message; }
+    };
+
+    window.toggleUser = (uid, currentStatus) => updateDoc(doc(db, "users", uid), { active: !currentStatus });
+
+    window.toggleCalcFields = () => {
+      const c = document.getElementById('txCategory').value;
+      document.getElementById('calcBox').classList.toggle('hidden', c !== 'daily' && c !== 'meters');
+    };
+    window.calcFromQty = () => {
+      const q = Number(document.getElementById('calcQty').value || 0);
+      const r = Number(document.getElementById('calcRate').value || 0);
+      if (q > 0 && r > 0) document.getElementById('txAmount').value = q * r;
+    };
+
+    const openTxModal = (preProjId = null, preAccId = null) => {
+      if (userRole !== 'admin' && !myCanAdd) { alert("تم إيقاف صلاحية إضافة المصروفات من الإدارة."); return; }
+      editingTxId = null; editingOrigAmount = null;
+      document.getElementById('txModalTitle').innerText = 'تسجيل عملية جديدة';
+      document.getElementById('btnSaveTx').innerText = 'حفظ العملية';
+      document.getElementById('txDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txNote').value = '';
+      document.getElementById('txReceipt').value = '';
+      document.getElementById('calcQty').value = '';
+      document.getElementById('calcRate').value = '';
+      if (preProjId) document.getElementById('txProject').value = preProjId;
+      populateAccountSelect(preAccId && preAccId !== '__general__' ? preAccId : '');
+      toggleCalcFields();
+      document.getElementById('txModal').classList.remove('hidden');
+    };
+    window.openTxModalForCurrent = (overrideAccId = null) => openTxModal(currentProjId, overrideAccId || currentAccId);
+    document.getElementById('btnOpenModal').onclick = () => openTxModal(currentProjId, currentAccId);
+    document.getElementById('btnCloseModal').onclick = () => { editingTxId = null; editingOrigAmount = null; document.getElementById('txModal').classList.add('hidden'); };
+    window.quickAdd = (projId) => { openTxModal(projId, null); document.getElementById('txAmount').focus(); };
+
+    document.getElementById('btnSaveTx').onclick = async () => {
+      const category = document.getElementById('txCategory').value;
+      const type = category === 'income' ? 'in' : 'out';
+      const projectId = document.getElementById('txProject').value || 'general';
+      const pObj = projects.find(p => p.id === projectId);
+      const accountId = document.getElementById('txAccount').value || null;
+      const aObj = accounts.find(a => a.id === accountId);
+      const workerId = document.getElementById('txWorker').value;
+      const workerObj = usersList.find(u => u.id === workerId);
+      const txDate = document.getElementById('txDate').value || new Date().toISOString().slice(0, 10);
+      const amount = Number(document.getElementById('txAmount').value);
+      const note = document.getElementById('txNote').value.trim();
+      const file = document.getElementById('txReceipt').files[0];
+      if (!amount || amount <= 0) return;
+      if (category === 'custody' && !workerId) { alert("اختر المهندس المستلم للعُهدة أولاً"); return; }
+
+      let receiptData = null;
+      if (file) {
+        try {
+          receiptData = await compressImage(file, 800, 470000);
+          if (receiptData.length >= 495000) { alert("حجم الصورة بعد الضغط ما زال كبيراً، اختر صورة أصغر."); return; }
+        } catch (e) { alert("تعذر ضغط الصورة"); return; }
+      }
+
+      try {
+        if (editingTxId) {
+          const updateData = {
+            type, category, projectId, project: pObj ? pObj.name : 'عام',
+            accountId, accountName: aObj ? aObj.name : '',
+            workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
+            txDate, amount, note,
+            updatedBy: currentUser.uid, updatedAt: serverTimestamp()
+          };
+          if (userRole !== 'admin') {
+            updateData.editedByStaff = true;
+            updateData.prevAmount = editingOrigAmount;
+          }
+          if (receiptData) {
+            const rRef = await addDoc(collection(db, "receipts"), {
+              imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
+            });
+            updateData.receiptId = rRef.id;
+            updateData.hasReceipt = true;
+          }
+          await updateDoc(doc(db, "transactions", editingTxId), updateData);
+          editingTxId = null; editingOrigAmount = null;
+        } else {
+          const payload = {
+            type, category, projectId, project: pObj ? pObj.name : 'عام',
+            accountId, accountName: aObj ? aObj.name : '',
+            workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
+            txDate, amount, note, deleted: false,
+            status: userRole === 'admin' ? 'approved' : 'pending',
+            createdBy: currentUser.uid, createdByName: currentUserName
+          };
+          if (!navigator.onLine || !auth.currentUser) {
+            offlineQueue.unshift({ ...payload, receiptData, localId: Date.now(), pendingSync: true });
+            localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
+            renderTxs();
+          } else {
+            let receiptId = null;
+            if (receiptData) {
+              const rRef = await addDoc(collection(db, "receipts"), {
+                imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
+              });
+              receiptId = rRef.id;
+            }
+            await addDoc(collection(db, "transactions"), { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() });
+          }
+        }
+        document.getElementById('txAmount').value = '';
+        document.getElementById('txNote').value = '';
+        document.getElementById('txReceipt').value = '';
+        document.getElementById('txModal').classList.add('hidden');
+      } catch (e) {
+        alert("تعذر الحفظ: " + e.message);
+      }
+    };
+
+    window.approveTx = (id) => updateDoc(doc(db, "transactions", id), { status: 'approved', updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+    window.rejectTx = (id) => {
+      const reason = prompt("سبب رفض المصروف (اختياري):") ?? '';
+      updateDoc(doc(db, "transactions", id), { status: 'rejected', rejectReason: reason.trim(), updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+    };
+    window.softDeleteTx = (id) => { if (confirm("نقل العملية إلى سلة المحذوفات؟")) updateDoc(doc(db, "transactions", id), { deleted: true, deletedByName: currentUserName, updatedBy: currentUser.uid, updatedAt: serverTimestamp() }); };
+    window.restoreTx = (id) => updateDoc(doc(db, "transactions", id), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+
+    window.updateReportOptions = () => {
+      const type = document.getElementById('repFilterType').value;
+      const valSel = document.getElementById('repFilterVal');
+      if (type === 'all') { valSel.classList.add('hidden'); return; }
+      valSel.classList.remove('hidden');
+      valSel.innerHTML = type === 'project'
+        ? projects.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('')
+        : usersList.map(u => `<option value="${esc(u.id)}">${esc(u.name)}</option>`).join('');
+    };
+
+    window.generateReport = () => {
+      const type = document.getElementById('repFilterType').value;
+      const val = document.getElementById('repFilterVal').value;
+      let filtered = allTxs.filter(t => t.status === 'approved' && t.deleted !== true);
+      let title = "كشف حساب عام";
+      if (type === 'project') {
+        const p = projects.find(x => x.id === val);
+        filtered = filtered.filter(t => t.projectId === val || t.project === p?.name);
+        title = `كشف حساب مشروع: ${p?.name || ''}`;
+      }
+      if (type === 'worker') {
+        const w = usersList.find(u => u.id === val);
+        filtered = filtered.filter(t => t.workerId === val);
+        title = `كشف حساب: ${w?.name || ''}`;
+      }
+
+      lastReportRows = filtered;
+      let outS = 0, inS = 0, dueW = 0, advW = 0, dedW = 0, rows = '';
+      filtered.forEach(t => {
+        const amt = Number(t.amount || 0);
+        if (t.type === 'in') inS += amt;
+        else if (t.category !== 'custody') outS += amt;
+        if (t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum') dueW += amt;
+        if (t.category === 'advance') advW += amt;
+        if (t.category === 'deduction') dedW += amt;
+        const dt = t.txDate || (t.createdAt?.seconds ? new Date(t.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'اليوم');
+        rows += `<tr><td>${esc(dt)}</td><td>${esc(t.project || 'عام')}</td><td>${esc(catLabels[t.category] || '')}</td><td>${esc(t.note || '')}</td><td>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()}</td></tr>`;
+      });
+
+      const netVal = type === 'worker' ? (dueW - advW - dedW) : (inS - outS);
+      const workerSummary = type === 'worker' ? `<p style="background:var(--bg); padding:8px; border-radius:8px; font-size:13px;">
+        المستحق: <strong>${dueW.toLocaleString()} ج</strong> | السلف: <strong>${advW.toLocaleString()} ج</strong> | الخصومات: <strong>${dedW.toLocaleString()} ج</strong><br>
+        الباقي: <strong style="color:var(--primary); font-size:15px;">${netVal.toLocaleString()} ج</strong></p>` : '';
+
+      const s = companySettings;
+      const pdfHeader = `
+        <div class="pdf-header">
+          <div>
+            <strong style="color:var(--primary); font-size:16px;">${esc(s.nameAr || 'شركة ريفايس للمقاولات')}</strong><br>
+            <small style="color:var(--muted)">${esc(s.addressAr || '')} • ${esc(s.phone || '')}</small>
+          </div>
+          ${s.logo ? `<img src="${s.logo}" alt="Logo">` : ''}
+          <div style="text-align:left;">
+            <strong style="font-size:13px;">${esc(s.nameEn || 'Revise')}</strong><br>
+            <small style="color:var(--muted)">${esc(s.email || '')}</small>
+          </div>
+        </div>`;
+
+      const pdfFooter = (s.showStamp || s.showSignature) ? `
+        <div class="pdf-footer">
+          ${s.showSignature ? `<div><small>التوقيع</small>${s.signature ? `<img src="${s.signature}">` : '<br>__________'}</div>` : ''}
+          ${s.showStamp ? `<div><small>ختم الشركة</small>${s.stamp ? `<img src="${s.stamp}">` : '<br>__________'}</div>` : ''}
+        </div>` : '';
+
+      const area = document.getElementById('reportArea');
+      area.classList.remove('hidden');
+      area.innerHTML = `
+        ${pdfHeader}
+        <p style="text-align:center; margin:4px 0 10px; font-weight:bold; font-size:14px;">${esc(title)}</p>
+        <table><thead><tr><th>التاريخ</th><th>المشروع</th><th>البند</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>${rows || '<tr><td colspan="5" style="text-align:center">لا توجد عمليات</td></tr>'}</tbody></table>
+        ${workerSummary}
+        <p style="margin-top:10px; font-weight:bold;">إجمالي المصروفات: ${outS.toLocaleString()} ج | إجمالي الإيرادات: ${inS.toLocaleString()} ج</p>
+        <div class="tafqeet-box">الصافي بالحروف: ${esc(tafqeet(netVal))}</div>
+        ${pdfFooter}`;
+    };
+
+    window.exportCSV = () => {
+      if (!lastReportRows.length) generateReport();
+      let csv = "\uFEFFالتاريخ,المشروع,الشخص,البند,البيان,المبلغ\n";
+      lastReportRows.forEach(t => {
+        const dt = t.txDate || '';
+        const row = [dt, t.project || 'عام', t.workerName || '', catLabels[t.category] || '', (t.note || '').replace(/,/g, ' '), (t.type === 'in' ? '' : '-') + (t.amount || 0)];
+        csv += row.join(',') + "\n";
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `revise-report-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    };
+
+    window.shareWhatsApp = () => {
+      if (!lastReportRows.length) generateReport();
+      let outS = 0, inS = 0;
+      lastReportRows.forEach(t => { if (t.type === 'in') inS += Number(t.amount || 0); else if (t.category !== 'custody') outS += Number(t.amount || 0); });
+      const txt = `${companySettings.nameAr || 'شركة ريفايس للمقاولات'}\nعدد العمليات: ${lastReportRows.length}\nإجمالي المصروفات: ${outS.toLocaleString()} ج\nإجمالي الإيرادات: ${inS.toLocaleString()} ج\nالصافي: ${(inS - outS).toLocaleString()} ج (${tafqeet(inS - outS)})`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+    };
+
+    document.getElementById('btnBackup').onclick = () => {
+      const data = { date: new Date().toISOString(), companySettings, projects, accounts, users: usersList, transactions: allTxs, privateTxs };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `revise-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    };
+
+    window.switchTab = (tab, btn) => {
+      ['Home', 'Projects', 'Workers', 'Team', 'Reports'].forEach(t => document.getElementById('tab' + t).classList.toggle('hidden', t !== tab));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (tab === 'Projects') showProjLevel(1);
+    };
+
+    if (localStorage.getItem('revise_uid')) {
+      try {
+        currentUser = { uid: localStorage.getItem('revise_uid') };
+        userRole = localStorage.getItem('revise_role') || 'worker';
+        myAssignedProjects = readJson('revise_assigned', []);
+        myCanAdd = localStorage.getItem('revise_can_add') !== '0';
+        currentUserName = localStorage.getItem('revise_uname') || roleLabels[userRole] || 'مستخدم';
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        setupUIForRole(); renderProjects(); renderAccounts(); renderTeam(); renderTxs(); loadData();
+      } catch (e) { console.warn(e); }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
+        clearListeners();
+        localStorage.removeItem('revise_uid'); localStorage.removeItem('revise_role');
+        document.getElementById('authScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        return;
+      }
+      currentUser = user;
+      localStorage.setItem('revise_uid', user.uid);
+      try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (!uDoc.exists() || !uDoc.data().active) {
+          alert("حسابك غير مفعل أو تم إيقافه من الإدارة.");
+          clearListeners(); localStorage.removeItem('revise_uid');
+          await signOut(auth); return;
+        }
+        userRole = uDoc.data().role || 'worker';
+        myAssignedProjects = uDoc.data().assignedProjects || [];
+        myCanAdd = uDoc.data().canAddExpenses !== false;
+        currentUserName = uDoc.data().name || roleLabels[userRole] || 'مستخدم';
+      } catch (e) {
+        userRole = localStorage.getItem('revise_role') || 'worker';
+        myAssignedProjects = readJson('revise_assigned', []);
+        myCanAdd = localStorage.getItem('revise_can_add') !== '0';
+        currentUserName = localStorage.getItem('revise_uname') || roleLabels[userRole] || 'مستخدم';
+      }
+      localStorage.setItem('revise_role', userRole);
+      localStorage.setItem('revise_assigned', JSON.stringify(myAssignedProjects));
+      localStorage.setItem('revise_can_add', myCanAdd ? '1' : '0');
+      localStorage.setItem('revise_uname', currentUserName);
+      setupUIForRole();
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+      loadData(); syncOfflineQueue();
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+  </script>
+</body>
+</html>
