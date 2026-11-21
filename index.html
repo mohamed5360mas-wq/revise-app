@@ -46,6 +46,7 @@
     .filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 8px; }
     .tx-item:last-child { border-bottom: none; }
+    .tx-clickable { flex: 1; cursor: pointer; }
     .amt-out { color: var(--red); font-weight: bold; }
     .amt-in { color: var(--green); font-weight: bold; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); display: flex; border-top: 1px solid var(--border); padding: 6px 0; z-index: 20; }
@@ -121,7 +122,6 @@
           <div class="stat-box"><small>معلق للاعتماد</small><strong id="statPend" style="color:#d97706">0 ج</strong></div>
         </div>
 
-        <!-- بطاقة عُهدة المشاريع للمهندس والمدير -->
         <div id="custodyBox" class="card custody-card hidden no-print">
           <h3 id="custodyTitle" style="margin:0 0 8px; font-size:14px; color:var(--primary);">💼 أرصدة العُهد حسب المشروع</h3>
           <div id="custodyList"></div>
@@ -234,10 +234,10 @@
     </nav>
   </div>
 
-  <!-- نافذة إضافة عملية -->
+  <!-- نافذة إضافة / تعديل عملية -->
   <div id="txModal" class="modal hidden">
     <div class="modal-content">
-      <h3 style="margin-top:0; color:var(--primary);">تسجيل عملية جديدة</h3>
+      <h3 id="txModalTitle" style="margin-top:0; color:var(--primary);">تسجيل عملية جديدة</h3>
       <select id="txCategory" onchange="toggleCalcFields()">
         <option value="general">مصروف عام / خامات (خارج)</option>
         <option value="daily">يومية صنايعي (أيام × سعر اليومية)</option>
@@ -340,7 +340,7 @@
     import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '8.0';
+    const APP_VER = '8.1';
     if (localStorage.getItem('revise_app_ver') !== APP_VER) {
       ['revise_cache_projects', 'revise_cache_users', 'revise_cache_txs'].forEach(k => localStorage.removeItem(k));
       localStorage.setItem('revise_app_ver', APP_VER);
@@ -417,7 +417,7 @@
 
     let currentUser = null, userRole = 'worker', myAssignedProjects = [];
     let dataLoaded = false, isSyncing = false, showTrash = false, projFilter = 'all', searchQuery = '', unsubs = [];
-    let assignTargetUid = null, lastReportRows = [];
+    let assignTargetUid = null, lastReportRows = [], editingTxId = null;
     let staffOwnTxs = [], staffCustodyTxs = [];
 
     const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch { return def; } };
@@ -587,7 +587,6 @@
       }
     }
 
-    // حساب وعرض عُهدة كل مهندس لكل مشروع على حدة
     function renderCustodySummary() {
       const box = document.getElementById('custodyBox');
       const list = document.getElementById('custodyList');
@@ -881,6 +880,7 @@
         const syncTag = t.pendingSync ? ' <span style="font-size:10px; color:#d97706;">(⏳ بانتظار النت)</span>' : '';
         const rejectTag = t.status === 'rejected' ? `<br><small style="color:var(--red)">❌ مرفوض${t.rejectReason ? `: ${esc(t.rejectReason)}` : ''}</small>` : '';
         const receiptBtn = (t.receiptId || t.receiptData) ? `<button onclick="viewReceipt('${esc(t.receiptId || '')}', '${esc(t.localId || '')}')" class="sm secondary">🖼️ فاتورة</button>` : '';
+        const canEdit = isAdmin && !showTrash && !t.localId;
 
         let actions = '';
         if (t.localId) actions = `<small style="color:#d97706;">محفوظ على الهاتف</small>`;
@@ -899,12 +899,12 @@
 
         list.innerHTML += `
           <div class="tx-item">
-            <div>
+            <div ${canEdit ? `class="tx-clickable" onclick="editTx('${esc(t.id)}')"` : ''}>
               <strong>${esc(projLabel)}</strong> ${catLabel ? `<span class="badge" style="background:var(--border); color:var(--text);">${esc(catLabel)}</span>` : ''}${syncTag}<br>
               <small style="color:var(--muted)">${t.txDate ? `📅 ${esc(t.txDate)} • ` : ''}${t.workerName ? `👤 ${esc(t.workerName)} • ` : ''}${esc(t.note || '')}</small>${rejectTag}
             </div>
             <div style="text-align:left;">
-              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</div>
+              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}" ${canEdit ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>${t.type === 'in' ? '+' : '-'}${amt.toLocaleString()} ج</div>
               ${actions}
             </div>
           </div>`;
@@ -916,6 +916,26 @@
       document.getElementById('statPendingBadge').innerText = `${pendingCount} معلق`;
       renderCustodySummary();
     }
+
+    window.editTx = (id) => {
+      if (userRole !== 'admin') return;
+      const t = allTxs.find(x => x.id === id);
+      if (!t) return;
+      editingTxId = id;
+      document.getElementById('txModalTitle').innerText = 'تعديل المعاملة';
+      document.getElementById('btnSaveTx').innerText = 'حفظ التعديلات';
+      document.getElementById('txCategory').value = t.category || 'general';
+      document.getElementById('txProject').value = t.projectId || 'general';
+      document.getElementById('txWorker').value = t.workerId || '';
+      document.getElementById('txDate').value = t.txDate || new Date().toISOString().slice(0, 10);
+      document.getElementById('txAmount').value = t.amount || '';
+      document.getElementById('txNote').value = t.note || '';
+      document.getElementById('txReceipt').value = '';
+      document.getElementById('calcQty').value = '';
+      document.getElementById('calcRate').value = '';
+      toggleCalcFields();
+      document.getElementById('txModal').classList.remove('hidden');
+    };
 
     window.viewReceipt = async (receiptId, localId) => {
       const modal = document.getElementById('receiptModal');
@@ -970,7 +990,12 @@
     };
 
     const openTxModal = () => {
+      editingTxId = null;
+      document.getElementById('txModalTitle').innerText = 'تسجيل عملية جديدة';
+      document.getElementById('btnSaveTx').innerText = 'حفظ العملية';
       document.getElementById('txDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txNote').value = '';
       document.getElementById('txReceipt').value = '';
       document.getElementById('calcQty').value = '';
       document.getElementById('calcRate').value = '';
@@ -978,7 +1003,7 @@
       document.getElementById('txModal').classList.remove('hidden');
     };
     document.getElementById('btnOpenModal').onclick = openTxModal;
-    document.getElementById('btnCloseModal').onclick = () => document.getElementById('txModal').classList.add('hidden');
+    document.getElementById('btnCloseModal').onclick = () => { editingTxId = null; document.getElementById('txModal').classList.add('hidden'); };
     window.quickAdd = (projId) => { openTxModal(); document.getElementById('txProject').value = projId; document.getElementById('txAmount').focus(); };
 
     document.getElementById('btnSaveTx').onclick = async () => {
@@ -1003,33 +1028,53 @@
         } catch (e) { alert("تعذر ضغط الصورة"); return; }
       }
 
-      const payload = {
-        type, category, projectId, project: pObj ? pObj.name : 'عام',
-        workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
-        txDate, amount, note, deleted: false,
-        status: userRole === 'admin' ? 'approved' : 'pending',
-        createdBy: currentUser.uid
-      };
-
-      if (!navigator.onLine || !auth.currentUser) {
-        offlineQueue.unshift({ ...payload, receiptData, localId: Date.now(), pendingSync: true });
-        localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
-        renderTxs();
-      } else {
-        let receiptId = null;
-        if (receiptData) {
-          const rRef = await addDoc(collection(db, "receipts"), {
-            imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
-          });
-          receiptId = rRef.id;
+      try {
+        if (editingTxId) {
+          const updateData = {
+            type, category, projectId, project: pObj ? pObj.name : 'عام',
+            workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
+            txDate, amount, note,
+            updatedBy: currentUser.uid, updatedAt: serverTimestamp()
+          };
+          if (receiptData) {
+            const rRef = await addDoc(collection(db, "receipts"), {
+              imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
+            });
+            updateData.receiptId = rRef.id;
+            updateData.hasReceipt = true;
+          }
+          await updateDoc(doc(db, "transactions", editingTxId), updateData);
+          editingTxId = null;
+        } else {
+          const payload = {
+            type, category, projectId, project: pObj ? pObj.name : 'عام',
+            workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
+            txDate, amount, note, deleted: false,
+            status: userRole === 'admin' ? 'approved' : 'pending',
+            createdBy: currentUser.uid
+          };
+          if (!navigator.onLine || !auth.currentUser) {
+            offlineQueue.unshift({ ...payload, receiptData, localId: Date.now(), pendingSync: true });
+            localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
+            renderTxs();
+          } else {
+            let receiptId = null;
+            if (receiptData) {
+              const rRef = await addDoc(collection(db, "receipts"), {
+                imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
+              });
+              receiptId = rRef.id;
+            }
+            await addDoc(collection(db, "transactions"), { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() });
+          }
         }
-        await addDoc(collection(db, "transactions"), { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() });
+        document.getElementById('txAmount').value = '';
+        document.getElementById('txNote').value = '';
+        document.getElementById('txReceipt').value = '';
+        document.getElementById('txModal').classList.add('hidden');
+      } catch (e) {
+        alert("تعذر الحفظ: " + e.message);
       }
-
-      document.getElementById('txAmount').value = '';
-      document.getElementById('txNote').value = '';
-      document.getElementById('txReceipt').value = '';
-      document.getElementById('txModal').classList.add('hidden');
     };
 
     window.approveTx = (id) => updateDoc(doc(db, "transactions", id), { status: 'approved', updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
@@ -1154,7 +1199,6 @@
       btn.classList.add('active');
     };
 
-    // التشغيل التلقائي للجلسة المحفوظة (بعد تعريف كل الدوال والأزرار لمنع التجمّد)
     if (localStorage.getItem('revise_uid')) {
       try {
         currentUser = { uid: localStorage.getItem('revise_uid') };
