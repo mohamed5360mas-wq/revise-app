@@ -36,17 +36,18 @@
     .container { padding: 14px; max-width: 700px; margin: auto; }
     .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
 
-    /* بطاقة الإجماليات البارزة بظل داكن أنيق */
-    .hero-card { background: var(--hero-bg); color: #f8fafc; border-radius: 18px; padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--hero-border); box-shadow: 0 6px 20px rgba(15,23,42,0.18); }
+    /* بطاقة الرادار والإجماليات */
+    .hero-card { background: var(--hero-bg); color: #f8fafc; border-radius: 18px; padding: 14px; margin-bottom: 12px; border: 1.5px solid var(--hero-border); box-shadow: 0 6px 20px rgba(15,23,42,0.18); }
     .hero-label { font-size: 12px; color: #cbd5e1; margin-bottom: 4px; }
-    .hero-main-val { font-size: 24px; font-weight: 800; letter-spacing: 0.3px; }
-    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-    .hero-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; text-align: center; }
-    .hero-sub { background: var(--hero-sub); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.06); }
-    .hero-sub small { display: block; color: #cbd5e1; font-size: 11px; margin-bottom: 3px; }
-    .hero-sub strong { font-size: 15px; }
+    .hero-main-val { font-size: 23px; font-weight: 800; letter-spacing: 0.3px; }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .hero-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; text-align: center; }
+    .hero-sub { background: var(--hero-sub); border-radius: 12px; padding: 9px 6px; border: 1px solid rgba(255,255,255,0.06); }
+    .hero-sub.clickable { cursor: pointer; transition: transform 0.12s, background 0.15s; }
+    .hero-sub.clickable:active { transform: scale(0.97); background: rgba(255,255,255,0.14); }
+    .hero-sub small { display: block; color: #cbd5e1; font-size: 10.5px; margin-bottom: 3px; }
+    .hero-sub strong { font-size: 14px; }
 
-    /* شارات الحالة الصغيرة */
     .pill { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-right: 4px; vertical-align: middle; }
     .pill-pending { background: rgba(217,119,6,0.15); color: var(--orange); }
     .pill-approved { background: rgba(5,150,105,0.15); color: var(--green); }
@@ -62,17 +63,37 @@
     button.gold { background: var(--gold); color: #111; }
     button.green { background: var(--green); color: #fff; }
     button.red { background: var(--red); color: #fff; }
-    button.outline-gold { background: transparent; border: 1.5px solid var(--gold); color: var(--gold); }
-    body:not(.dark) button.outline-gold { color: #b45309; border-color: #d97706; background: #fffbeb; }
     button.sm { width: auto; padding: 6px 11px; font-size: 12px; margin: 0; border-radius: 10px; }
+    a.call-btn { display: inline-flex; align-items: center; justify-content: center; background: rgba(5,150,105,0.14); color: var(--green); text-decoration: none; padding: 6px 10px; border-radius: 10px; font-size: 13px; font-weight: bold; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+    /* خانة المبلغ + أيقونة الآلة الحاسبة */
+    .amt-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .amt-wrap input { margin-top: 0; flex: 1; }
+    .calc-trigger { width: 46px; height: 44px; margin: 0; padding: 0; border-radius: 12px; background: var(--bg); color: var(--primary); border: 1.5px solid var(--border); font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* الآلة الحاسبة المنبثقة */
+    .calc-display { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: left; direction: ltr; font-size: 22px; font-weight: 800; min-height: 52px; word-break: break-all; margin-bottom: 10px; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; direction: ltr; }
+    .calc-key { margin: 0; padding: 14px 0; font-size: 18px; border-radius: 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .calc-key.op { background: rgba(29,78,216,0.14); color: var(--primary); }
+    .calc-key.eq { background: var(--gold); color: #111; }
+    .calc-key.clr { background: rgba(220,38,38,0.14); color: var(--red); }
 
     .date-warn { border: 2px solid #f59e0b !important; background: rgba(245,158,11,0.08) !important; }
     .warn-box { background: rgba(245,158,11,0.14); border: 1px solid #f59e0b; color: var(--orange); border-radius: 12px; padding: 9px 11px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
     .worker-banner { background: rgba(29,78,216,0.12); border: 1px solid var(--primary); color: var(--primary); border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
-    /* المفضلة الأفقية */
+    /* زر تبديل دمج العهدة */
+    .toggle-pill { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px; margin-top: 10px; cursor: pointer; font-size: 13px; font-weight: bold; }
+    .toggle-pill.on { border-color: var(--primary); background: rgba(29,78,216,0.09); color: var(--primary); }
+
+    /* تبويبات داخل النوافذ */
+    .seg-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--bg); padding: 4px; border-radius: 12px; margin-bottom: 10px; }
+    .seg-btn { margin: 0; padding: 8px; font-size: 12.5px; border-radius: 9px; background: transparent; color: var(--muted); }
+    .seg-btn.active { background: var(--card); color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
     .fav-bar { display: flex; gap: 10px; overflow-x: auto; padding: 2px 0 8px; margin-bottom: 8px; }
     .fav-card { background: var(--card); border: 1.5px solid var(--gold); border-radius: 14px; padding: 10px 12px; min-width: 158px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     .fav-main { cursor: pointer; flex: 1; }
@@ -80,7 +101,6 @@
     .fav-main small { color: var(--muted); font-size: 11px; }
     .fav-plus { width: 32px; height: 32px; border-radius: 10px; background: var(--gold); color: #111; font-size: 18px; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-    /* أزرار له وعليه */
     .dir-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
     .dir-btn { padding: 13px 10px; border-radius: 14px; font-size: 14px; font-weight: bold; border: 2px solid transparent; margin: 0; opacity: 0.45; transition: 0.15s; }
     .dir-btn.out { background: var(--red); color: #fff; }
@@ -108,7 +128,6 @@
 
     .fab { position: fixed; bottom: 72px; left: 18px; width: 56px; height: 56px; border-radius: 50%; background: var(--gold); color: #111; font-size: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.28); z-index: 15; border: none; padding: 0; margin: 0; }
 
-    /* القائمة الجانبية */
     .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; display: flex; justify-content: flex-start; }
     .drawer { width: 300px; max-width: 86vw; background: var(--card); height: 100%; padding: 18px 14px; overflow-y: auto; box-shadow: -4px 0 18px rgba(0,0,0,0.25); }
     .drawer-item { width: 100%; text-align: right; background: transparent; color: var(--text); border: none; border-bottom: 1px solid var(--border); border-radius: 0; padding: 13px 6px; margin: 0; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -119,26 +138,20 @@
     .modal.center-modal .modal-content { border-radius: 20px; max-width: 400px; }
     .modal-content { background: var(--card); color: var(--text); width: 100%; max-width: 620px; border-radius: 22px 22px 0 0; padding: 18px; max-height: 92vh; overflow-y: auto; }
 
-    .worker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
-    .w-box { background: var(--bg); padding: 10px; border-radius: 12px; text-align: center; }
-    .w-box small { color: var(--muted); display: block; font-size: 11px; }
-    .w-box strong { font-size: 15px; }
     .check-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; cursor: pointer; }
     .tafqeet-live { font-size: 12px; color: var(--primary); font-weight: bold; margin: 5px 4px 2px; min-height: 18px; }
-    .tafqeet-box { background: var(--bg); border-right: 3px solid var(--primary); padding: 8px 10px; margin-top: 10px; font-size: 12px; font-weight: bold; border-radius: 8px; }
     .archive-toggle { background: var(--bg); color: var(--muted); border: 1px dashed var(--border); text-align: center; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 12px; font-size: 13px; }
 
-    /* شريط التنبيهات السفلي مع زر التراجع السريع */
     .toast { position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 24px; font-size: 13px; z-index: 60; box-shadow: 0 4px 14px rgba(0,0,0,0.32); display: flex; align-items: center; gap: 10px; max-width: 92vw; }
     .toast.err { background: #991b1b; }
     .toast-undo-btn { background: var(--gold); color: #111; border: none; border-radius: 14px; padding: 4px 10px; font-size: 12px; font-weight: 800; width: auto; margin: 0; cursor: pointer; }
 
-    /* شريط حالة المساحة */
     .prog-track { width: 100%; height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 10px 0; }
     .prog-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--primary)); border-radius: 10px; transition: width 0.3s; }
 
-    /* منطقة تجهيز ملف PDF مخفية عن العرض */
-    #pdfRenderStage { position: fixed; left: -9999px; top: 0; width: 760px; background: #fff; color: #0f172a; padding: 20px; direction: rtl; font-family: system-ui, -apple-system, sans-serif; }
+    /* إصلاح صفحة الـ PDF البيضاء على الموبايل: التجهيز داخل حدود الشاشة */
+    #pdfOverlay { position: fixed; inset: 0; background: rgba(15,23,42,0.85); z-index: 90; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 15px; }
+    #pdfRenderStage { position: fixed; left: 0; top: 0; width: 760px; background: #fff; color: #0f172a; padding: 20px; direction: rtl; font-family: system-ui, -apple-system, sans-serif; z-index: 80; pointer-events: none; }
     .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; margin-bottom: 12px; gap: 10px; }
     .pdf-header img { max-height: 58px; max-width: 90px; object-fit: contain; }
     .pdf-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
@@ -153,6 +166,7 @@
 
   <div id="offlineBanner" class="hidden">⚠️ وضع عدم الاتصال: العمليات محفوظة محلياً وستُرفع تلقائياً عند عودة الإنترنت</div>
   <div id="toastBox" class="toast hidden"><span id="toastText"></span><button id="toastUndoBtn" class="toast-undo-btn hidden">تراجع ↩️</button></div>
+  <div id="pdfOverlay" class="hidden">📄 جاري تجهيز ملف الـ PDF...</div>
 
   <!-- شاشة تسجيل الدخول -->
   <div id="authScreen" class="container" style="margin-top: 45px;">
@@ -188,31 +202,13 @@
 
       <!-- تبويب الرئيسية -->
       <div id="tabHome">
-        <!-- المفضلة -->
-        <div id="favSection" class="hidden">
-          <div id="favBar" class="fav-bar"></div>
-        </div>
+        <div id="favSection" class="hidden"><div id="favBar" class="fav-bar"></div></div>
 
-        <!-- بطاقة الإجماليات البارزة (للمدير أو من يملك صلاحية الإجماليات) -->
-        <div id="homeHeroCard" class="hero-card hidden">
-          <div class="between">
-            <div>
-              <div class="hero-label">إجمالي مصروفات المشاريع (عليه)</div>
-              <div id="heroTotalOut" class="hero-main-val" style="color:#f87171;">0 ج</div>
-            </div>
-            <span id="heroNetBadge" class="badge">صافي: 0 ج</span>
-          </div>
-          <div class="hero-grid">
-            <div class="hero-sub">
-              <small>إجمالي الوارد (له)</small>
-              <strong id="heroTotalIn" style="color:#34d399;">0 ج</strong>
-            </div>
-            <div class="hero-sub">
-              <small>العمليات المعتمدة</small>
-              <strong id="heroApprovedCount" style="color:#facc15;">0 حركة</strong>
-            </div>
-          </div>
-        </div>
+        <!-- رادار المدير / نسخة مصغرة للمحاسب والمهندس / شاشة الصنايعي -->
+        <div id="radarCard" class="hero-card hidden"></div>
+
+        <!-- زر فاتورة خامات للصنايعي/المقاول -->
+        <button id="btnWorkerMaterial" class="gold hidden" style="margin-bottom:12px;" onclick="openWorkerMaterialModal()">🧾 تسجيل فاتورة خامات للموقع</button>
 
         <!-- الاعتمادات المعلقة -->
         <div id="approvalsCard" class="card hidden" style="border-right:4px solid var(--gold);">
@@ -239,9 +235,8 @@
         </div>
       </div>
 
-      <!-- تبويب التصنيفات (المشاريع + الحسابات الشخصية) -->
+      <!-- تبويب التصنيفات (المشاريع) -->
       <div id="tabProjects" class="hidden">
-        <!-- المستوى 1: قائمة التصنيفات -->
         <div id="projLevel1">
           <div id="addProjBox" class="card">
             <div class="between" style="margin-bottom:4px;">
@@ -267,7 +262,6 @@
           </div>
         </div>
 
-        <!-- المستوى 2: الحسابات الفرعية داخل التصنيف -->
         <div id="projLevel2" class="hidden">
           <div class="card">
             <div class="between">
@@ -298,7 +292,6 @@
           <div id="projSummaryBar" class="hero-card hidden"></div>
         </div>
 
-        <!-- المستوى 3: جدول الحركات والرصيد التراكمي -->
         <div id="projLevel3" class="hidden">
           <div class="card">
             <div class="between">
@@ -316,17 +309,23 @@
         </div>
       </div>
 
-      <!-- تبويب الصنايعية -->
+      <!-- تبويب كشف الحساب الموحد -->
       <div id="tabWorkers" class="hidden">
         <div class="card">
           <div class="between" style="flex-wrap:wrap; gap:6px;">
-            <h3 style="margin:0; font-size:15px;">حسابات الصنايعية والمقاولين</h3>
+            <h3 style="margin:0; font-size:15px;">📒 كشف الحساب (فريق وصنايعية)</h3>
             <div class="row">
               <button id="btnAddForWorker" onclick="openTxModalForWorker()" class="sm gold hidden">+ حركة</button>
               <button id="btnWorkerRep" onclick="openReportModal('worker')" class="sm secondary hidden">📄 PDF</button>
             </div>
           </div>
-          <select id="workerSelect" onchange="renderWorkerLedger()"><option value="">-- اختر صنايعي / مقاول --</option></select>
+          <select id="workerSelect" onchange="renderWorkerLedger()"><option value="">-- اختر مهندس / صنايعي / مقاول --</option></select>
+          <div id="workerMergeToggleBox" class="hidden">
+            <div id="workerMergeToggle" class="toggle-pill" onclick="toggleWorkerMerge()">
+              <span>🔀 دمج العُهدة مع اليوميات (الجيب الواحد)</span>
+              <span id="workerMergeState" class="badge">مفصول</span>
+            </div>
+          </div>
           <div id="workerLedgerBox"></div>
         </div>
       </div>
@@ -348,7 +347,7 @@
     <nav class="bottom-nav">
       <button class="nav-btn active" id="navHome" onclick="switchTab('Home')">🏠 الرئيسية</button>
       <button class="nav-btn" id="navProjects" onclick="switchTab('Projects')">📂 التصنيفات</button>
-      <button class="nav-btn hidden" id="navWorkers" onclick="switchTab('Workers')">👷 الصنايعية</button>
+      <button class="nav-btn hidden" id="navWorkers" onclick="switchTab('Workers')">📒 كشف الحساب</button>
       <button class="nav-btn hidden" id="navTeam" onclick="switchTab('Team')">👥 الفريق</button>
     </nav>
   </div>
@@ -369,10 +368,9 @@
       <button class="drawer-item hidden" id="drwSettings" onclick="closeDrawer(); openSettingsModal()"><span>🏢 بيانات الشركة وترويسة الـ PDF</span></button>
       <button class="drawer-item hidden" id="drwPrivate" onclick="closeDrawer(); openPrivateModal()"><span>🔒 الحساب السري للمدير</span></button>
       <button class="drawer-item hidden" id="drwTimeTravel" onclick="closeDrawer(); openTimeTravelModal()"><span>⏪ التراجع الزمني (آلة الزمن)</span></button>
-      <button class="drawer-item hidden" id="drwTrash" onclick="closeDrawer(); openTrashModal()"><span>🗑️ سلة المحذوفات</span><span id="drwTrashCount" class="badge hidden">0</span></button>
+      <button class="drawer-item hidden" id="drwTrash" onclick="closeDrawer(); openTrashModal()"><span>🗑️ السلة والتراجعات العكسية</span><span id="drwTrashCount" class="badge hidden">0</span></button>
       <button class="drawer-item hidden" id="drwReports" onclick="closeDrawer(); openReportModal('all')"><span>📊 التقارير العامة (PDF / Excel)</span></button>
       <button class="drawer-item hidden" id="drwStorage" onclick="closeDrawer(); openStorageModal()"><span>💾 حالة المساحة</span><small id="drwStorageMini" style="color:var(--muted);"></small></button>
-      <button class="drawer-item hidden" id="drwClearTest" onclick="closeDrawer(); clearExperimentalData()"><span>🧹 تنظيف العمليات التجريبية</span></button>
       <button class="drawer-item hidden" id="drwBackup" onclick="closeDrawer(); downloadBackup()"><span>⬇️ حفظ نسخة احتياطية (JSON)</span></button>
       <button class="drawer-item hidden" id="drwRestore" onclick="closeDrawer(); document.getElementById('restoreFile').click()"><span>⬆️ استرجاع نسخة احتياطية (JSON)</span></button>
       <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreBackup(event)">
@@ -382,7 +380,7 @@
     </div>
   </div>
 
-  <!-- نافذة تأكيد الخروج من التطبيق -->
+  <!-- نافذة تأكيد الخروج -->
   <div id="exitModal" class="modal center-modal hidden">
     <div class="modal-content" style="text-align:center;">
       <h3 style="margin:0 0 8px; color:var(--primary);">هل تريد الخروج من التطبيق؟</h3>
@@ -394,12 +392,47 @@
     </div>
   </div>
 
+  <!-- نافذة الآلة الحاسبة المنبثقة -->
+  <div id="calcModal" class="modal center-modal hidden" style="z-index:55;">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:8px;">
+        <h3 style="margin:0; color:var(--primary);">🧮 آلة حاسبة سريعة</h3>
+        <button onclick="closeModal('calcModal')" class="sm secondary">✕</button>
+      </div>
+      <div id="calcDisplay" class="calc-display">0</div>
+      <div class="calc-grid">
+        <button type="button" class="calc-key clr" onclick="calcInput('C')">C</button>
+        <button type="button" class="calc-key clr" onclick="calcInput('B')">⌫</button>
+        <button type="button" class="calc-key op" onclick="calcInput('/')">÷</button>
+        <button type="button" class="calc-key op" onclick="calcInput('*')">×</button>
+        <button type="button" class="calc-key" onclick="calcInput('7')">7</button>
+        <button type="button" class="calc-key" onclick="calcInput('8')">8</button>
+        <button type="button" class="calc-key" onclick="calcInput('9')">9</button>
+        <button type="button" class="calc-key op" onclick="calcInput('-')">-</button>
+        <button type="button" class="calc-key" onclick="calcInput('4')">4</button>
+        <button type="button" class="calc-key" onclick="calcInput('5')">5</button>
+        <button type="button" class="calc-key" onclick="calcInput('6')">6</button>
+        <button type="button" class="calc-key op" onclick="calcInput('+')">+</button>
+        <button type="button" class="calc-key" onclick="calcInput('1')">1</button>
+        <button type="button" class="calc-key" onclick="calcInput('2')">2</button>
+        <button type="button" class="calc-key" onclick="calcInput('3')">3</button>
+        <button type="button" class="calc-key eq" onclick="calcEval()">=</button>
+        <button type="button" class="calc-key" style="grid-column:span 2;" onclick="calcInput('0')">0</button>
+        <button type="button" class="calc-key" onclick="calcInput('.')">.</button>
+        <button type="button" class="calc-key green" onclick="calcConfirm()" style="background:var(--green); color:#fff;">موافق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- نافذة إضافة / تعديل عملية -->
   <div id="txModal" class="modal hidden">
     <div class="modal-content">
       <div class="between" style="margin-bottom:6px;">
         <h3 id="txModalTitle" style="margin:0; color:var(--primary);">تسجيل عملية</h3>
-        <button onclick="closeModal('txModal')" class="sm secondary">✕</button>
+        <div class="row">
+          <button type="button" id="btnTxHistory" onclick="openTxHistoryModal()" class="sm secondary hidden">📜 سجل العملية</button>
+          <button onclick="closeModal('txModal')" class="sm secondary">✕</button>
+        </div>
       </div>
 
       <div id="txWorkerBanner" class="worker-banner hidden">
@@ -412,13 +445,21 @@
         <button type="button" id="btnDirIn" class="dir-btn in" onclick="setTxDir('in')">↑ وارد (له)</button>
       </div>
 
-      <input type="number" id="txAmount" placeholder="المبلغ (جنيه)" inputmode="decimal" oninput="updateLiveTafqeet()">
+      <div class="amt-wrap">
+        <input type="number" id="txAmount" placeholder="المبلغ (جنيه)" inputmode="decimal" oninput="updateLiveTafqeet()">
+        <button type="button" class="calc-trigger" onclick="openCalcFor('txAmount')" title="آلة حاسبة">🧮</button>
+      </div>
       <div id="liveTafqeet" class="tafqeet-live"></div>
 
       <select id="txProject" onchange="populateAccountSelect()"></select>
       <select id="txAccount"><option value="">عام (داخل التصنيف)</option></select>
       <input type="date" id="txDate" onchange="checkTxDateWarning()">
       <textarea id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، يومية، بعت 5 جرام...)"></textarea>
+
+      <label id="paidNowRow" class="check-row hidden" style="background:rgba(5,150,105,0.08); border-radius:10px; padding:9px 10px; margin-top:8px; border:1px solid var(--green);">
+        <input type="checkbox" id="txPaidNow">
+        <span style="color:var(--green); font-weight:bold; font-size:13px;">☑ تم التسليم نقداً الآن (يُسجّل استحقاق + سداد في مصروف المشروع)</span>
+      </label>
 
       <details id="txExtraDetails" style="margin-top:8px; background:var(--bg); padding:8px 10px; border-radius:12px;">
         <summary style="cursor:pointer; font-size:13px; color:var(--muted); font-weight:bold;">خيارات إضافية (صنايعي / بند / حاسبة / فاتورة 📷)</summary>
@@ -429,6 +470,7 @@
           <option value="lump_sum">مقطوعية لصنايعي</option>
           <option value="advance">واصل / سلفة لصنايعي</option>
           <option value="deduction">خصم على صنايعي</option>
+          <option value="material_purchase">فاتورة خامات / مشتريات</option>
           <option value="custody" id="optCustody">تسليم عُهدة لمهندس</option>
           <option value="income" id="optIncome">إيراد / مستخلص</option>
         </select>
@@ -437,7 +479,7 @@
           <input type="number" id="calcRate" placeholder="السعر" inputmode="decimal" oninput="calcFromQty()" style="flex:1;">
         </div>
         <select id="txWorker" onchange="updateWorkerBanner()"><option value="">-- بدون شخص محدد --</option></select>
-        <label style="display:block; font-size:12px; color:var(--muted); margin-top:8px;">📷 صورة الفاتورة (أقل من 500 ك.ب):</label>
+        <label style="display:block; font-size:12px; color:var(--muted); margin-top:8px;">📷 صورة الفاتورة (اختياري — أقل من 500 ك.ب):</label>
         <input type="file" id="txReceipt" accept="image/*">
       </details>
 
@@ -449,6 +491,38 @@
     </div>
   </div>
 
+  <!-- نافذة تسجيل فاتورة خامات للصنايعي/المقاول -->
+  <div id="workerMaterialModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:6px;">
+        <h3 style="margin:0; color:var(--primary);">🧾 تسجيل فاتورة خامات للموقع</h3>
+        <button onclick="closeModal('workerMaterialModal')" class="sm secondary">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin-top:0;">تُرسل للمدير للاعتماد، وبمجرد اعتمادها تُضاف في حسابك (له).</p>
+      <div class="amt-wrap">
+        <input type="number" id="wmAmount" placeholder="المبلغ (جنيه)" inputmode="decimal">
+        <button type="button" class="calc-trigger" onclick="openCalcFor('wmAmount')" title="آلة حاسبة">🧮</button>
+      </div>
+      <select id="wmProject"></select>
+      <input type="date" id="wmDate">
+      <textarea id="wmNote" placeholder="البيان / التفاصيل (إجباري — مثلاً: مشال أسمنت، مسامير، نقل...)"></textarea>
+      <label style="display:block; font-size:12px; color:var(--muted); margin-top:8px;">📷 صورة الفاتورة (اختياري):</label>
+      <input type="file" id="wmReceipt" accept="image/*">
+      <button id="btnSaveWorkerMaterial" class="green" style="margin-top:12px;">إرسال للاعتماد</button>
+    </div>
+  </div>
+
+  <!-- نافذة سجل العملية (للمدير فقط) -->
+  <div id="txHistoryModal" class="modal hidden" style="z-index:45;">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:8px;">
+        <h3 style="margin:0; color:var(--primary);">📜 سجل العملية</h3>
+        <button onclick="closeModal('txHistoryModal')" class="sm secondary">✕</button>
+      </div>
+      <div id="txHistoryList"></div>
+    </div>
+  </div>
+
   <!-- نافذة التراجع الزمني (آلة الزمن) -->
   <div id="timeTravelModal" class="modal hidden">
     <div class="modal-content">
@@ -456,12 +530,12 @@
         <h3 style="margin:0; color:var(--primary);">⏪ التراجع الزمني (آلة الزمن)</h3>
         <button onclick="closeModal('timeTravelModal')" class="sm secondary">✕</button>
       </div>
-      <p style="font-size:12px; color:var(--muted); margin-top:0;">يعيد المعاملات والتصنيفات والفروع كما كانت في الوقت المختار (يحتفظ بآخر 30 يوماً / 300 حركة).</p>
+      <p style="font-size:12px; color:var(--muted); margin-top:0;">يعيد المعاملات والتصنيفات والفروع كما كانت، ويحفظ لقطة تراجع عكسي (Redo) لمدة 30 يوماً.</p>
 
       <div style="background:var(--bg); padding:10px; border-radius:12px; margin-bottom:10px;">
         <strong style="font-size:13px; display:block; margin-bottom:4px;">نطاق التراجع:</strong>
-        <label class="check-row" style="padding:5px 0;"><input type="radio" name="ttScope" value="mine" checked><span>تعديلاتي فقط (المدير) — حماية لشغل الفريق</span></label>
-        <label class="check-row" style="border:none; padding:5px 0;"><input type="radio" name="ttScope" value="all"><span>تعديلات الكل (بما فيها تعديلات المهندسين)</span></label>
+        <label class="check-row" style="padding:5px 0;"><input type="radio" name="ttScope" value="mine" checked><span>تعديلاتي فقط (المدير)</span></label>
+        <label class="check-row" style="border:none; padding:5px 0;"><input type="radio" name="ttScope" value="all"><span>تعديلات جميع المديرين</span></label>
       </div>
 
       <div class="row" style="margin-bottom:8px;">
@@ -501,7 +575,7 @@
         <small id="stPercentTxt" style="color:#cbd5e1; font-size:11px;">أقل من 1% مستخدم</small>
       </div>
       <div id="stBreakdown" style="font-size:13px;"></div>
-      <button onclick="closeModal('storageModal'); openTrashModal()" class="secondary" style="margin-top:12px;">🗑️ فتح سلة المحذوفات لتفريغ المساحة</button>
+      <button onclick="closeModal('storageModal'); openTrashModal()" class="secondary" style="margin-top:12px;">🗑️ فتح السلة لتفريغ المساحة</button>
     </div>
   </div>
 
@@ -529,9 +603,10 @@
       </div>
       <input type="text" id="uName" placeholder="الاسم (مثلاً: م. أحمد أو أسطى كريم)">
       <div class="row">
-        <input type="tel" id="uPhone" placeholder="رقم الموبايل" style="flex:1;">
+        <input type="tel" id="uPhone" placeholder="رقم الموبايل (للاتصال والعرض)" style="flex:1;">
         <input type="number" id="uPin" placeholder="PIN (6 أرقام)" inputmode="numeric" style="flex:1;">
       </div>
+      <small id="uLoginPhoneHint" class="hidden" style="display:block; color:var(--muted); margin-top:4px; font-size:11.5px;"></small>
       <select id="uRole">
         <option value="engineer">مهندس موقع</option>
         <option value="accountant">محاسب</option>
@@ -557,34 +632,26 @@
     </div>
   </div>
 
-  <!-- نافذة خيارات التقرير (PDF / Excel / واتساب) -->
+  <!-- نافذة خيارات التقرير -->
   <div id="reportModal" class="modal hidden">
     <div class="modal-content">
       <div class="between" style="margin-bottom:8px;">
         <h3 id="repModalTitle" style="margin:0; color:var(--primary);">التقارير</h3>
         <button onclick="closeModal('reportModal')" class="sm secondary">✕</button>
       </div>
-
       <div id="repPendingWarn" class="warn-box hidden"></div>
-
       <label class="check-row"><input type="radio" name="repMode" value="full" checked style="width:auto; margin-left:8px;"><span>تقرير كشف الحساب (كامل)</span></label>
       <label class="check-row"><input type="radio" name="repMode" value="monthly" style="width:auto; margin-left:8px;"><span>تقرير كشف حساب شهري</span></label>
-
-      <div id="repMonthBox" class="hidden">
-        <input type="month" id="repMonthVal">
-      </div>
-
+      <div id="repMonthBox" class="hidden"><input type="month" id="repMonthVal"></div>
       <label class="check-row" style="border:none;"><input type="checkbox" id="repUseRange" onchange="toggleRepRange()"><span>تحديد تاريخ الفترة (من – إلى)</span></label>
       <div id="repRangeBox" class="row hidden">
         <input type="date" id="repFrom" style="flex:1;">
         <input type="date" id="repTo" style="flex:1;">
       </div>
-
       <select id="repSort">
         <option value="asc">تصاعدي حسب تاريخ العملية (الأقدم أولاً)</option>
         <option value="desc">تنازلي حسب تاريخ العملية (الأحدث أولاً)</option>
       </select>
-
       <div class="row" style="margin-top:14px;">
         <button id="btnRunPdf" onclick="runReport('pdf')" class="red" style="flex:1;">📄 PDF ومشاركة</button>
         <button onclick="runReport('csv')" class="green" style="flex:1;">📊 Excel</button>
@@ -593,21 +660,31 @@
     </div>
   </div>
 
-  <!-- نافذة سلة المحذوفات (مع حذف نهائي انتقائي + حذف الصور المرفقة) -->
+  <!-- نافذة سلة المحذوفات + التراجعات العكسية (Redo) -->
   <div id="trashModal" class="modal hidden">
     <div class="modal-content">
       <div class="between" style="margin-bottom:8px;">
-        <h3 style="margin:0; color:var(--primary);">🗑️ سلة المحذوفات</h3>
+        <h3 style="margin:0; color:var(--primary);">🗑️ السلة والتراجعات العكسية</h3>
         <button onclick="closeModal('trashModal')" class="sm secondary">✕</button>
       </div>
-      <div id="trashBulkBar" class="between hidden" style="background:var(--bg); padding:8px 10px; border-radius:12px; margin-bottom:8px;">
-        <label class="row" style="cursor:pointer; font-size:13px; margin:0;">
-          <input type="checkbox" id="trashSelectAll" onchange="toggleSelectAllTrash(this.checked)">
-          <span>تحديد الكل</span>
-        </label>
-        <button id="btnHardDeleteSelected" onclick="hardDeleteSelectedTrash()" class="sm red">حذف المحدد نهائياً</button>
+      <div class="seg-tabs">
+        <button type="button" id="segTrashBtn" class="seg-btn active" onclick="switchTrashTab('trash')">🗑️ المحذوفات</button>
+        <button type="button" id="segRedoBtn" class="seg-btn" onclick="switchTrashTab('redo')">↪️ التراجعات العكسية</button>
       </div>
-      <div id="trashList"></div>
+      <div id="trashTabBody">
+        <div id="trashBulkBar" class="between hidden" style="background:var(--bg); padding:8px 10px; border-radius:12px; margin-bottom:8px;">
+          <label class="row" style="cursor:pointer; font-size:13px; margin:0;">
+            <input type="checkbox" id="trashSelectAll" onchange="toggleSelectAllTrash(this.checked)">
+            <span>تحديد الكل</span>
+          </label>
+          <button id="btnHardDeleteSelected" onclick="hardDeleteSelectedTrash()" class="sm red">حذف المحدد نهائياً</button>
+        </div>
+        <div id="trashList"></div>
+      </div>
+      <div id="redoTabBody" class="hidden">
+        <small style="display:block; color:var(--muted); margin-bottom:8px;">تُحفظ لقطات التراجع العكسي (Redo) لآخر 30 يوماً وتُحذف تلقائياً بعدها.</small>
+        <div id="redoList"></div>
+      </div>
     </div>
   </div>
 
@@ -669,17 +746,7 @@
     </div>
   </div>
 
-  <!-- منطقة تجهيز ملف PDF -->
-  <div id="pdfRenderStage"></div>
-
-  <script>
-    window.addEventListener('error', function(e) {
-      var m = document.getElementById('authMsg');
-      if (m && !document.getElementById('authScreen').classList.contains('hidden')) {
-        m.innerText = 'خطأ برمجي: ' + (e.message || 'غير معروف');
-      }
-    });
-  </script>
+  <div id="pdfRenderStage" class="hidden"></div>
 
   <script type="module">
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -691,12 +758,13 @@
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
-      collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, getDocs, serverTimestamp
+      collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, writeBatch, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '11.0';
+    const APP_VER = '12.0';
     const FOUNDER_PHONE = '01000227438';
     const FOUNDER_EMAIL = 'mohamed5360mas@gmail.com';
+    const ALLOWED_TT_COLS = ['transactions', 'projects', 'accounts'];
     const ALL_CACHE_KEYS = [
       'revise_cache_projects', 'revise_cache_accounts', 'revise_cache_users', 'revise_cache_txs',
       'revise_offline_queue', 'revise_uid', 'revise_role', 'revise_assigned', 'revise_perms',
@@ -731,15 +799,22 @@
     }
 
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي' };
-    const catLabels = { general: 'عام', daily: 'يومية', meters: 'أمتار', lump_sum: 'مقطوعية', advance: 'واصل / سلفة', deduction: 'خصم', custody: 'عُهدة', income: 'إيراد' };
+    const roleLabels = { admin: 'المدير', engineer: 'مهندس', accountant: 'محاسب', worker: 'صنايعي / مقاول' };
+    const catLabels = {
+      general: 'عام', daily: 'يومية', meters: 'أمتار', lump_sum: 'مقطوعية',
+      advance: 'واصل / سلفة', deduction: 'خصم', material_purchase: 'فاتورة خامات',
+      custody: 'عُهدة', income: 'إيراد'
+    };
 
-    /* التاريخ والوقت بالتوقيت المحلي للجهاز (إصلاح خطأ UTC بعد منتصف الليل) */
+    /* الأساس النقدي: ما يُحسب كمصروف فعلي على المشروع */
+    function isProjectCashExpense(t) {
+      if (!t || t.deleted === true || t.status !== 'approved' || t.type !== 'out') return false;
+      const c = t.category || 'general';
+      return c === 'general' || c === 'advance' || c === 'material_purchase';
+    }
+
     function getLocalDateStr(d = new Date()) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
     function getLocalMonthStr(d = new Date()) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -749,13 +824,11 @@
       const d = new Date(ts.seconds * 1000);
       return `${getLocalDateStr(d)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
-
     function normalizePhone(val) {
       const digits = String(val || '').trim().replace(/[\s\-+]/g, '');
       if (digits.startsWith('20') && digits.length === 12) return '0' + digits.slice(2);
       return digits;
     }
-
     function resolveLoginEmails(rawVal) {
       const val = String(rawVal || '').trim();
       if (!val) return [];
@@ -764,23 +837,17 @@
       if (phone === FOUNDER_PHONE) return [FOUNDER_EMAIL, `${FOUNDER_PHONE}@revise.app`];
       return [`${phone}@revise.app`];
     }
-
     function friendlyError(e) {
       const code = e?.code || '';
       const msg = e?.message || '';
-      if (code === 'permission-denied' || msg.includes('Missing or insufficient permissions')) {
-        return 'تم رفض العملية من السيرفر (تأكد من نشر قواعد Firebase المحدّثة وصلاحياتك)';
-      }
+      if (code === 'permission-denied' || msg.includes('Missing or insufficient permissions')) return 'تم رفض العملية (تأكد من نشر قواعد Firebase المحدّثة وصلاحياتك)';
       if (code === 'unavailable' || !navigator.onLine) return 'لا يوجد اتصال بالإنترنت حالياً';
-      if (code === 'resource-exhausted') return 'تم تجاوز حصة قاعدة البيانات المجانية';
       if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'بيانات الدخول غير صحيحة';
       if (code === 'auth/user-not-found') return 'هذا الحساب غير مسجل';
-      if (code === 'auth/too-many-requests') return 'محاولات كثيرة جداً، انتظر قليلاً ثم أعد المحاولة';
-      if (code === 'auth/requires-recent-login') return 'يرجى تسجيل الخروج والدخول مجدداً لتأكيد هويتك';
+      if (code === 'auth/too-many-requests') return 'محاولات كثيرة جداً، انتظر قليلاً';
       return msg || 'حدث خطأ غير متوقع';
     }
 
-    /* نظام التنبيهات الموحّد + زر التراجع السريع لمدة 5 ثواني */
     function showToast(msg, opts = {}) {
       const box = document.getElementById('toastBox');
       const txt = document.getElementById('toastText');
@@ -791,10 +858,7 @@
         undoBtn.classList.remove('hidden');
         undoBtn.onclick = async () => {
           undoBtn.disabled = true;
-          try { await opts.onUndo(); } finally {
-            undoBtn.disabled = false;
-            box.classList.add('hidden');
-          }
+          try { await opts.onUndo(); } finally { undoBtn.disabled = false; box.classList.add('hidden'); }
         };
       } else {
         undoBtn.classList.add('hidden');
@@ -805,21 +869,15 @@
       window.__toastTimer = setTimeout(() => box.classList.add('hidden'), opts.onUndo ? 5000 : (opts.error ? 4000 : 2600));
     }
 
-    /* مؤشر الحفظ الفوري الموحّد ومنع الضغط المتكرر */
     async function withBusy(btn, busyText, fn) {
       if (!btn) return fn();
       if (btn.disabled) return;
       const orig = btn.innerText;
       btn.disabled = true;
       btn.innerText = busyText || 'جاري الحفظ...';
-      try {
-        return await fn();
-      } catch (e) {
-        showToast(friendlyError(e), { error: true });
-      } finally {
-        btn.disabled = false;
-        btn.innerText = orig;
-      }
+      try { return await fn(); }
+      catch (e) { showToast(friendlyError(e), { error: true }); }
+      finally { btn.disabled = false; btn.innerText = orig; }
     }
 
     function tafqeet(n) {
@@ -857,10 +915,7 @@
             canvas.height = Math.round(img.height * scale);
             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
             let out = canvas.toDataURL('image/jpeg', quality);
-            while (out.length > maxLen && quality > 0.2) {
-              quality -= 0.1;
-              out = canvas.toDataURL('image/jpeg', quality);
-            }
+            while (out.length > maxLen && quality > 0.2) { quality -= 0.1; out = canvas.toDataURL('image/jpeg', quality); }
             resolve(out);
           };
           img.onerror = reject;
@@ -871,16 +926,77 @@
       });
     }
 
+    /* آلة حاسبة آمنة بدون eval */
+    let calcTargetId = null, calcExpr = '';
+    function safeEvaluateMath(expr) {
+      const clean = String(expr || '').replace(/[^0-9+\-*/.]/g, '');
+      if (!clean) return NaN;
+      const tokens = clean.match(/(\d+\.?\d*|\.\d+|[+\-*/])/g);
+      if (!tokens) return NaN;
+      const vals = [], ops = [];
+      const prec = { '+': 1, '-': 1, '*': 2, '/': 2 };
+      const applyOp = () => {
+        const op = ops.pop(), b = vals.pop(), a = vals.pop();
+        if (a === undefined || b === undefined) return;
+        if (op === '+') vals.push(a + b);
+        else if (op === '-') vals.push(a - b);
+        else if (op === '*') vals.push(a * b);
+        else if (op === '/') vals.push(b === 0 ? NaN : a / b);
+      };
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        if (!isNaN(t)) vals.push(parseFloat(t));
+        else if (prec[t]) {
+          while (ops.length && prec[ops[ops.length - 1]] >= prec[t]) applyOp();
+          ops.push(t);
+        }
+      }
+      while (ops.length) applyOp();
+      return vals.length === 1 ? vals[0] : NaN;
+    }
+
+    window.openCalcFor = (inputId) => {
+      calcTargetId = inputId;
+      const cur = document.getElementById(inputId)?.value || '';
+      calcExpr = cur ? String(cur) : '';
+      document.getElementById('calcDisplay').innerText = calcExpr || '0';
+      document.getElementById('calcModal').classList.remove('hidden');
+      pushNavState();
+    };
+    window.calcInput = (ch) => {
+      if (ch === 'C') calcExpr = '';
+      else if (ch === 'B') calcExpr = calcExpr.slice(0, -1);
+      else calcExpr += ch;
+      document.getElementById('calcDisplay').innerText = calcExpr || '0';
+    };
+    window.calcEval = () => {
+      const res = safeEvaluateMath(calcExpr);
+      if (!isFinite(res)) { showToast('معادلة غير صالحة', { error: true }); return; }
+      calcExpr = String(Math.round(res * 100) / 100);
+      document.getElementById('calcDisplay').innerText = calcExpr;
+    };
+    window.calcConfirm = () => {
+      const res = safeEvaluateMath(calcExpr);
+      if (!isFinite(res) || res <= 0) { showToast('الناتج يجب أن يكون أكبر من صفر', { error: true }); return; }
+      const finalVal = Math.round(res * 100) / 100;
+      if (calcTargetId) {
+        const el = document.getElementById(calcTargetId);
+        if (el) { el.value = finalVal; el.dispatchEvent(new Event('input')); }
+      }
+      closeModal('calcModal');
+    };
+
     let currentUser = null, currentUserName = 'المدير', userRole = 'worker', isFounderUser = false;
     let myAssignedProjects = [], myCanAdd = true, myPerms = {};
     let dataLoaded = false, isSyncing = false, searchQuery = '', unsubs = [];
     let editingTxId = null, editingOrigAmount = null, editingUserId = null, txDir = 'out';
     let currentTab = 'Home', projLevel = 1, currentProjId = null, currentAccId = null;
     let reportScope = 'all', approvalsExpanded = true, archiveExpanded = false, archivedAccExpanded = false;
-    let staffOwnTxs = [], staffCustodyTxs = [];
+    let workerMergeMode = false;
+    let staffOwnTxs = [], staffCustodyTxs = [], workerOwnMatTxs = [];
     let pendingShortcutProj = new URLSearchParams(location.search).get('quickProj');
     let loginFailCount = 0, loginLockUntil = 0;
-    let auditLogs = [], ttPendingLogs = [];
+    let auditLogs = [], redoSnapshots = [], ttPendingLogs = [];
 
     const readJson = (k, def) => { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(def)); } catch (e) { return def; } };
     let projects = readJson('revise_cache_projects', []);
@@ -896,7 +1012,6 @@
       logo: '', stamp: '', signature: '', showStamp: true, showSignature: true
     });
 
-    /* سجل التراجع الزمني (مع تنظيف تلقائي لآخر 30 يوم أو 300 حركة) */
     function stripServerFields(obj) {
       if (!obj || typeof obj !== 'object') return null;
       const clean = {};
@@ -908,50 +1023,31 @@
       return clean;
     }
 
-    async function recordAuditLog(action, collectionName, docId, beforeObj, afterObj, summary) {
-      if (!navigator.onLine || !currentUser) return;
-      try {
-        await addDoc(collection(db, "audit_logs"), {
-          actorUid: currentUser.uid,
-          actorName: currentUserName,
-          action,
-          collectionName,
-          docId,
-          before: stripServerFields(beforeObj),
-          after: stripServerFields(afterObj),
-          summary,
-          tsMs: Date.now(),
-          createdAt: serverTimestamp()
-        });
-        if (userRole === 'admin') pruneAuditLogs();
-      } catch (e) {
-        console.warn("Audit log skipped:", e.message);
-      }
+    function addAuditToBatch(batch, action, collectionName, docId, beforeObj, afterObj, summary) {
+      if (!currentUser || !ALLOWED_TT_COLS.includes(collectionName)) return;
+      const logRef = doc(collection(db, "audit_logs"));
+      batch.set(logRef, {
+        actorUid: currentUser.uid,
+        actorName: currentUserName,
+        actorRole: userRole,
+        action,
+        collectionName,
+        docId,
+        before: stripServerFields(beforeObj),
+        after: stripServerFields(afterObj),
+        summary,
+        tsMs: Date.now(),
+        reverted: false,
+        createdAt: serverTimestamp()
+      });
     }
 
-    async function pruneAuditLogs() {
-      if (userRole !== 'admin' || auditLogs.length <= 300) {
-        const cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        const expired = auditLogs.filter(l => (l.tsMs || 0) < cutoff);
-        for (const l of expired.slice(0, 15)) {
-          try { await deleteDoc(doc(db, "audit_logs", l.id)); } catch (e) {}
-        }
-        return;
-      }
-      const excess = auditLogs.slice(300);
-      for (const l of excess.slice(0, 20)) {
-        try { await deleteDoc(doc(db, "audit_logs", l.id)); } catch (e) {}
-      }
-    }
-
-    /* إدارة زر الرجوع في الهاتف + نافذة تأكيد الخروج */
-    function pushNavState() {
-      try { history.pushState({ revise: true }, ''); } catch (e) {}
-    }
+    /* إدارة زر الرجوع في الهاتف */
+    function pushNavState() { try { history.pushState({ revise: true }, ''); } catch (e) {} }
     pushNavState();
 
     function getOpenModalId() {
-      const ids = ['exitModal', 'txModal', 'timeTravelModal', 'storageModal', 'changePassModal', 'userModal', 'reportModal', 'trashModal', 'settingsModal', 'privateModal', 'receiptModal'];
+      const ids = ['calcModal', 'txHistoryModal', 'exitModal', 'txModal', 'workerMaterialModal', 'timeTravelModal', 'storageModal', 'changePassModal', 'userModal', 'reportModal', 'trashModal', 'settingsModal', 'privateModal', 'receiptModal'];
       return ids.find(id => !document.getElementById(id).classList.contains('hidden')) || null;
     }
 
@@ -974,26 +1070,21 @@
     window.confirmAppExit = () => {
       closeModal('exitModal');
       try { window.close(); } catch (e) {}
-      history.go(-2);
+      history.go(-3);
     };
 
     window.addEventListener('popstate', () => {
-      if (goBackStep()) {
-        pushNavState();
-        return;
-      }
+      if (goBackStep()) { pushNavState(); return; }
       document.getElementById('exitModal').classList.remove('hidden');
       pushNavState();
     });
 
-    /* الوضع الليلي */
     if (localStorage.getItem('revise_dark') === '1') document.body.classList.add('dark');
     window.toggleTheme = () => {
       document.body.classList.toggle('dark');
       localStorage.setItem('revise_dark', document.body.classList.contains('dark') ? '1' : '0');
     };
 
-    /* القائمة الجانبية */
     document.getElementById('btnOpenDrawer').onclick = () => {
       populateDefaultQuickProj();
       updateDrawerIndicators();
@@ -1003,12 +1094,11 @@
     window.closeDrawer = () => document.getElementById('drawerBackdrop').classList.add('hidden');
 
     function updateDrawerIndicators() {
-      const trashedCount = allTxs.filter(t => t.deleted === true).length;
+      const trashedCount = allTxs.filter(t => t.deleted === true).length + redoSnapshots.length;
       const pill = document.getElementById('drwTrashCount');
       pill.innerText = trashedCount;
       pill.classList.toggle('hidden', !trashedCount);
-      const est = estimateStorageUsage();
-      document.getElementById('drwStorageMini').innerText = `${est.totalMb.toFixed(1)} MB`;
+      document.getElementById('drwStorageMini').innerText = `${estimateStorageUsage().totalMb.toFixed(1)} MB`;
     }
 
     function estimateStorageUsage() {
@@ -1017,8 +1107,7 @@
       const logCount = auditLogs.length;
       const textKb = (txCount * 0.85) + (projects.length * 0.4) + (accounts.length * 0.4) + (usersList.length * 0.5) + (logCount * 1.4);
       const receiptsKb = receiptCount * 220;
-      const totalMb = (textKb + receiptsKb) / 1024;
-      return { txCount, receiptCount, logCount, textKb, receiptsKb, totalMb };
+      return { txCount, receiptCount, logCount, textKb, receiptsKb, totalMb: (textKb + receiptsKb) / 1024 };
     }
 
     window.openStorageModal = () => {
@@ -1026,11 +1115,11 @@
       const pct = Math.min(100, (est.totalMb / 1024) * 100);
       document.getElementById('stUsedMb').innerText = `${est.totalMb.toFixed(2)} MB / 1024 MB`;
       document.getElementById('stProgFill').style.width = `${Math.max(1, pct).toFixed(1)}%`;
-      document.getElementById('stPercentTxt').innerText = pct < 1 ? 'أقل من 1% مستخدم — المساحة ممتازة' : `${pct.toFixed(1)}% مستخدم من الباقة المجانية`;
+      document.getElementById('stPercentTxt').innerText = pct < 1 ? 'أقل من 1% مستخدم — المساحة ممتازة' : `${pct.toFixed(1)}% مستخدم`;
       document.getElementById('stBreakdown').innerHTML = `
-        <div class="tx-item"><span>📄 إجمالي العمليات المسجلة</span><strong>${est.txCount.toLocaleString()} حركة</strong></div>
-        <div class="tx-item"><span>🖼️ صور الفواتير المرفقة</span><strong>${est.receiptCount.toLocaleString()} صورة (~${(est.receiptsKb/1024).toFixed(2)} MB)</strong></div>
-        <div class="tx-item"><span>⏪ سجل التراجع الزمني</span><strong>${est.logCount.toLocaleString()} / 300</strong></div>`;
+        <div class="tx-item"><span>📄 إجمالي العمليات</span><strong>${est.txCount.toLocaleString()} حركة</strong></div>
+        <div class="tx-item"><span>🖼️ صور الفواتير</span><strong>${est.receiptCount.toLocaleString()} صورة (~${(est.receiptsKb/1024).toFixed(2)} MB)</strong></div>
+        <div class="tx-item"><span>📜 سجل الرقابة</span><strong>${est.logCount.toLocaleString()} سجل</strong></div>`;
       document.getElementById('storageModal').classList.remove('hidden');
       pushNavState();
     };
@@ -1044,7 +1133,7 @@
     window.saveDefaultQuickProj = () => {
       defaultQuickProjId = document.getElementById('defaultQuickProjSel').value;
       localStorage.setItem('revise_default_quick_proj', defaultQuickProjId);
-      showToast('تم حفظ المشروع الافتراضي للإضافة السريعة');
+      showToast('تم حفظ المشروع الافتراضي');
     };
 
     document.getElementById('searchBox').oninput = (e) => {
@@ -1068,7 +1157,12 @@
             });
             receiptId = rRef.id;
           }
-          await addDoc(collection(db, "transactions"), { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() });
+          const batch = writeBatch(db);
+          const txRef = doc(collection(db, "transactions"));
+          const finalPayload = { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() };
+          batch.set(txRef, finalPayload);
+          addAuditToBatch(batch, 'create', 'transactions', txRef.id, null, finalPayload, `إضافة عملية (مزامنة): ${Number(payload.amount||0).toLocaleString()} ج`);
+          await batch.commit();
         } catch (e) { remaining.push(item); }
       }
       offlineQueue = remaining;
@@ -1085,24 +1179,18 @@
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 
-    /* التعرف التلقائي على نوع الدخول (هاتف / بريد) */
     document.getElementById('loginId').addEventListener('input', (e) => {
       const v = e.target.value.trim();
       const b = document.getElementById('loginModeBadge');
       if (!v) { b.classList.add('hidden'); return; }
       b.classList.remove('hidden');
-      if (v.includes('@')) b.innerText = 'دخول بالبريد الإلكتروني';
-      else b.innerText = 'دخول برقم الهاتف';
+      b.innerText = v.includes('@') ? 'دخول بالبريد الإلكتروني' : 'دخول برقم الهاتف';
     });
 
     document.getElementById('btnLogin').onclick = async () => {
       const btn = document.getElementById('btnLogin');
       const msg = document.getElementById('authMsg');
-      if (Date.now() < loginLockUntil) {
-        const sec = Math.ceil((loginLockUntil - Date.now()) / 1000);
-        msg.innerText = `تم قفل الدخول مؤقتاً، انتظر ${sec} ثانية`;
-        return;
-      }
+      if (Date.now() < loginLockUntil) { msg.innerText = `انتظر ${Math.ceil((loginLockUntil - Date.now()) / 1000)} ثانية`; return; }
       if (!navigator.onLine) { msg.innerText = "تسجيل الدخول لأول مرة يحتاج إنترنت"; return; }
       const id = document.getElementById('loginId').value.trim();
       const pass = document.getElementById('loginPass').value;
@@ -1111,56 +1199,36 @@
       await withBusy(btn, 'جاري الدخول...', async () => {
         msg.innerText = "";
         await setPersistence(auth, browserLocalPersistence).catch(() => {});
-        const candidates = resolveLoginEmails(id);
         let lastErr = null;
-        for (const email of candidates) {
-          try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            loginFailCount = 0;
-            msg.innerText = "";
-            return;
-          } catch (e) {
-            lastErr = e;
-          }
+        for (const email of resolveLoginEmails(id)) {
+          try { await signInWithEmailAndPassword(auth, email, pass); loginFailCount = 0; return; }
+          catch (e) { lastErr = e; }
         }
         loginFailCount++;
-        if (loginFailCount >= 5) {
-          loginLockUntil = Date.now() + 30000;
-          loginFailCount = 0;
-          msg.innerText = "محاولات خاطئة متكررة — تم القفل لمدة 30 ثانية";
-        } else {
-          msg.innerText = friendlyError(lastErr);
-        }
+        if (loginFailCount >= 5) { loginLockUntil = Date.now() + 30000; loginFailCount = 0; msg.innerText = "تم القفل لمدة 30 ثانية"; }
+        else msg.innerText = friendlyError(lastErr);
       });
     };
 
-    /* نسيت كلمة السر */
     document.getElementById('btnForgotPass').onclick = async () => {
       const btn = document.getElementById('btnForgotPass');
       const msg = document.getElementById('authMsg');
-      if (!navigator.onLine) { msg.innerText = "استعادة كلمة السر تحتاج اتصال بالإنترنت"; return; }
+      if (!navigator.onLine) { msg.innerText = "يحتاج اتصال بالإنترنت"; return; }
       const raw = document.getElementById('loginId').value.trim();
-      if (!raw) {
-        msg.style.color = 'var(--orange)';
-        msg.innerText = "اكتب رقم موبايلك أو بريدك الإلكتروني أولاً ثم اضغط «هل نسيت كلمة السر؟»";
-        document.getElementById('loginId').focus();
-        return;
-      }
-      const candidates = resolveLoginEmails(raw);
-      const targetEmail = candidates[0];
+      if (!raw) { msg.style.color = 'var(--orange)'; msg.innerText = "اكتب رقم موبايلك أو بريدك أولاً"; return; }
+      const targetEmail = resolveLoginEmails(raw)[0];
       if (!targetEmail || targetEmail.endsWith('@revise.app')) {
         msg.style.color = 'var(--orange)';
-        msg.innerText = "حسابات الموظفين بالرقم الداخلي تُستعاد عن طريق المدير فقط، أما حساب البريد فيُرسل له رابط الاستعادة.";
+        msg.innerText = "حسابات الموظفين بالرقم الداخلي تُستعاد عن طريق المدير فقط.";
         return;
       }
       await withBusy(btn, 'جاري الإرسال...', async () => {
         await sendPasswordResetEmail(auth, targetEmail);
         msg.style.color = 'var(--green)';
-        msg.innerText = `✅ تم إرسال رابط إعادة تعيين كلمة السر إلى: ${targetEmail} (راجع البريد الوارد والرسائل غير المرغوب فيها)`;
+        msg.innerText = `✅ تم إرسال رابط إعادة التعيين إلى: ${targetEmail}`;
       });
     };
 
-    /* تغيير كلمة السر من الإعدادات */
     window.openChangePassModal = () => {
       document.getElementById('cpCurrent').value = '';
       document.getElementById('cpNew').value = '';
@@ -1170,36 +1238,25 @@
       pushNavState();
     };
     document.getElementById('btnSaveNewPass').onclick = async () => {
-      const btn = document.getElementById('btnSaveNewPass');
-      const cur = document.getElementById('cpCurrent').value;
-      const nw = document.getElementById('cpNew').value;
-      const cf = document.getElementById('cpConfirm').value;
+      const cur = document.getElementById('cpCurrent').value, nw = document.getElementById('cpNew').value, cf = document.getElementById('cpConfirm').value;
       const msg = document.getElementById('cpMsg');
-      if (!cur || !nw) { msg.style.color = 'var(--red)'; msg.innerText = 'أكمل جميع الحقول'; return; }
-      if (nw.length < 6) { msg.style.color = 'var(--red)'; msg.innerText = 'كلمة السر الجديدة يجب أن تكون 6 أحرف/أرقام على الأقل'; return; }
-      if (nw !== cf) { msg.style.color = 'var(--red)'; msg.innerText = 'كلمتا السر غير متطابقتين'; return; }
-      if (!navigator.onLine || !auth.currentUser) { msg.style.color = 'var(--red)'; msg.innerText = 'هذه العملية تحتاج اتصال بالإنترنت'; return; }
-
-      await withBusy(btn, 'جاري التغيير...', async () => {
+      if (!cur || !nw || nw.length < 6 || nw !== cf) { msg.style.color = 'var(--red)'; msg.innerText = 'تحقق من الحقول (6 أحرف على الأقل وتطابق)'; return; }
+      await withBusy(document.getElementById('btnSaveNewPass'), 'جاري التغيير...', async () => {
         try {
           const cred = EmailAuthProvider.credential(auth.currentUser.email, cur);
           await reauthenticateWithCredential(auth.currentUser, cred);
           await updatePassword(auth.currentUser, nw);
           closeModal('changePassModal');
           showToast('✅ تم تغيير كلمة السر بنجاح');
-        } catch (e) {
-          msg.style.color = 'var(--red)';
-          msg.innerText = friendlyError(e);
-        }
+        } catch (e) { msg.style.color = 'var(--red)'; msg.innerText = friendlyError(e); }
       });
     };
 
-    /* تسجيل الخروج مع مسح الكاش بالكامل */
     window.doLogout = async () => {
-      if (offlineQueue.length && !confirm("يوجد عمليات لم تُرفع بعد، هل تريد الخروج ومسح البيانات المحلية؟")) return;
+      if (offlineQueue.length && !confirm("يوجد عمليات لم تُرفع بعد، هل تريد الخروج؟")) return;
       clearListeners();
       ALL_CACHE_KEYS.forEach(k => localStorage.removeItem(k));
-      projects = []; accounts = []; usersList = []; allTxs = []; offlineQueue = []; privateTxs = []; auditLogs = [];
+      projects = []; accounts = []; usersList = []; allTxs = []; offlineQueue = []; privateTxs = []; auditLogs = []; redoSnapshots = [];
       await signOut(auth);
       location.reload();
     };
@@ -1210,6 +1267,7 @@
     function setupUIForRole() {
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
+      const isWorker = userRole === 'worker';
       const allowAdd = isAdmin || (isStaff && myCanAdd);
       document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
       document.getElementById('drwSettings').classList.toggle('hidden', !isAdmin);
@@ -1218,7 +1276,6 @@
       document.getElementById('drwTrash').classList.toggle('hidden', !isAdmin);
       document.getElementById('drwReports').classList.toggle('hidden', !isAdmin);
       document.getElementById('drwStorage').classList.toggle('hidden', !isAdmin);
-      document.getElementById('drwClearTest').classList.toggle('hidden', !isAdmin);
       document.getElementById('drwBackup').classList.toggle('hidden', !isAdmin);
       document.getElementById('drwRestore').classList.toggle('hidden', !isAdmin);
       document.getElementById('drawerQuickProjBox').classList.toggle('hidden', !allowAdd);
@@ -1237,11 +1294,13 @@
       document.getElementById('btnWorkerRep').classList.toggle('hidden', !isAdmin);
       document.getElementById('btnFabAdd').classList.toggle('hidden', !allowAdd);
       document.getElementById('btnAddInAcc').classList.toggle('hidden', !allowAdd);
+      document.getElementById('btnWorkerMaterial').classList.toggle('hidden', !isWorker);
+      document.querySelector('.bottom-nav').classList.toggle('hidden', isWorker);
     }
 
     function mergeStaffTxs() {
       const map = new Map();
-      [...staffOwnTxs, ...staffCustodyTxs].forEach(t => map.set(t.id, t));
+      [...staffOwnTxs, ...staffCustodyTxs, ...workerOwnMatTxs].forEach(t => map.set(t.id, t));
       allTxs = [...map.values()].sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
       localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
       renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger();
@@ -1252,10 +1311,7 @@
       dataLoaded = true;
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
-      const onErr = (err) => {
-        console.warn("Firestore:", err.message);
-        showToast(friendlyError(err), { error: true });
-      };
+      const onErr = (err) => { console.warn("Firestore:", err.message); showToast(friendlyError(err), { error: true }); };
 
       unsubs.push(onSnapshot(doc(db, "settings", "company"), (snap) => {
         if (snap.exists()) {
@@ -1275,16 +1331,26 @@
         unsubs.push(onSnapshot(collection(db, "audit_logs"), (snap) => {
           auditLogs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.tsMs || 0) - (a.tsMs || 0));
         }, onErr));
+        unsubs.push(onSnapshot(collection(db, "redo_snapshots"), (snap) => {
+          const now = Date.now();
+          const list = [];
+          snap.docs.forEach(d => {
+            const data = { id: d.id, ...d.data() };
+            if (data.expiresAtMs && data.expiresAtMs < now) deleteDoc(doc(db, "redo_snapshots", d.id)).catch(() => {});
+            else list.push(data);
+          });
+          redoSnapshots = list.sort((a, b) => (b.tsMs || 0) - (a.tsMs || 0));
+          renderRedoList();
+        }, onErr));
       }
 
-      if (isStaff) {
-        unsubs.push(onSnapshot(collection(db, "projects"), (snap) => {
-          projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          localStorage.setItem('revise_cache_projects', JSON.stringify(projects));
-          renderProjects(); renderCustodySummary(); checkShortcutLaunch();
-        }, onErr));
+      unsubs.push(onSnapshot(collection(db, "projects"), (snap) => {
+        projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        localStorage.setItem('revise_cache_projects', JSON.stringify(projects));
+        renderProjects(); renderCustodySummary(); checkShortcutLaunch();
+      }, onErr));
 
-        // مواءمة استعلام الفروع مع قواعد الأمان (hiddenFromStaff == false للموظف)
+      if (isStaff) {
         const accQuery = isAdmin ? collection(db, "accounts") : query(collection(db, "accounts"), where("hiddenFromStaff", "==", false));
         unsubs.push(onSnapshot(accQuery, (snap) => {
           accounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1295,7 +1361,7 @@
         unsubs.push(onSnapshot(collection(db, "users"), (snap) => {
           usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
-          renderTeam(); renderCustodySummary();
+          renderTeam(); renderCustodySummary(); renderTxs();
         }, onErr));
       }
 
@@ -1307,7 +1373,6 @@
           renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger(); renderTrash();
         }, onErr));
       } else if (isStaff) {
-        // مواءمة استعلامات الموظف مع شرط deleted == false
         unsubs.push(onSnapshot(query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid), where("deleted", "==", false)), (snap) => {
           staffOwnTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
           mergeStaffTxs();
@@ -1317,12 +1382,13 @@
           mergeStaffTxs();
         }, onErr));
       } else {
-        // مواءمة استعلام الصنايعي مع شرط deleted == false
         unsubs.push(onSnapshot(query(collection(db, "transactions"), where("workerId", "==", currentUser.uid), where("status", "==", "approved"), where("deleted", "==", false)), (snap) => {
-          allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
-            .sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
-          localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
-          renderTxs(); renderWorkerLedger();
+          staffOwnTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
+          mergeStaffTxs();
+        }, onErr));
+        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid), where("category", "==", "material_purchase"), where("deleted", "==", false)), (snap) => {
+          workerOwnMatTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
+          mergeStaffTxs();
         }, onErr));
       }
     }
@@ -1340,7 +1406,61 @@
       return projects.filter(p => myAssignedProjects.includes(p.id) && p.visible !== false && !p.archived);
     }
 
-    /* التصنيفات والمشاريع (المستوى 1، 2، 3) */
+    /* حساب كشف شخص (معادلة الجيب الواحد + الفصل) */
+    function computePersonAccount(uid) {
+      const personTxs = [...offlineQueue, ...allTxs].filter(t =>
+        t.deleted !== true && t.status !== 'rejected' &&
+        (userRole === 'admin' || t.status === 'approved') &&
+        (t.workerId === uid || (t.createdBy === uid && (t.category === 'general' || t.category === 'advance' || t.category === 'material_purchase') && t.type === 'out'))
+      );
+      let workLahu = 0, workAlayh = 0, custodyIn = 0, custodySpent = 0;
+      const rows = [];
+      personTxs.forEach(t => {
+        const amt = Number(t.amount || 0);
+        const c = t.category || 'general';
+        let kind = 'work', side = 'alayh';
+        if (t.workerId === uid && c === 'custody') {
+          kind = 'custody'; side = 'alayh'; custodyIn += amt;
+        } else if (t.createdBy === uid && t.workerId !== uid && t.type === 'out' && (c === 'general' || c === 'advance')) {
+          kind = 'custody'; side = 'lahu'; custodySpent += amt;
+        } else if (t.workerId === uid && (c === 'daily' || c === 'meters' || c === 'lump_sum' || c === 'material_purchase' || t.type === 'in')) {
+          kind = 'work'; side = 'lahu'; workLahu += amt;
+        } else if (t.workerId === uid && (c === 'advance' || c === 'deduction' || t.type === 'out')) {
+          kind = 'work'; side = 'alayh'; workAlayh += amt;
+        } else {
+          return;
+        }
+        rows.push({ ...t, _kind: kind, _side: side, _amt: amt });
+      });
+      const totalLahu = workLahu + custodySpent;
+      const totalAlayh = workAlayh + custodyIn;
+      return {
+        workLahu, workAlayh, workNet: workLahu - workAlayh,
+        custodyIn, custodySpent, custodyRem: custodyIn - custodySpent,
+        totalLahu, totalAlayh, mergedNet: totalLahu - totalAlayh,
+        rows
+      };
+    }
+
+    function getTotalUnpaidWorkers() {
+      let sum = 0;
+      usersList.filter(u => u.role === 'worker').forEach(w => {
+        const st = computePersonAccount(w.id);
+        if (st.mergedNet > 0) sum += st.mergedNet;
+      });
+      return sum;
+    }
+
+    function getTotalTeamCustody() {
+      let sum = 0;
+      usersList.filter(u => u.role === 'engineer' || u.role === 'accountant').forEach(u => {
+        const st = computePersonAccount(u.id);
+        if (st.custodyRem > 0) sum += st.custodyRem;
+      });
+      return sum;
+    }
+
+    /* التصنيفات والمشاريع */
     function setProjLevel(lvl) {
       projLevel = lvl;
       document.getElementById('projLevel1').classList.toggle('hidden', lvl !== 1);
@@ -1354,17 +1474,18 @@
       catch (e) { showToast(friendlyError(e), { error: true }); }
     };
 
-    /* إصلاح استرجاع المشروع من الأرشيف (بدون إرسال isFavorite: undefined) */
     window.toggleArchiveProj = async (pid, cur) => {
       if (userRole !== 'admin') return;
       const next = !cur;
-      if (!confirm(next ? "نقل إلى المشاريع والتصنيفات المنتهية؟ (سيُغلق عن الفريق)" : "استعادة إلى التصنيفات النشطة؟")) return;
+      if (!confirm(next ? "نقل إلى المشاريع المنتهية؟" : "استعادة إلى التصنيفات النشطة؟")) return;
       const pBefore = projects.find(p => p.id === pid);
       const upd = next ? { archived: true, isFavorite: false } : { archived: false };
       try {
-        await updateDoc(doc(db, "projects", pid), upd);
-        await recordAuditLog('update', 'projects', pid, pBefore, { ...pBefore, ...upd }, `${next ? 'أرشفة' : 'استعادة'} مشروع: ${pBefore?.name || ''}`);
-        showToast(next ? 'تم النقل للمنتهي' : 'تمت الاستعادة للنشطة');
+        const batch = writeBatch(db);
+        batch.update(doc(db, "projects", pid), upd);
+        addAuditToBatch(batch, 'update', 'projects', pid, pBefore, { ...pBefore, ...upd }, `${next ? 'أرشفة' : 'استعادة'} مشروع: ${pBefore?.name || ''}`);
+        await batch.commit();
+        showToast(next ? 'تم النقل للمنتهي' : 'تمت الاستعادة');
       } catch (e) { showToast(friendlyError(e), { error: true }); }
     };
 
@@ -1373,7 +1494,6 @@
       document.getElementById('archivedProjList').classList.toggle('hidden', !archiveExpanded);
       document.getElementById('archiveArrow').innerText = archiveExpanded ? '▲' : '▼';
     };
-
     window.toggleArchivedAccList = () => {
       archivedAccExpanded = !archivedAccExpanded;
       document.getElementById('archivedAccList').classList.toggle('hidden', !archivedAccExpanded);
@@ -1395,15 +1515,14 @@
       sel.innerHTML = (userRole === 'admin' ? '<option value="general">عام</option>' : '') + activeProjs.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
       if (!sel.innerHTML) sel.innerHTML = '<option value="general">عام</option>';
 
-      const favs = activeProjs.filter(p => p.isFavorite);
+      const favs = activeProjs.filter(p => p.isFavorite && userRole !== 'worker');
       favSec.classList.toggle('hidden', !favs.length);
       favBar.innerHTML = favs.map(p => `
         <div class="fav-card">
           <div class="fav-main" onclick="openProjectFromHome('${esc(p.id)}')">
-            <strong>⭐ ${esc(p.name)}</strong>
-            <small>فتح الفروع</small>
+            <strong>⭐ ${esc(p.name)}</strong><small>فتح الفروع</small>
           </div>
-          <button class="fav-plus" onclick="quickAdd('${esc(p.id)}')" title="إضافة مصروف عام سريع">+</button>
+          <button class="fav-plus" onclick="quickAdd('${esc(p.id)}')" title="إضافة سريعة">+</button>
         </div>`).join('');
 
       const filterFn = (p) => !searchQuery || (p.name || '').toLowerCase().includes(searchQuery);
@@ -1417,8 +1536,8 @@
             <strong>📂 ${esc(p.name)}</strong> <span class="badge">${accCount} فرع</span>
           </div>
           ${userRole === 'admin' ? `<div class="row">
-            <button onclick="toggleFav('${esc(p.id)}', ${!!p.isFavorite})" class="sm secondary" title="مفضلة">${p.isFavorite ? '⭐' : '☆'}</button>
-            <button onclick="toggleArchiveProj('${esc(p.id)}', false)" class="sm secondary" title="نقل للمنتهي">📦</button>
+            <button onclick="toggleFav('${esc(p.id)}', ${!!p.isFavorite})" class="sm secondary">${p.isFavorite ? '⭐' : '☆'}</button>
+            <button onclick="toggleArchiveProj('${esc(p.id)}', false)" class="sm secondary">📦</button>
           </div>` : ''}
         </div>`;
       }).join('') : '<p style="color:var(--muted); text-align:center;">لا توجد تصنيفات نشطة</p>';
@@ -1428,29 +1547,18 @@
         document.getElementById('archiveCount').innerText = archFiltered.length;
         archList.innerHTML = archFiltered.map(p => `
           <div class="tx-item">
-            <div class="tx-clickable" onclick="openProjectAccounts('${esc(p.id)}')">
-              <strong style="color:var(--muted);">📦 ${esc(p.name)}</strong>
-            </div>
+            <div class="tx-clickable" onclick="openProjectAccounts('${esc(p.id)}')"><strong style="color:var(--muted);">📦 ${esc(p.name)}</strong></div>
             <button onclick="toggleArchiveProj('${esc(p.id)}', true)" class="sm secondary">استعادة</button>
           </div>`).join('');
-      } else {
-        archSec.classList.add('hidden');
-      }
+      } else archSec.classList.add('hidden');
       populateAccountSelect();
     }
 
-    window.openProjectFromHome = (pid) => {
-      switchTab('Projects', true);
-      openProjectAccounts(pid);
-    };
-
+    window.openProjectFromHome = (pid) => { switchTab('Projects', true); openProjectAccounts(pid); };
     window.openProjectAccounts = (pid) => {
       currentProjId = pid; currentAccId = null;
-      const p = projects.find(x => x.id === pid);
-      document.getElementById('curProjTitle').innerText = p ? p.name : 'تصنيف';
-      setProjLevel(2);
-      pushNavState();
-      renderAccounts();
+      document.getElementById('curProjTitle').innerText = projects.find(x => x.id === pid)?.name || 'تصنيف';
+      setProjLevel(2); pushNavState(); renderAccounts();
     };
 
     window.renameCurrentProject = async () => {
@@ -1459,8 +1567,10 @@
       const n = prompt("تعديل اسم التصنيف / المشروع:", p?.name || '');
       if (n && n.trim()) {
         try {
-          await updateDoc(doc(db, "projects", currentProjId), { name: n.trim() });
-          await recordAuditLog('update', 'projects', currentProjId, p, { ...p, name: n.trim() }, `تعديل اسم مشروع: ${p?.name || ''} ← ${n.trim()}`);
+          const batch = writeBatch(db);
+          batch.update(doc(db, "projects", currentProjId), { name: n.trim() });
+          addAuditToBatch(batch, 'update', 'projects', currentProjId, p, { ...p, name: n.trim() }, `تعديل اسم مشروع: ${p?.name || ''} ← ${n.trim()}`);
+          await batch.commit();
           document.getElementById('curProjTitle').innerText = n.trim();
           showToast('تم تعديل الاسم');
         } catch (e) { showToast(friendlyError(e), { error: true }); }
@@ -1470,26 +1580,23 @@
     window.createProjectShortcut = () => {
       if (!currentProjId) return;
       const p = projects.find(x => x.id === currentProjId);
-      const url = `${location.origin}${location.pathname}?quickProj=${encodeURIComponent(currentProjId)}`;
-      try { history.replaceState({ revise: true }, '', url); } catch (e) {}
-      alert(`تم تجهيز رابط الاختصار لمشروع "${p?.name || ''}".\n\nلإضافته على شاشة الهاتف الآن:\n1) اضغط على الثلاث نقاط (⋮) أعلى متصفح Chrome\n2) اختر "الإضافة إلى الشاشة الرئيسية"\n3) اختر "إنشاء اختصار"`);
+      try { history.replaceState({ revise: true }, '', `${location.origin}${location.pathname}?quickProj=${encodeURIComponent(currentProjId)}`); } catch (e) {}
+      alert(`تم تجهيز رابط الاختصار لمشروع "${p?.name || ''}".\nاضغط (⋮) في Chrome ← الإضافة إلى الشاشة الرئيسية.`);
     };
 
-    /* إضافة تصنيف وفرع مع فتح الكيبورد التلقائي عند الفراغ ودعم Enter */
     async function handleAddProject() {
       const inp = document.getElementById('projName');
       const name = inp.value.trim();
-      if (!name) {
-        inp.focus();
-        showToast('اكتب الاسم أولاً');
-        return;
-      }
+      if (!name) { inp.focus(); showToast('اكتب الاسم أولاً'); return; }
       const isFavorite = document.getElementById('projFav').checked;
       await withBusy(document.getElementById('btnAddProj'), 'جاري الحفظ...', async () => {
-        const ref = await addDoc(collection(db, "projects"), { name, category: 'active', isFavorite, visible: true, archived: false, createdAt: serverTimestamp() });
-        await recordAuditLog('create', 'projects', ref.id, null, { name, category: 'active', isFavorite, visible: true, archived: false }, `إضافة مشروع: ${name}`);
-        inp.value = '';
-        document.getElementById('projFav').checked = false;
+        const batch = writeBatch(db);
+        const ref = doc(collection(db, "projects"));
+        const payload = { name, category: 'active', isFavorite, visible: true, archived: false, createdAt: serverTimestamp() };
+        batch.set(ref, payload);
+        addAuditToBatch(batch, 'create', 'projects', ref.id, null, payload, `إضافة مشروع: ${name}`);
+        await batch.commit();
+        inp.value = ''; document.getElementById('projFav').checked = false;
         showToast('تم إضافة التصنيف');
       });
     }
@@ -1500,17 +1607,16 @@
       if (!currentProjId || userRole !== 'admin') return;
       const inp = document.getElementById('accName');
       const name = inp.value.trim();
-      if (!name) {
-        inp.focus();
-        showToast('اكتب الاسم أولاً');
-        return;
-      }
+      if (!name) { inp.focus(); showToast('اكتب الاسم أولاً'); return; }
       const hiddenFromStaff = document.getElementById('accHiddenStaff').checked;
       await withBusy(document.getElementById('btnAddAcc'), 'جاري الحفظ...', async () => {
-        const ref = await addDoc(collection(db, "accounts"), { projectId: currentProjId, name, hiddenFromStaff, archived: false, createdAt: serverTimestamp() });
-        await recordAuditLog('create', 'accounts', ref.id, null, { projectId: currentProjId, name, hiddenFromStaff, archived: false }, `إضافة فرع: ${name}`);
-        inp.value = '';
-        document.getElementById('accHiddenStaff').checked = false;
+        const batch = writeBatch(db);
+        const ref = doc(collection(db, "accounts"));
+        const payload = { projectId: currentProjId, name, hiddenFromStaff, archived: false, createdAt: serverTimestamp() };
+        batch.set(ref, payload);
+        addAuditToBatch(batch, 'create', 'accounts', ref.id, null, payload, `إضافة فرع: ${name}`);
+        await batch.commit();
+        inp.value = ''; document.getElementById('accHiddenStaff').checked = false;
         showToast('تم إضافة الفرع');
       });
     }
@@ -1523,23 +1629,26 @@
       catch (e) { showToast(friendlyError(e), { error: true }); }
     };
 
-    /* أرشفة الفرع إذا كان يحتوي على عمليات قديمة، وحذفه فقط إذا كان فارغاً تماماً */
     window.archiveOrDeleteAcc = async (aid) => {
       if (userRole !== 'admin') return;
       const a = accounts.find(x => x.id === aid);
       const hasAnyTx = allTxs.some(t => t.accountId === aid);
       if (hasAnyTx) {
-        if (!confirm(`الفرع "${a?.name || ''}" مرتبط بعمليات مسجلة. هل تريد أرشفته (إخفاءه مع الحفاظ على سجل عملياته)؟`)) return;
+        if (!confirm(`الفرع "${a?.name || ''}" مرتبط بعمليات. هل تريد أرشفته؟`)) return;
         try {
-          await updateDoc(doc(db, "accounts", aid), { archived: true });
-          await recordAuditLog('update', 'accounts', aid, a, { ...a, archived: true }, `أرشفة فرع: ${a?.name || ''}`);
+          const batch = writeBatch(db);
+          batch.update(doc(db, "accounts", aid), { archived: true });
+          addAuditToBatch(batch, 'update', 'accounts', aid, a, { ...a, archived: true }, `أرشفة فرع: ${a?.name || ''}`);
+          await batch.commit();
           showToast('تمت أرشفة الفرع');
         } catch (e) { showToast(friendlyError(e), { error: true }); }
       } else {
-        if (!confirm(`الفرع "${a?.name || ''}" فارغ تماماً. هل تريد حذفه نهائياً؟`)) return;
+        if (!confirm(`حذف الفرع الفارغ "${a?.name || ''}" نهائياً؟`)) return;
         try {
-          await deleteDoc(doc(db, "accounts", aid));
-          await recordAuditLog('delete', 'accounts', aid, a, null, `حذف فرع فارغ: ${a?.name || ''}`);
+          const batch = writeBatch(db);
+          batch.delete(doc(db, "accounts", aid));
+          addAuditToBatch(batch, 'delete', 'accounts', aid, a, null, `حذف فرع فارغ: ${a?.name || ''}`);
+          await batch.commit();
           showToast('تم حذف الفرع');
         } catch (e) { showToast(friendlyError(e), { error: true }); }
       }
@@ -1549,17 +1658,24 @@
       if (userRole !== 'admin') return;
       const a = accounts.find(x => x.id === aid);
       try {
-        await updateDoc(doc(db, "accounts", aid), { archived: false });
-        await recordAuditLog('update', 'accounts', aid, a, { ...a, archived: false }, `استعادة فرع: ${a?.name || ''}`);
+        const batch = writeBatch(db);
+        batch.update(doc(db, "accounts", aid), { archived: false });
+        addAuditToBatch(batch, 'update', 'accounts', aid, a, { ...a, archived: false }, `استعادة فرع: ${a?.name || ''}`);
+        await batch.commit();
         showToast('تمت استعادة الفرع');
       } catch (e) { showToast(friendlyError(e), { error: true }); }
     };
 
+    /* إحصائيات الفرع والمشروع بالأساس النقدي */
     function getAccountStats(aid, pid) {
       if (!canSeeTotals()) return { count: 0, inSum: 0, outSum: 0, net: 0 };
       const txs = allTxs.filter(t => t.deleted !== true && t.status === 'approved' && t.projectId === pid && (aid === '__general__' ? !t.accountId : t.accountId === aid));
       let inSum = 0, outSum = 0;
-      txs.forEach(t => { const a = Number(t.amount || 0); if (t.type === 'in') inSum += a; else if (t.category !== 'custody') outSum += a; });
+      txs.forEach(t => {
+        const a = Number(t.amount || 0);
+        if (t.type === 'in' && t.category !== 'custody') inSum += a;
+        else if (isProjectCashExpense(t)) outSum += a;
+      });
       return { count: txs.length, inSum, outSum, net: inSum - outSum };
     }
 
@@ -1581,7 +1697,7 @@
         html += `<div class="tx-item">
           <div class="tx-clickable" onclick="openAccountLedger('__general__', 'عام')">
             <strong>📁 عام</strong> <span class="badge">${genSt.count}</span><br>
-            <small style="color:var(--muted)">الرصيد: <strong style="color:${genSt.net < 0 ? 'var(--red)' : 'var(--green)'}">${Math.abs(genSt.net).toLocaleString()} ج (${genSt.net >= 0 ? 'له' : 'عليه'})</strong></small>
+            <small style="color:var(--muted)">مصروف نقدي: <strong style="color:var(--red)">${genSt.outSum.toLocaleString()} ج</strong> • وارد: <strong style="color:var(--green)">${genSt.inSum.toLocaleString()} ج</strong></small>
           </div>
           <button onclick="openTxModalForCurrent('__general__')" class="sm gold">+</button>
         </div>`;
@@ -1594,12 +1710,12 @@
         html += `<div class="tx-item">
           <div class="tx-clickable" onclick="openAccountLedger('${esc(a.id)}', '${esc(a.name)}')">
             <strong>${a.hiddenFromStaff ? '🔒 ' : '📂 '}${esc(a.name)}</strong> ${canSeeTotals() ? `<span class="badge">${st.count}</span>` : ''}<br>
-            ${canSeeTotals() ? `<small style="color:var(--muted)">الرصيد: <strong style="color:${st.net < 0 ? 'var(--red)' : 'var(--green)'}">${Math.abs(st.net).toLocaleString()} ج (${st.net >= 0 ? 'له' : 'عليه'})</strong></small>` : '<small style="color:var(--muted)">اضغط لإضافة حركة</small>'}
+            ${canSeeTotals() ? `<small style="color:var(--muted)">مصروف نقدي: <strong style="color:var(--red)">${st.outSum.toLocaleString()} ج</strong></small>` : '<small style="color:var(--muted)">اضغط لإضافة حركة</small>'}
           </div>
           <div class="row">
             <button onclick="openTxModalForCurrent('${esc(a.id)}')" class="sm gold">+</button>
-            ${userRole === 'admin' ? `<button onclick="toggleAccHidden('${esc(a.id)}', ${!!a.hiddenFromStaff})" class="sm secondary" title="إخفاء عن المهندسين">${a.hiddenFromStaff ? '🔒' : '👁️'}</button>
-            <button onclick="archiveOrDeleteAcc('${esc(a.id)}')" class="sm secondary" style="color:${hasTx ? 'var(--orange)' : 'var(--red)'};" title="${hasTx ? 'أرشفة الفرع' : 'حذف الفرع'}">${hasTx ? '📦' : '×'}</button>` : ''}
+            ${userRole === 'admin' ? `<button onclick="toggleAccHidden('${esc(a.id)}', ${!!a.hiddenFromStaff})" class="sm secondary">${a.hiddenFromStaff ? '🔒' : '👁️'}</button>
+            <button onclick="archiveOrDeleteAcc('${esc(a.id)}')" class="sm secondary" style="color:${hasTx ? 'var(--orange)' : 'var(--red)'};">${hasTx ? '📦' : '×'}</button>` : ''}
           </div>
         </div>`;
       });
@@ -1613,37 +1729,29 @@
           const st = getAccountStats(a.id, currentProjId);
           projIn += st.inSum; projOut += st.outSum;
           return `<div class="tx-item">
-            <div class="tx-clickable" onclick="openAccountLedger('${esc(a.id)}', '${esc(a.name)}')">
-              <strong style="color:var(--muted);">📦 ${esc(a.name)}</strong>
-            </div>
+            <div class="tx-clickable" onclick="openAccountLedger('${esc(a.id)}', '${esc(a.name)}')"><strong style="color:var(--muted);">📦 ${esc(a.name)}</strong></div>
             <button onclick="restoreAcc('${esc(a.id)}')" class="sm secondary">استعادة</button>
           </div>`;
         }).join('');
-      } else {
-        archSec.classList.add('hidden');
-      }
+      } else archSec.classList.add('hidden');
 
       if (canSeeTotals()) {
         const net = projIn - projOut;
         sumBar.classList.remove('hidden');
         sumBar.innerHTML = `
-          <div class="hero-label">ملخص المشروع</div>
+          <div class="hero-label">ملخص المشروع (الأساس النقدي الفعلي)</div>
           <div class="hero-grid-3">
-            <div class="hero-sub"><small>له</small><strong style="color:#34d399">${projIn.toLocaleString()} ج</strong></div>
-            <div class="hero-sub"><small>عليه</small><strong style="color:#f87171">${projOut.toLocaleString()} ج</strong></div>
+            <div class="hero-sub"><small>وارد</small><strong style="color:#34d399">${projIn.toLocaleString()} ج</strong></div>
+            <div class="hero-sub"><small>مصروف نقدي</small><strong style="color:#f87171">${projOut.toLocaleString()} ج</strong></div>
             <div class="hero-sub"><small>الصافي (${net >= 0 ? 'له' : 'عليه'})</small><strong style="color:#facc15">${Math.abs(net).toLocaleString()} ج</strong></div>
           </div>`;
-      } else {
-        sumBar.classList.add('hidden');
-      }
+      } else sumBar.classList.add('hidden');
     }
 
     window.openAccountLedger = (aid, title) => {
       currentAccId = aid;
       document.getElementById('curAccTitle').innerText = title;
-      setProjLevel(3);
-      pushNavState();
-      renderLedger();
+      setProjLevel(3); pushNavState(); renderLedger();
     };
 
     window.renameCurrentAccount = async () => {
@@ -1652,8 +1760,10 @@
       const n = prompt("تعديل اسم الفرع:", a?.name || '');
       if (n && n.trim()) {
         try {
-          await updateDoc(doc(db, "accounts", currentAccId), { name: n.trim() });
-          await recordAuditLog('update', 'accounts', currentAccId, a, { ...a, name: n.trim() }, `تعديل اسم فرع: ${a?.name || ''} ← ${n.trim()}`);
+          const batch = writeBatch(db);
+          batch.update(doc(db, "accounts", currentAccId), { name: n.trim() });
+          addAuditToBatch(batch, 'update', 'accounts', currentAccId, a, { ...a, name: n.trim() }, `تعديل اسم فرع: ${a?.name || ''} ← ${n.trim()}`);
+          await batch.commit();
           document.getElementById('curAccTitle').innerText = n.trim();
           showToast('تم تعديل اسم الفرع');
         } catch (e) { showToast(friendlyError(e), { error: true }); }
@@ -1666,11 +1776,11 @@
       const sumBar = document.getElementById('accSummaryBar');
 
       const txs = allTxs.filter(t => t.deleted !== true && t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId) && (userRole === 'admin' || t.createdBy === currentUser?.uid));
-      const approvedAsc = [...txs].filter(t => t.status === 'approved' && t.category !== 'custody').sort((a, b) => (a.txDate || '').localeCompare(b.txDate || '') || ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
+      const cashAsc = [...txs].filter(t => t.status === 'approved' && (isProjectCashExpense(t) || (t.type === 'in' && t.category !== 'custody'))).sort((a, b) => (a.txDate || '').localeCompare(b.txDate || '') || ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
 
       let running = 0, inSum = 0, outSum = 0;
       const runMap = new Map();
-      approvedAsc.forEach(t => {
+      cashAsc.forEach(t => {
         const amt = Number(t.amount || 0);
         if (t.type === 'in') { running += amt; inSum += amt; }
         else { running -= amt; outSum += amt; }
@@ -1688,26 +1798,24 @@
         const balTxt = (canSeeTotals() && bal !== undefined) ? `${Math.abs(bal).toLocaleString()} (${bal >= 0 ? 'له' : 'عليه'})` : '—';
         return `<tr ${canClick ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>
           <td>${esc(t.txDate || '')}</td>
-          <td class="${isIn ? 'cell-in' : 'cell-out'}">${amt.toLocaleString()}<br><small>${isIn ? 'له' : 'عليه'}</small></td>
+          <td class="${isIn ? 'cell-in' : 'cell-out'}">${amt.toLocaleString()}<br><small>${esc(catLabels[t.category] || (isIn ? 'له' : 'عليه'))}</small></td>
           <td>${esc(t.note || catLabels[t.category] || '')}${byTag} ${stPill}</td>
           <td>${balTxt}</td>
         </tr>`;
       }).join('');
 
-      box.innerHTML = `<table class="ledger-table"><thead><tr><th>التاريخ</th><th>المبلغ</th><th>التفاصيل</th><th>الرصيد</th></tr></thead><tbody>${trs || '<tr><td colspan="4" style="text-align:center">لا توجد حركات</td></tr>'}</tbody></table>`;
+      box.innerHTML = `<table class="ledger-table"><thead><tr><th>التاريخ</th><th>المبلغ</th><th>التفاصيل</th><th>الرصيد النقدي</th></tr></thead><tbody>${trs || '<tr><td colspan="4" style="text-align:center">لا توجد حركات</td></tr>'}</tbody></table>`;
       if (canSeeTotals()) {
         const net = inSum - outSum;
         sumBar.classList.remove('hidden');
         sumBar.innerHTML = `
-          <div class="hero-label">ملخص الفرع</div>
+          <div class="hero-label">ملخص الفرع (نقدي)</div>
           <div class="hero-grid-3">
-            <div class="hero-sub"><small>له</small><strong style="color:#34d399">${inSum.toLocaleString()} ج</strong></div>
-            <div class="hero-sub"><small>عليه</small><strong style="color:#f87171">${outSum.toLocaleString()} ج</strong></div>
+            <div class="hero-sub"><small>وارد</small><strong style="color:#34d399">${inSum.toLocaleString()} ج</strong></div>
+            <div class="hero-sub"><small>مصروف نقدي</small><strong style="color:#f87171">${outSum.toLocaleString()} ج</strong></div>
             <div class="hero-sub"><small>الصافي (${net >= 0 ? 'له' : 'عليه'})</small><strong style="color:#facc15">${Math.abs(net).toLocaleString()} ج</strong></div>
           </div>`;
-      } else {
-        sumBar.classList.add('hidden');
-      }
+      } else sumBar.classList.add('hidden');
     }
 
     function populateAccountSelect(selectedAccId = '') {
@@ -1719,7 +1827,7 @@
     }
     window.populateAccountSelect = populateAccountSelect;
 
-    /* الاعتمادات والعمليات بالواجهة الرئيسية */
+    /* الاعتمادات ورادار المدير */
     window.toggleApprovalsBody = () => {
       approvalsExpanded = !approvalsExpanded;
       document.getElementById('approvalsBody').classList.toggle('hidden', !approvalsExpanded);
@@ -1731,6 +1839,12 @@
       document.getElementById('approvalsBody').classList.remove('hidden');
       document.getElementById('approvalsCard').scrollIntoView({ behavior: 'smooth' });
     };
+    window.scrollToCustody = () => {
+      switchTab('Home', false);
+      const el = document.getElementById('custodyBox');
+      if (!el.classList.contains('hidden')) el.scrollIntoView({ behavior: 'smooth' });
+      else showToast('لا توجد عُهد نشطة حالياً');
+    };
 
     function canCurrentUserApproveTx(t) {
       if (userRole === 'admin') return true;
@@ -1740,33 +1854,69 @@
       return creator && (creator.role === 'engineer' || creator.role === 'worker');
     }
 
+    function renderRadarCard(pendingCount) {
+      const card = document.getElementById('radarCard');
+      if (userRole === 'admin') {
+        const unpaid = getTotalUnpaidWorkers();
+        const teamCust = getTotalTeamCustody();
+        card.classList.remove('hidden');
+        card.innerHTML = `
+          <div class="hero-label">🎯 رادار المدير</div>
+          <div class="hero-grid-3">
+            <div class="hero-sub clickable" onclick="scrollToApprovals()">
+              <small>⏳ بانتظار اعتمادك</small>
+              <strong style="color:#facc15;">${pendingCount} حركة</strong>
+            </div>
+            <div class="hero-sub clickable" onclick="switchTab('Workers')">
+              <small>👷 مستحقات صنايعية</small>
+              <strong style="color:#f87171;">${unpaid.toLocaleString()} ج</strong>
+            </div>
+            <div class="hero-sub clickable" onclick="scrollToCustody()">
+              <small>💼 كاش مع الفريق</small>
+              <strong style="color:#34d399;">${teamCust.toLocaleString()} ج</strong>
+            </div>
+          </div>`;
+      } else if (userRole === 'accountant' && canApproveNow()) {
+        card.classList.remove('hidden');
+        card.innerHTML = `
+          <div class="between" style="cursor:pointer;" onclick="scrollToApprovals()">
+            <div><div class="hero-label">⏳ بانتظار اعتمادك</div><div class="hero-main-val" style="color:#facc15;">${pendingCount} حركة</div></div>
+            <span class="badge">مراجعة الآن</span>
+          </div>`;
+      } else if (userRole === 'engineer' && myPerms.canSeeCustody !== false) {
+        const st = computePersonAccount(currentUser?.uid);
+        card.classList.remove('hidden');
+        card.innerHTML = `
+          <div class="hero-label">💼 رصيد عُهدتك الحالي</div>
+          <div class="hero-main-val" style="color:${st.custodyRem < 0 ? '#f87171' : '#34d399'};">${st.custodyRem.toLocaleString()} ج</div>
+          <small style="color:#cbd5e1; font-size:11px;">مستلم: ${st.custodyIn.toLocaleString()} ج • مصروف معتمد: ${st.custodySpent.toLocaleString()} ج</small>`;
+      } else if (userRole === 'worker') {
+        const st = computePersonAccount(currentUser?.uid);
+        card.classList.remove('hidden');
+        card.innerHTML = `
+          <div class="hero-label">حسابي (${st.mergedNet >= 0 ? 'باقي لي' : 'عليّ'})</div>
+          <div class="hero-main-val" style="color:${st.mergedNet >= 0 ? '#34d399' : '#f87171'};">${Math.abs(st.mergedNet).toLocaleString()} ج</div>
+          <div class="hero-grid">
+            <div class="hero-sub"><small>إجمالي لي</small><strong style="color:#34d399;">${st.totalLahu.toLocaleString()} ج</strong></div>
+            <div class="hero-sub"><small>وصلني</small><strong style="color:#f87171;">${st.totalAlayh.toLocaleString()} ج</strong></div>
+          </div>`;
+      } else {
+        card.classList.add('hidden');
+      }
+    }
+
     function renderTxs() {
       const list = document.getElementById('txList');
       const appCard = document.getElementById('approvalsCard');
       const appBody = document.getElementById('approvalsBody');
       const hdrPill = document.getElementById('hdrPendingPill');
-      const heroCard = document.getElementById('homeHeroCard');
       const isAdmin = userRole === 'admin';
       const allowApprove = canApproveNow();
 
       const activeAll = [...offlineQueue, ...allTxs].filter(t => t.deleted !== true);
-
-      /* بطاقة الإجماليات الرئيسية */
-      if (canSeeTotals()) {
-        const approved = activeAll.filter(t => t.status === 'approved' && t.category !== 'custody' && !t.localId);
-        let totIn = 0, totOut = 0;
-        approved.forEach(t => { const a = Number(t.amount || 0); if (t.type === 'in') totIn += a; else totOut += a; });
-        const net = totIn - totOut;
-        heroCard.classList.remove('hidden');
-        document.getElementById('heroTotalOut').innerText = `${totOut.toLocaleString()} ج`;
-        document.getElementById('heroTotalIn').innerText = `${totIn.toLocaleString()} ج`;
-        document.getElementById('heroApprovedCount').innerText = `${approved.length} حركة`;
-        document.getElementById('heroNetBadge').innerText = `الصافي (${net >= 0 ? 'له' : 'عليه'}): ${Math.abs(net).toLocaleString()} ج`;
-      } else {
-        heroCard.classList.add('hidden');
-      }
-
       const pendingList = activeAll.filter(t => t.status === 'pending' && !t.localId && canCurrentUserApproveTx(t));
+
+      renderRadarCard(pendingList.length);
 
       if (allowApprove && pendingList.length) {
         appCard.classList.remove('hidden');
@@ -1778,17 +1928,14 @@
           const pName = projects.find(p => p.id === t.projectId)?.name || t.project || 'عام';
           const accTxt = t.accountName ? ' • ' + t.accountName : '';
           const byTxt = t.createdByName ? '✍️ ' + esc(t.createdByName) : '';
-          const timeTxt = fmtTime(t.createdAt) ? ' (' + esc(fmtTime(t.createdAt)) + ')' : '';
-          const prevTxt = t.prevAmount != null ? ' — كان: ' + Number(t.prevAmount).toLocaleString() + ' ج' : '';
-          const editTag = t.editedByStaff ? `<br><small style="color:var(--orange); font-weight:bold;">✏️ تم التعديل${prevTxt}</small>` : '';
-          const rBtn = t.receiptId ? `<button onclick="viewReceipt('${esc(t.receiptId)}','')" class="sm secondary">🖼️</button>` : '';
+          const rBtn = t.receiptId ? `<button onclick="viewReceipt('${esc(t.receiptId)}')" class="sm secondary">🖼️</button>` : '';
           return `<div class="tx-item">
             <div class="tx-clickable" onclick="editTx('${esc(t.id)}')">
               <strong>${esc(pName)}${esc(accTxt)}</strong> <span class="pill pill-cat">${esc(catLabels[t.category] || 'عام')}</span><br>
-              <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || catLabels[t.category] || '')}<br>${byTxt}${timeTxt}</small>${editTag}
+              <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || catLabels[t.category] || '')}<br>${byTxt}</small>
             </div>
             <div style="text-align:left;">
-              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${amt.toLocaleString()} ج (${t.type === 'in' ? 'له' : 'عليه'})</div>
+              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${amt.toLocaleString()} ج</div>
               <div class="row" style="margin-top:4px; justify-content:flex-end;">
                 ${rBtn}
                 <button onclick="approveTx('${esc(t.id)}', this)" class="sm green">اعتماد</button>
@@ -1816,7 +1963,7 @@
         const rejectTag = t.status === 'rejected' ? `<br><small style="color:var(--red)">❌ مرفوض${t.rejectReason ? ': ' + esc(t.rejectReason) : ''}</small>` : '';
         const stPill = t.status === 'pending' ? '<span class="pill pill-pending">معلق</span>' : (t.status === 'rejected' ? '<span class="pill pill-rejected">مرفوض</span>' : (!isAdmin ? '<span class="pill pill-approved">معتمد</span>' : ''));
         const catPill = t.category && t.category !== 'general' ? `<span class="pill pill-cat">${esc(catLabels[t.category] || '')}</span>` : '';
-        const canEdit = (isAdmin && !t.localId) || (!isAdmin && !t.localId && t.status === 'pending' && t.createdBy === currentUser?.uid && myCanAdd);
+        const canEdit = (isAdmin && !t.localId) || (!isAdmin && userRole !== 'worker' && !t.localId && t.status === 'pending' && t.createdBy === currentUser?.uid && myCanAdd);
         return `<div class="tx-item">
           <div ${canEdit ? `class="tx-clickable" onclick="editTx('${esc(t.id)}')"` : ''}>
             <strong>${esc(pName)}${esc(accTxt)}</strong> ${catPill}${stPill}<br>
@@ -1824,7 +1971,7 @@
           </div>
           <div style="text-align:left;">
             <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}" ${canEdit ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>${amt.toLocaleString()} ج</div>
-            <small style="color:var(--muted);">${t.type === 'in' ? 'وارد (له)' : 'مصروف (عليه)'}</small>
+            <small style="color:var(--muted);">${esc(catLabels[t.category] || (t.type === 'in' ? 'وارد' : 'مصروف'))}</small>
           </div>
         </div>`;
       }).join('') : '<p style="color:var(--muted); text-align:center;">لا توجد عمليات</p>';
@@ -1832,7 +1979,6 @@
       renderCustodySummary();
     }
 
-    /* إصلاح عُهدة المهندس: خصم الفلوس الفعلية الخارجة فقط (مصروف عام + سلفة) وليس الاستحقاقات */
     function renderCustodySummary() {
       const box = document.getElementById('custodyBox');
       const list = document.getElementById('custodyList');
@@ -1848,8 +1994,7 @@
         }
       });
       activeTxs.forEach(t => {
-        const isActualCashOut = t.type === 'out' && (!t.category || t.category === 'general' || t.category === 'advance');
-        if (isActualCashOut && t.createdBy) {
+        if (isProjectCashExpense(t) && t.createdBy) {
           const key = `${t.createdBy}__${t.projectId || 'general'}`;
           if (pairs.has(key)) pairs.get(key).spent += Number(t.amount || 0);
         }
@@ -1859,7 +2004,7 @@
       if (!entries.length) { box.classList.add('hidden'); return; }
 
       box.classList.remove('hidden');
-      document.getElementById('custodyTitle').innerText = userRole === 'admin' ? '💼 عُهد المهندسين' : '💼 رصيد عُهدتك المتبقي';
+      document.getElementById('custodyTitle').innerText = userRole === 'admin' ? '💼 عُهد المهندسين' : '💼 تفصيل عُهدتك بالمشاريع';
       list.innerHTML = entries.map(e => {
         const uName = usersList.find(u => u.id === e.uid)?.name || 'مهندس';
         const pName = projects.find(p => p.id === e.pid)?.name || e.projName;
@@ -1871,7 +2016,7 @@
       }).join('');
     }
 
-    /* نافذة الإضافة والتعديل (مع ذكاء زر + وحفظ + جديد وتنبيه التاريخ القديم) */
+    /* نافذة الإضافة والتعديل */
     window.setTxDir = (dir) => {
       txDir = dir;
       document.getElementById('btnDirOut').classList.toggle('active', dir === 'out');
@@ -1883,8 +2028,7 @@
     };
     window.checkTxDateWarning = () => {
       const el = document.getElementById('txDate');
-      const isOld = el.value && el.value !== getLocalDateStr();
-      el.classList.toggle('date-warn', !!isOld);
+      el.classList.toggle('date-warn', !!(el.value && el.value !== getLocalDateStr()));
     };
     window.updateWorkerBanner = () => {
       const wid = document.getElementById('txWorker').value;
@@ -1893,20 +2037,18 @@
         const u = usersList.find(x => x.id === wid);
         document.getElementById('txWorkerBannerText').innerText = `👤 الحساب: ${u ? u.name : 'شخص محدد'}`;
         banner.classList.remove('hidden');
-      } else {
-        banner.classList.add('hidden');
-      }
+      } else banner.classList.add('hidden');
     };
-    window.clearTxWorkerSelection = () => {
-      document.getElementById('txWorker').value = '';
-      updateWorkerBanner();
-    };
+    window.clearTxWorkerSelection = () => { document.getElementById('txWorker').value = ''; updateWorkerBanner(); };
+
     window.onTxCategoryChange = () => {
       const c = document.getElementById('txCategory').value;
       document.getElementById('calcBox').classList.toggle('hidden', c !== 'daily' && c !== 'meters');
+      const isDueCat = (c === 'daily' || c === 'meters' || c === 'lump_sum');
+      document.getElementById('paidNowRow').classList.toggle('hidden', !(isDueCat && !editingTxId && userRole === 'admin'));
       if (userRole === 'admin') {
         if (c === 'income') setTxDir('in');
-        else if (c === 'advance' || c === 'deduction' || c === 'custody') setTxDir('out');
+        else if (c === 'advance' || c === 'deduction' || c === 'custody' || c === 'material_purchase') setTxDir('out');
       }
     };
     window.calcFromQty = () => {
@@ -1915,29 +2057,31 @@
       if (q > 0 && r > 0) { document.getElementById('txAmount').value = q * r; updateLiveTafqeet(); }
     };
 
-    const openTxModal = (preProjId = null, preAccId = '', preWorkerId = '') => {
-      if (userRole !== 'admin' && !myCanAdd) { showToast("تم إيقاف صلاحية الإضافة من الإدارة", { error: true }); return; }
+    const openTxModal = (preProjId = null, preAccId = '', preWorkerId = '', preCategory = 'general', preAmount = '') => {
+      if (userRole !== 'admin' && !myCanAdd) { showToast("تم إيقاف صلاحية الإضافة", { error: true }); return; }
       editingTxId = null; editingOrigAmount = null;
       document.getElementById('txModalTitle').innerText = 'تسجيل عملية جديدة';
       document.getElementById('btnSaveTx').innerText = 'حفظ';
       document.getElementById('btnSaveAndNew').classList.remove('hidden');
       document.getElementById('btnDeleteTxModal').classList.add('hidden');
+      document.getElementById('btnTxHistory').classList.add('hidden');
       setTxDir('out');
-      document.getElementById('txCategory').value = 'general';
+      document.getElementById('txCategory').value = preCategory || 'general';
       document.getElementById('txWorker').value = preWorkerId || '';
       document.getElementById('txDate').value = getLocalDateStr();
       checkTxDateWarning();
-      document.getElementById('txAmount').value = '';
+      document.getElementById('txAmount').value = preAmount || '';
       document.getElementById('calcQty').value = '';
       document.getElementById('calcRate').value = '';
-      document.getElementById('liveTafqeet').innerText = '';
-      document.getElementById('txNote').value = '';
+      document.getElementById('txPaidNow').checked = false;
+      updateLiveTafqeet();
+      document.getElementById('txNote').value = preCategory === 'custody' ? 'تسليم عُهدة' : (preCategory === 'advance' && preAmount ? 'تسديد / تصفية حساب' : '');
       document.getElementById('txReceipt').value = '';
       const targetProj = preProjId || defaultQuickProjId || 'general';
       const selP = document.getElementById('txProject');
       if ([...selP.options].some(o => o.value === targetProj)) selP.value = targetProj;
       populateAccountSelect(preAccId && preAccId !== '__general__' ? preAccId : '');
-      document.getElementById('txExtraDetails').open = !!preWorkerId;
+      document.getElementById('txExtraDetails').open = !!(preWorkerId || preCategory !== 'general');
       updateWorkerBanner();
       onTxCategoryChange();
       document.getElementById('txModal').classList.remove('hidden');
@@ -1945,24 +2089,26 @@
       setTimeout(() => document.getElementById('txAmount').focus(), 100);
     };
 
-    /* ذكاء زر + العائم في كل مكان */
+    window.quickAddCustody = (uid) => {
+      const u = usersList.find(x => x.id === uid);
+      const pid = (u?.assignedProjects && u.assignedProjects[0]) || defaultQuickProjId || 'general';
+      openTxModal(pid, '', uid, 'custody', '');
+    };
+    window.openSettleWorker = (uid, remAmt) => {
+      openTxModal(defaultQuickProjId, '', uid, 'advance', remAmt > 0 ? remAmt : '');
+    };
+
     document.getElementById('btnFabAdd').onclick = () => {
-      if (currentTab === 'Workers') {
-        const wid = document.getElementById('workerSelect').value;
-        openTxModal(defaultQuickProjId, '', wid || '');
-      } else if (currentTab === 'Projects' && projLevel === 3 && currentProjId) {
-        openTxModal(currentProjId, currentAccId || '');
-      } else if (currentTab === 'Projects' && projLevel === 2 && currentProjId) {
-        openTxModal(currentProjId, '');
-      } else {
-        openTxModal(defaultQuickProjId, '');
-      }
+      if (currentTab === 'Workers') openTxModal(defaultQuickProjId, '', document.getElementById('workerSelect').value || '');
+      else if (currentTab === 'Projects' && projLevel === 3 && currentProjId) openTxModal(currentProjId, currentAccId || '');
+      else if (currentTab === 'Projects' && projLevel === 2 && currentProjId) openTxModal(currentProjId, '');
+      else openTxModal(defaultQuickProjId, '');
     };
     window.quickAdd = (pid) => openTxModal(pid, '');
     window.openTxModalForCurrent = (overrideAccId = null) => openTxModal(currentProjId, overrideAccId || currentAccId);
     window.openTxModalForWorker = () => {
       const wid = document.getElementById('workerSelect').value;
-      if (!wid) { showToast('اختر صنايعي أو مقاول أولاً'); return; }
+      if (!wid) { showToast('اختر شخصاً أولاً'); return; }
       openTxModal(defaultQuickProjId, '', wid);
     };
 
@@ -1976,6 +2122,7 @@
       document.getElementById('btnSaveTx').innerText = 'حفظ التعديل';
       document.getElementById('btnSaveAndNew').classList.add('hidden');
       document.getElementById('btnDeleteTxModal').classList.remove('hidden');
+      document.getElementById('btnTxHistory').classList.toggle('hidden', userRole !== 'admin');
       setTxDir(t.type === 'in' ? 'in' : 'out');
       document.getElementById('txCategory').value = t.category || 'general';
       const selP = document.getElementById('txProject');
@@ -1995,20 +2142,50 @@
       pushNavState();
     };
 
+    /* شاشة سجل العملية (للمدير فقط) */
+    window.openTxHistoryModal = () => {
+      if (userRole !== 'admin' || !editingTxId) return;
+      const logs = auditLogs.filter(l => l.collectionName === 'transactions' && l.docId === editingTxId).sort((a, b) => (a.tsMs || 0) - (b.tsMs || 0));
+      const box = document.getElementById('txHistoryList');
+      const actNames = { create: '➕ إنشاء', update: '✏️ تعديل', delete: '🗑️ حذف' };
+      box.innerHTML = logs.length ? logs.map(l => {
+        const dt = new Date(l.tsMs || Date.now());
+        const tm = `${getLocalDateStr(dt)} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+        let diffHtml = '';
+        if (l.before && l.after) {
+          ['amount', 'project', 'accountName', 'category', 'note', 'status'].forEach(k => {
+            if (l.before[k] !== l.after[k]) {
+              diffHtml += `<div style="font-size:11.5px; color:var(--muted);">• ${k}: <span style="color:var(--red); text-decoration:line-through;">${esc(l.before[k] ?? '—')}</span> ← <span style="color:var(--green); font-weight:bold;">${esc(l.after[k] ?? '—')}</span></div>`;
+            }
+          });
+        }
+        return `<div class="tx-item" style="display:block;">
+          <div class="between"><strong>${actNames[l.action] || l.action} • ${esc(l.actorName || '')}</strong><small style="color:var(--muted)">${tm}</small></div>
+          <div style="font-size:12px; margin-top:3px;">${esc(l.summary || '')}</div>
+          ${diffHtml}
+        </div>`;
+      }).join('') : '<p style="color:var(--muted); text-align:center;">لا يوجد سجل محفوظ لهذه العملية</p>';
+      document.getElementById('txHistoryModal').classList.remove('hidden');
+      pushNavState();
+    };
+
     window.deleteCurrentEditingTx = async () => {
       if (!editingTxId) return;
       if (!confirm("نقل هذه العملية إلى سلة المحذوفات؟")) return;
       const targetId = editingTxId;
       const beforeObj = allTxs.find(x => x.id === targetId);
       await withBusy(document.getElementById('btnDeleteTxModal'), 'جاري الحذف...', async () => {
-        await updateDoc(doc(db, "transactions", targetId), {
-          deleted: true, deletedByName: currentUserName, updatedBy: currentUser.uid, updatedAt: serverTimestamp()
-        });
-        await recordAuditLog('update', 'transactions', targetId, beforeObj, { ...beforeObj, deleted: true }, `حذف عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج (${beforeObj?.note || beforeObj?.project || ''})`);
+        const batch = writeBatch(db);
+        batch.update(doc(db, "transactions", targetId), { deleted: true, deletedByName: currentUserName, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+        addAuditToBatch(batch, 'update', 'transactions', targetId, beforeObj, { ...beforeObj, deleted: true }, `حذف عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        await batch.commit();
         closeModal('txModal');
         showToast('تم النقل إلى السلة', {
           onUndo: userRole === 'admin' ? async () => {
-            await updateDoc(doc(db, "transactions", targetId), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+            const b2 = writeBatch(db);
+            b2.update(doc(db, "transactions", targetId), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+            addAuditToBatch(b2, 'update', 'transactions', targetId, { ...beforeObj, deleted: true }, { ...beforeObj, deleted: false }, 'تراجع سريع عن الحذف');
+            await b2.commit();
             showToast('تم التراجع عن الحذف');
           } : null
         });
@@ -2028,21 +2205,18 @@
       const txDate = document.getElementById('txDate').value || getLocalDateStr();
       const amount = Number(document.getElementById('txAmount').value);
       const note = document.getElementById('txNote').value.trim();
+      const paidNow = document.getElementById('txPaidNow').checked && !editingTxId && userRole === 'admin' && (category === 'daily' || category === 'meters' || category === 'lump_sum');
       const file = document.getElementById('txReceipt').files[0];
 
-      if (!amount || amount <= 0) {
-        document.getElementById('txAmount').focus();
-        showToast("أدخل مبلغاً صحيحاً", { error: true });
-        return;
-      }
-      if (note.length > 500) { showToast("التفاصيل طويلة جداً (الحد الأقصى 500 حرف)", { error: true }); return; }
+      if (!amount || amount <= 0) { document.getElementById('txAmount').focus(); showToast("أدخل مبلغاً صحيحاً", { error: true }); return; }
+      if (note.length > 500) { showToast("التفاصيل طويلة جداً", { error: true }); return; }
       if (category === 'custody' && !workerId) { showToast("اختر المهندس المستلم للعُهدة", { error: true }); return; }
 
       await withBusy(btn, 'جاري الحفظ...', async () => {
         let receiptData = null;
         if (file) {
           receiptData = await compressImage(file, 800, 470000);
-          if (receiptData.length >= 495000) throw new Error("حجم الصورة كبير جداً حتى بعد الضغط");
+          if (receiptData.length >= 495000) throw new Error("حجم الصورة كبير جداً");
         }
 
         if (editingTxId) {
@@ -2057,23 +2231,15 @@
           if (userRole === 'admin') updateData.type = type;
           else { updateData.editedByStaff = true; updateData.prevAmount = editingOrigAmount; }
           if (receiptData) {
-            const rRef = await addDoc(collection(db, "receipts"), {
-              imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
-            });
+            const rRef = await addDoc(collection(db, "receipts"), { imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp() });
             updateData.receiptId = rRef.id; updateData.hasReceipt = true;
           }
-          await updateDoc(doc(db, "transactions", targetId), updateData);
-          await recordAuditLog('update', 'transactions', targetId, beforeObj, { ...beforeObj, ...updateData }, `تعديل عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ← ${amount.toLocaleString()} ج`);
+          const batch = writeBatch(db);
+          batch.update(doc(db, "transactions", targetId), updateData);
+          addAuditToBatch(batch, 'update', 'transactions', targetId, beforeObj, { ...beforeObj, ...updateData }, `تعديل عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ← ${amount.toLocaleString()} ج`);
+          await batch.commit();
           closeModal('txModal');
-          showToast('تم حفظ التعديلات', {
-            onUndo: userRole === 'admin' && beforeObj ? async () => {
-              const prev = stripServerFields(beforeObj);
-              if (prev) {
-                await updateDoc(doc(db, "transactions", targetId), { ...prev, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
-                showToast('تم التراجع عن التعديل');
-              }
-            } : null
-          });
+          showToast('تم حفظ التعديلات');
         } else {
           const payload = {
             type, category, projectId, project: pObj ? pObj.name : 'عام',
@@ -2090,43 +2256,100 @@
           } else {
             let receiptId = null;
             if (receiptData) {
-              const rRef = await addDoc(collection(db, "receipts"), {
-                imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp()
-              });
+              const rRef = await addDoc(collection(db, "receipts"), { imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp() });
               receiptId = rRef.id;
             }
-            const newRef = await addDoc(collection(db, "transactions"), { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() });
-            await recordAuditLog('create', 'transactions', newRef.id, null, { ...payload, receiptId, hasReceipt: !!receiptId }, `إضافة عملية: ${amount.toLocaleString()} ج (${note || payload.project})`);
+            const batch = writeBatch(db);
+            const newRef = doc(collection(db, "transactions"));
+            const fullPayload = { ...payload, receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp() };
+            batch.set(newRef, fullPayload);
+            addAuditToBatch(batch, 'create', 'transactions', newRef.id, null, fullPayload, `إضافة عملية: ${amount.toLocaleString()} ج (${note || payload.project})`);
+
+            if (paidNow && workerId) {
+              const payRef = doc(collection(db, "transactions"));
+              const payPayload = {
+                ...payload, type: 'out', category: 'advance', note: `سداد نقدي فوري: ${note || catLabels[category]}`,
+                receiptId: null, hasReceipt: false, createdAt: serverTimestamp()
+              };
+              batch.set(payRef, payPayload);
+              addAuditToBatch(batch, 'create', 'transactions', payRef.id, null, payPayload, `سداد نقدي فوري: ${amount.toLocaleString()} ج`);
+            }
+            await batch.commit();
           }
 
           if (keepOpenForNew) {
             document.getElementById('txAmount').value = '';
-            document.getElementById('calcQty').value = '';
-            document.getElementById('calcRate').value = '';
-            document.getElementById('liveTafqeet').innerText = '';
-            document.getElementById('txNote').value = '';
-            document.getElementById('txReceipt').value = '';
+            document.getElementById('calcQty').value = ''; document.getElementById('calcRate').value = '';
+            document.getElementById('liveTafqeet').innerText = ''; document.getElementById('txNote').value = '';
+            document.getElementById('txReceipt').value = ''; document.getElementById('txPaidNow').checked = false;
             showToast('✅ تم الحفظ — أضف العملية التالية');
             setTimeout(() => document.getElementById('txAmount').focus(), 80);
           } else {
             closeModal('txModal');
-            showToast('✅ تم تسجيل العملية');
+            showToast(paidNow ? '✅ تم تسجيل الاستحقاق والسداد النقدي' : '✅ تم تسجيل العملية');
           }
         }
       });
     }
-
     document.getElementById('btnSaveTx').onclick = () => saveTransaction(false);
     document.getElementById('btnSaveAndNew').onclick = () => saveTransaction(true);
+
+    /* تسجيل فاتورة خامات من شاشة الصنايعي/المقاول */
+    window.openWorkerMaterialModal = () => {
+      const sel = document.getElementById('wmProject');
+      const vis = getVisibleProjects().filter(p => !p.archived);
+      sel.innerHTML = vis.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+      if (!vis.length) { showToast('لا توجد مشاريع مسندة إليك حالياً', { error: true }); return; }
+      document.getElementById('wmAmount').value = '';
+      document.getElementById('wmDate').value = getLocalDateStr();
+      document.getElementById('wmNote').value = '';
+      document.getElementById('wmReceipt').value = '';
+      document.getElementById('workerMaterialModal').classList.remove('hidden');
+      pushNavState();
+    };
+    document.getElementById('btnSaveWorkerMaterial').onclick = async () => {
+      const amount = Number(document.getElementById('wmAmount').value);
+      const projectId = document.getElementById('wmProject').value;
+      const pObj = projects.find(p => p.id === projectId);
+      const txDate = document.getElementById('wmDate').value || getLocalDateStr();
+      const note = document.getElementById('wmNote').value.trim();
+      const file = document.getElementById('wmReceipt').files[0];
+      if (!amount || amount <= 0) { showToast('أدخل مبلغاً صحيحاً', { error: true }); return; }
+      if (!note) { showToast('كتابة البيان / التفاصيل إجبارية', { error: true }); return; }
+      await withBusy(document.getElementById('btnSaveWorkerMaterial'), 'جاري الإرسال...', async () => {
+        let receiptId = null;
+        if (file) {
+          const imgData = await compressImage(file, 800, 470000);
+          const rRef = await addDoc(collection(db, "receipts"), { imageData: imgData, createdBy: currentUser.uid, workerId: currentUser.uid, createdAt: serverTimestamp() });
+          receiptId = rRef.id;
+        }
+        const batch = writeBatch(db);
+        const txRef = doc(collection(db, "transactions"));
+        const payload = {
+          type: 'out', category: 'material_purchase', projectId, project: pObj ? pObj.name : 'عام',
+          accountId: null, accountName: '', workerId: currentUser.uid, workerName: currentUserName,
+          txDate, amount, note, deleted: false, status: 'pending',
+          createdBy: currentUser.uid, createdByName: currentUserName,
+          receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp()
+        };
+        batch.set(txRef, payload);
+        addAuditToBatch(batch, 'create', 'transactions', txRef.id, null, payload, `فاتورة خامات من ${currentUserName}: ${amount.toLocaleString()} ج`);
+        await batch.commit();
+        closeModal('workerMaterialModal');
+        showToast('✅ تم إرسال الفاتورة للمدير للاعتماد');
+      });
+    };
 
     window.approveTx = async (id, btn) => {
       const beforeObj = allTxs.find(x => x.id === id);
       await withBusy(btn, 'جاري...', async () => {
-        await updateDoc(doc(db, "transactions", id), {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "transactions", id), {
           status: 'approved', approvedBy: currentUser.uid, approvedByName: currentUserName,
           updatedBy: currentUser.uid, updatedAt: serverTimestamp()
         });
-        await recordAuditLog('update', 'transactions', id, beforeObj, { ...beforeObj, status: 'approved' }, `اعتماد عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        addAuditToBatch(batch, 'update', 'transactions', id, beforeObj, { ...beforeObj, status: 'approved' }, `اعتماد عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        await batch.commit();
         showToast('✅ تم الاعتماد');
       });
     };
@@ -2136,74 +2359,106 @@
       if (reason === null) return;
       const beforeObj = allTxs.find(x => x.id === id);
       await withBusy(btn, 'جاري...', async () => {
-        await updateDoc(doc(db, "transactions", id), {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "transactions", id), {
           status: 'rejected', rejectReason: reason.trim(), approvedBy: currentUser.uid, approvedByName: currentUserName,
           updatedBy: currentUser.uid, updatedAt: serverTimestamp()
         });
-        await recordAuditLog('update', 'transactions', id, beforeObj, { ...beforeObj, status: 'rejected' }, `رفض عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        addAuditToBatch(batch, 'update', 'transactions', id, beforeObj, { ...beforeObj, status: 'rejected' }, `رفض عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        await batch.commit();
         showToast('تم الرفض');
       });
     };
 
-    /* حسابات الصنايعية والمقاولين (مع زر إضافة مباشر لـ [الاسم]) */
-    function isWorkerTxLahu(t) {
-      return t.type === 'in' || t.category === 'daily' || t.category === 'meters' || t.category === 'lump_sum';
-    }
+    /* كشف الحساب الموحد + زر دمج/فصل العهدة */
+    window.toggleWorkerMerge = () => {
+      workerMergeMode = !workerMergeMode;
+      document.getElementById('workerMergeToggle').classList.toggle('on', workerMergeMode);
+      document.getElementById('workerMergeState').innerText = workerMergeMode ? 'مدمج' : 'مفصول';
+      renderWorkerLedger();
+    };
 
     window.renderWorkerLedger = () => {
       const wid = document.getElementById('workerSelect').value;
       const box = document.getElementById('workerLedgerBox');
       const addBtn = document.getElementById('btnAddForWorker');
+      const mergeBox = document.getElementById('workerMergeToggleBox');
       const allowAdd = userRole === 'admin' || ((userRole === 'engineer' || userRole === 'accountant') && myCanAdd);
 
       if (!wid) {
-        addBtn.classList.add('hidden');
-        box.innerHTML = '<p style="color:var(--muted); font-size:13px; margin-top:10px;">اختر شخصاً لعرض حسابه وتعديل أي حركة.</p>';
+        addBtn.classList.add('hidden'); mergeBox.classList.add('hidden');
+        box.innerHTML = '<p style="color:var(--muted); font-size:13px; margin-top:10px;">اختر شخصاً لعرض كشف حسابه.</p>';
         return;
       }
 
       const wUser = usersList.find(u => u.id === wid);
-      if (allowAdd) {
-        addBtn.classList.remove('hidden');
-        addBtn.innerText = `+ حركة لـ ${wUser ? wUser.name : ''}`;
+      mergeBox.classList.remove('hidden');
+      if (allowAdd) { addBtn.classList.remove('hidden'); addBtn.innerText = `+ حركة لـ ${wUser ? wUser.name : ''}`; }
+      else addBtn.classList.add('hidden');
+
+      const st = computePersonAccount(wid);
+      const settleBtn = (userRole === 'admin' && st.mergedNet > 0)
+        ? `<button onclick="openSettleWorker('${esc(wid)}', ${st.mergedNet})" class="sm gold" style="margin-top:8px; width:100%;">💸 تسديد / تصفية (${st.mergedNet.toLocaleString()} ج)</button>`
+        : (st.mergedNet === 0 ? `<div style="margin-top:6px; font-size:12px; color:#34d399; font-weight:bold;">✅ الحساب خالص (0 ج)</div>` : '');
+
+      let cardsHtml = '';
+      if (workerMergeMode) {
+        cardsHtml = `
+          <div class="hero-card" style="margin-top:10px;">
+            <div class="between">
+              <div class="hero-label">صافي الجيب الواحد — ${esc(wUser?.name || '')} (${st.mergedNet >= 0 ? 'له' : 'عليه'})</div>
+              ${wUser?.phone ? `<a class="call-btn" href="tel:${esc(wUser.phone)}">📞</a>` : ''}
+            </div>
+            <div class="hero-main-val" style="color:${st.mergedNet >= 0 ? '#34d399' : '#f87171'};">${Math.abs(st.mergedNet).toLocaleString()} ج</div>
+            <div style="font-size:11px; color:#cbd5e1; margin-top:3px;">${esc(tafqeet(st.mergedNet))}</div>
+            <div class="hero-grid">
+              <div class="hero-sub"><small>إجمالي له (شغل + فواتير)</small><strong style="color:#34d399">${st.totalLahu.toLocaleString()} ج</strong></div>
+              <div class="hero-sub"><small>إجمالي وصله (سلف + عُهد)</small><strong style="color:#f87171">${st.totalAlayh.toLocaleString()} ج</strong></div>
+            </div>
+            ${settleBtn}
+          </div>`;
       } else {
-        addBtn.classList.add('hidden');
+        cardsHtml = `
+          <div class="hero-card" style="margin-top:10px;">
+            <div class="between">
+              <div class="hero-label">شغل ويوميات ${esc(wUser?.name || '')} (${st.workNet >= 0 ? 'باقي له' : 'عليه'})</div>
+              ${wUser?.phone ? `<a class="call-btn" href="tel:${esc(wUser.phone)}">📞</a>` : ''}
+            </div>
+            <div class="hero-main-val" style="color:${st.workNet >= 0 ? '#34d399' : '#f87171'};">${Math.abs(st.workNet).toLocaleString()} ج</div>
+            <div class="hero-grid">
+              <div class="hero-sub"><small>له (يوميات/متر/خامات)</small><strong style="color:#34d399">${st.workLahu.toLocaleString()} ج</strong></div>
+              <div class="hero-sub"><small>وصله (سلف/خصم)</small><strong style="color:#f87171">${st.workAlayh.toLocaleString()} ج</strong></div>
+            </div>
+            ${settleBtn}
+          </div>`;
+        if (st.custodyIn > 0 || st.custodySpent > 0) {
+          cardsHtml += `
+            <div class="card" style="border-right:4px solid var(--primary); margin-top:8px;">
+              <div class="between"><strong>💼 حساب العُهدة المنفصل</strong><strong style="color:${st.custodyRem > 0 ? 'var(--orange)' : 'var(--green)'};">${st.custodyRem >= 0 ? 'معه ' + st.custodyRem.toLocaleString() + ' ج' : 'له فرق ' + Math.abs(st.custodyRem).toLocaleString() + ' ج'}</strong></div>
+              <small style="color:var(--muted);">مستلم عُهدة: ${st.custodyIn.toLocaleString()} ج • صرف فواتير: ${st.custodySpent.toLocaleString()} ج</small>
+            </div>`;
+        }
       }
 
-      const txs = [...offlineQueue, ...allTxs].filter(t => t.workerId === wid && t.deleted !== true && t.status !== 'rejected' && (userRole === 'admin' || t.status === 'approved'));
-      let lahu = 0, alayh = 0, rows = '';
-      txs.forEach(t => {
-        const amt = Number(t.amount || 0);
-        const isLahu = isWorkerTxLahu(t);
-        if (isLahu) lahu += amt; else alayh += amt;
+      const rowsHtml = st.rows.map(t => {
+        const isLahu = t._side === 'lahu';
         const canEdit = userRole === 'admin' && !t.localId;
-        const catPill = t.category ? `<span class="pill pill-cat">${esc(catLabels[t.category] || '')}</span>` : '';
-        rows += `<div class="tx-item">
+        return `<div class="tx-item">
           <div ${canEdit ? `class="tx-clickable" onclick="editTx('${esc(t.id)}')"` : ''}>
-            <strong>${esc(t.note || catLabels[t.category] || 'حركة')}</strong> ${catPill}<br>
+            <strong>${esc(t.note || catLabels[t.category] || 'حركة')}</strong> <span class="pill pill-cat">${esc(catLabels[t.category] || '')}</span><br>
             <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.project || 'عام')}</small>
           </div>
           <div style="text-align:left;" ${canEdit ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>
-            <strong class="${isLahu ? 'amt-in' : 'amt-out'}">${amt.toLocaleString()} ج</strong><br>
-            <small style="color:var(--muted)">${isLahu ? 'له' : 'عليه'}</small>
+            <strong class="${isLahu ? 'amt-in' : 'amt-out'}">${t._amt.toLocaleString()} ج</strong><br>
+            <small style="color:var(--muted)">${isLahu ? 'له' : 'وصله'}</small>
           </div>
         </div>`;
-      });
-      const net = lahu - alayh;
-      box.innerHTML = `
-        <div class="hero-card" style="margin-top:12px;">
-          <div class="hero-label">صافي حساب ${esc(wUser ? wUser.name : '')} (${net >= 0 ? 'له' : 'عليه'})</div>
-          <div class="hero-main-val" style="color:${net >= 0 ? '#34d399' : '#f87171'};">${Math.abs(net).toLocaleString()} ج</div>
-          <div style="font-size:11px; color:#cbd5e1; margin-top:4px;">${esc(tafqeet(net))}</div>
-          <div class="hero-grid">
-            <div class="hero-sub"><small>إجمالي له</small><strong style="color:#34d399">${lahu.toLocaleString()} ج</strong></div>
-            <div class="hero-sub"><small>إجمالي عليه</small><strong style="color:#f87171">${alayh.toLocaleString()} ج</strong></div>
-          </div>
-        </div>
-        ${rows || '<p style="color:var(--muted); text-align:center;">لا توجد حركات مسجلة</p>'}`;
+      }).join('');
+
+      box.innerHTML = cardsHtml + (rowsHtml || '<p style="color:var(--muted); text-align:center;">لا توجد حركات مسجلة</p>');
     };
 
-    /* الفريق وإضافة مستخدم */
+    /* الفريق وإضافة/تعديل مستخدم (مع تعديل الهاتف + زر اتصال + زر إضافة عُهدة) */
     function renderTeam() {
       const list = document.getElementById('teamList');
       const wSel = document.getElementById('txWorker');
@@ -2211,21 +2466,27 @@
       const prevLedgerVal = ledgerSel.value;
       list.innerHTML = usersList.length ? '' : '<p style="color:var(--muted)">لا يوجد أعضاء بعد</p>';
       wSel.innerHTML = '<option value="">-- بدون شخص محدد --</option>';
-      ledgerSel.innerHTML = '<option value="">-- اختر صنايعي / مقاول --</option>';
+      ledgerSel.innerHTML = '<option value="">-- اختر مهندس / صنايعي / مقاول --</option>';
 
       usersList.forEach(u => {
         wSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)} (${esc(roleLabels[u.role] || u.role)})</option>`;
-        if (u.role === 'worker' || userRole === 'admin') ledgerSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)}</option>`;
+        ledgerSel.innerHTML += `<option value="${esc(u.id)}">${esc(u.name)} (${esc(roleLabels[u.role] || u.role)})</option>`;
         if (userRole === 'admin') {
           const isSelf = u.id === currentUser?.uid;
           const pCount = (u.assignedProjects || []).length;
+          const custBtn = (u.role === 'engineer' || u.role === 'accountant')
+            ? `<button onclick="quickAddCustody('${esc(u.id)}')" class="sm gold" title="إضافة عُهدة">💰 عُهدة</button>` : '';
           list.innerHTML += `
             <div class="tx-item">
               <div class="tx-clickable" onclick="openUserModal('${esc(u.id)}')">
                 <strong>${esc(u.name)}</strong> <span class="badge">${esc(roleLabels[u.role] || u.role)}</span><br>
-                <small style="color:var(--muted)">📱 ${esc(u.phone)} • 📂 ${pCount} تصنيف • ${u.active ? '✅ نشط' : '🚫 موقوف'}</small>
+                <small style="color:var(--muted)">📱 ${esc(u.phone)} • 📂 ${pCount} مشروع • ${u.active ? '✅ نشط' : '🚫 موقوف'}</small>
               </div>
-              ${!isSelf ? `<button onclick="toggleUser('${esc(u.id)}', ${!!u.active}, this)" class="sm ${u.active ? 'red' : 'green'}">${u.active ? 'إيقاف' : 'تفعيل'}</button>` : '<small style="color:var(--muted)">حسابك</small>'}
+              <div class="row">
+                ${u.phone ? `<a class="call-btn" href="tel:${esc(u.phone)}" title="اتصال">📞</a>` : ''}
+                ${custBtn}
+                ${!isSelf ? `<button onclick="toggleUser('${esc(u.id)}', ${!!u.active}, this)" class="sm ${u.active ? 'red' : 'green'}">${u.active ? 'إيقاف' : 'تفعيل'}</button>` : '<small style="color:var(--muted)">حسابك</small>'}
+              </div>
             </div>`;
         }
       });
@@ -2243,11 +2504,16 @@
     window.openUserModal = (uid = null) => {
       editingUserId = uid;
       const u = uid ? usersList.find(x => x.id === uid) : null;
-      document.getElementById('userModalTitle').innerText = u ? `تعديل صلاحيات: ${u.name}` : 'إضافة مستخدم جديد';
+      document.getElementById('userModalTitle').innerText = u ? `تعديل: ${u.name}` : 'إضافة مستخدم جديد';
       document.getElementById('btnSaveUser').innerText = u ? 'حفظ التعديلات' : 'إنشاء الحساب وتفعيله';
       document.getElementById('uName').value = u?.name || '';
       document.getElementById('uPhone').value = u?.phone || '';
-      document.getElementById('uPhone').disabled = !!u;
+      document.getElementById('uPhone').disabled = false;
+      const hint = document.getElementById('uLoginPhoneHint');
+      if (u) {
+        hint.classList.remove('hidden');
+        hint.innerText = `🔑 رقم الدخول الأصلي: ${u.loginPhone || u.phone} (تعديل الرقم أعلاه يُحدّث رقم الاتصال والعرض فقط)`;
+      } else hint.classList.add('hidden');
       document.getElementById('uPin').value = '';
       document.getElementById('uPin').classList.toggle('hidden', !!u);
       document.getElementById('uRole').value = u?.role || 'engineer';
@@ -2269,7 +2535,7 @@
     };
 
     document.getElementById('btnSaveUser').onclick = async () => {
-      if (!navigator.onLine) { showToast("هذه العملية تحتاج إنترنت", { error: true }); return; }
+      if (!navigator.onLine) { showToast("تحتاج إنترنت", { error: true }); return; }
       const name = document.getElementById('uName').value.trim();
       const phone = normalizePhone(document.getElementById('uPhone').value);
       const pin = document.getElementById('uPin').value.trim();
@@ -2282,24 +2548,23 @@
       };
       const assignedProjects = [...document.querySelectorAll('#uProjectsBox input:checked')].map(i => i.value);
       const msg = document.getElementById('userModalMsg');
-
       if (!name || !phone) { msg.style.color = 'var(--red)'; msg.innerText = 'أدخل الاسم ورقم الموبايل'; return; }
 
       await withBusy(document.getElementById('btnSaveUser'), 'جاري الحفظ...', async () => {
         try {
           if (editingUserId) {
-            await updateDoc(doc(db, "users", editingUserId), { name, role, canAddExpenses, assignedProjects, permissions });
+            await updateDoc(doc(db, "users", editingUserId), { name, phone, role, canAddExpenses, assignedProjects, permissions });
             closeModal('userModal');
-            showToast('✅ تم تحديث الصلاحيات');
+            showToast('✅ تم تحديث البيانات والصلاحيات');
           } else {
-            if (pin.length < 6) { msg.style.color = 'var(--red)'; msg.innerText = 'الرقم السري PIN يجب أن يكون 6 أرقام على الأقل'; return; }
+            if (pin.length < 6) { msg.style.color = 'var(--red)'; msg.innerText = 'الرقم السري PIN 6 أرقام على الأقل'; return; }
             const secApp = getApps().find(a => a.name === 'SecondaryAuth') || initializeApp(firebaseConfig, 'SecondaryAuth');
             const secAuth = getAuth(secApp);
             const cred = await createUserWithEmailAndPassword(secAuth, `${phone}@revise.app`, pin);
             const newUid = cred.user.uid;
             await signOut(secAuth);
             await setDoc(doc(db, "users", newUid), {
-              name, phone, role, active: true, canAddExpenses, assignedProjects, permissions, createdAt: serverTimestamp()
+              name, phone, loginPhone: phone, role, active: true, canAddExpenses, assignedProjects, permissions, createdAt: serverTimestamp()
             });
             closeModal('userModal');
             showToast(`✅ تم إنشاء وتفعيل حساب ${name}`);
@@ -2311,93 +2576,102 @@
       });
     };
 
-    /* التراجع الزمني (آلة الزمن) مع معاينة وتأكيد */
+    /* التراجع الزمني المحصّن + حفظ لقطة Redo */
     window.openTimeTravelModal = () => {
       document.getElementById('ttPreviewBox').classList.add('hidden');
       ttPendingLogs = [];
       const d = new Date(Date.now() - 10 * 60000);
-      const localIso = `${getLocalDateStr(d)}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-      document.getElementById('ttCustomTime').value = localIso;
+      document.getElementById('ttCustomTime').value = `${getLocalDateStr(d)}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
       document.getElementById('timeTravelModal').classList.remove('hidden');
       pushNavState();
     };
 
     window.previewTimeTravel = (mode) => {
       const scope = document.querySelector('input[name="ttScope"]:checked').value;
-      const scoped = auditLogs.filter(l => scope === 'all' || l.actorUid === currentUser?.uid);
+      const scoped = auditLogs.filter(l =>
+        l.reverted !== true &&
+        l.actorRole === 'admin' &&
+        ALLOWED_TT_COLS.includes(l.collectionName) &&
+        (scope === 'all' || l.actorUid === currentUser?.uid)
+      );
       let selected = [];
-      if (mode === 'last') {
-        if (scoped.length) selected = [scoped[0]];
-      } else {
-        let cutoffMs = 0;
-        if (mode === 'custom') {
-          const v = document.getElementById('ttCustomTime').value;
-          if (!v) { showToast('اختر وقتاً محدداً أولاً'); return; }
-          cutoffMs = new Date(v).getTime();
-        } else {
-          cutoffMs = Date.now() - (Number(mode) * 60 * 1000);
-        }
+      if (mode === 'last') { if (scoped.length) selected = [scoped[0]]; }
+      else {
+        const cutoffMs = mode === 'custom'
+          ? new Date(document.getElementById('ttCustomTime').value).getTime()
+          : Date.now() - (Number(mode) * 60 * 1000);
+        if (!cutoffMs) { showToast('اختر وقتاً محدداً أولاً'); return; }
         selected = scoped.filter(l => (l.tsMs || 0) >= cutoffMs);
       }
-
       const box = document.getElementById('ttPreviewBox');
-      if (!selected.length) {
-        box.classList.add('hidden');
-        showToast('لا توجد حركات مسجلة في هذه الفترة للتراجع عنها');
-        return;
-      }
+      if (!selected.length) { box.classList.add('hidden'); showToast('لا توجد حركات مديرين للتراجع عنها في هذه الفترة'); return; }
       ttPendingLogs = selected;
-      document.getElementById('ttPreviewTitle').innerText = `سيتم التراجع عن ${selected.length} حركة (من الأحدث للأقدم):`;
+      document.getElementById('ttPreviewTitle').innerText = `سيتم التراجع عن ${selected.length} حركة:`;
       document.getElementById('ttPreviewList').innerHTML = selected.map((l, idx) => {
         const dt = new Date(l.tsMs || Date.now());
-        const tm = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
-        return `<div style="padding:6px 0; border-bottom:1px solid var(--border);"><strong>${idx + 1}) ${esc(l.summary || l.action)}</strong><br><small style="color:var(--muted)">بواسطة: ${esc(l.actorName || '')} • الساعة ${tm}</small></div>`;
+        return `<div style="padding:6px 0; border-bottom:1px solid var(--border);"><strong>${idx + 1}) ${esc(l.summary || l.action)}</strong><br><small style="color:var(--muted)">${esc(l.actorName || '')} • ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}</small></div>`;
       }).join('');
       box.classList.remove('hidden');
     };
 
+    function pickAllowedRevertFields(col, obj) {
+      if (!obj) return {};
+      if (col === 'projects') {
+        const { name, category, isFavorite, visible, archived } = obj;
+        return { ...(name !== undefined && { name }), ...(category !== undefined && { category }), ...(isFavorite !== undefined && { isFavorite }), ...(visible !== undefined && { visible }), ...(archived !== undefined && { archived }) };
+      }
+      if (col === 'accounts') {
+        const { name, hiddenFromStaff, archived } = obj;
+        return { ...(name !== undefined && { name }), ...(hiddenFromStaff !== undefined && { hiddenFromStaff }), ...(archived !== undefined && { archived }) };
+      }
+      return { ...obj, updatedBy: currentUser.uid, updatedAt: serverTimestamp() };
+    }
+
     document.getElementById('btnExecTimeTravel').onclick = async () => {
       if (!ttPendingLogs.length) return;
       await withBusy(document.getElementById('btnExecTimeTravel'), 'جاري التراجع...', async () => {
+        const redoItems = [];
         for (const log of ttPendingLogs) {
+          if (!ALLOWED_TT_COLS.includes(log.collectionName)) continue;
           const ref = doc(db, log.collectionName, log.docId);
           if (log.action === 'create') {
-            if (log.collectionName === 'transactions') {
-              await updateDoc(ref, { deleted: true, deletedByName: 'تراجع زمني', updatedBy: currentUser.uid, updatedAt: serverTimestamp() }).catch(() => {});
-            } else if (log.collectionName === 'accounts') {
-              await deleteDoc(ref).catch(() => {});
-            } else if (log.collectionName === 'projects') {
-              await updateDoc(ref, { archived: true, isFavorite: false }).catch(() => {});
-            }
+            if (log.collectionName === 'transactions') await updateDoc(ref, { deleted: true, deletedByName: 'تراجع زمني', updatedBy: currentUser.uid, updatedAt: serverTimestamp() }).catch(() => {});
+            else if (log.collectionName === 'accounts') await deleteDoc(ref).catch(() => {});
+            else if (log.collectionName === 'projects') await updateDoc(ref, { archived: true, isFavorite: false }).catch(() => {});
           } else if (log.action === 'update' && log.before) {
-            await setDoc(ref, { ...log.before, updatedBy: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
+            await updateDoc(ref, pickAllowedRevertFields(log.collectionName, log.before)).catch(() => {});
           } else if (log.action === 'delete' && log.before) {
-            await setDoc(ref, { ...log.before, createdAt: serverTimestamp() });
+            await setDoc(ref, { ...log.before, createdAt: serverTimestamp() }).catch(() => {});
           }
-          await deleteDoc(doc(db, "audit_logs", log.id)).catch(() => {});
+          await updateDoc(doc(db, "audit_logs", log.id), { reverted: true }).catch(() => {});
+          redoItems.push({ logId: log.id, collectionName: log.collectionName, docId: log.docId, action: log.action, after: log.after || null, summary: log.summary || '' });
+        }
+        if (redoItems.length) {
+          await addDoc(collection(db, "redo_snapshots"), {
+            actorName: currentUserName,
+            count: redoItems.length,
+            summary: redoItems[0].summary + (redoItems.length > 1 ? ` (+${redoItems.length - 1})` : ''),
+            items: redoItems,
+            tsMs: Date.now(),
+            expiresAtMs: Date.now() + (30 * 24 * 60 * 60 * 1000)
+          });
         }
         ttPendingLogs = [];
         closeModal('timeTravelModal');
-        showToast('✅ تم تنفيذ التراجع الزمني بنجاح');
+        showToast('✅ تم التراجع الزمني وحفظ لقطة Redo');
       });
     };
 
-    /* التقارير + توليد ملف PDF حقيقي للمشاركة المباشرة (بدون window.print) + تنبيه المعلقات */
+    /* التقارير + إصلاح صفحة الـ PDF البيضاء على الموبايل */
     document.querySelectorAll('input[name="repMode"]').forEach(r => {
       r.onchange = () => document.getElementById('repMonthBox').classList.toggle('hidden', r.value !== 'monthly');
     });
-    window.toggleRepRange = () => {
-      document.getElementById('repRangeBox').classList.toggle('hidden', !document.getElementById('repUseRange').checked);
-    };
+    window.toggleRepRange = () => document.getElementById('repRangeBox').classList.toggle('hidden', !document.getElementById('repUseRange').checked);
 
     function countPendingForScope(scope) {
       let list = allTxs.filter(t => t.deleted !== true && t.status === 'pending');
-      if (scope === 'account' && currentProjId && currentAccId) {
-        list = list.filter(t => t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId));
-      } else if (scope === 'worker') {
-        const wid = document.getElementById('workerSelect').value;
-        list = list.filter(t => t.workerId === wid);
-      }
+      if (scope === 'account' && currentProjId && currentAccId) list = list.filter(t => t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId));
+      else if (scope === 'worker') list = list.filter(t => t.workerId === document.getElementById('workerSelect').value);
       return list.length;
     }
 
@@ -2406,38 +2680,40 @@
       const titles = { account: `تقرير: ${document.getElementById('curAccTitle').innerText}`, worker: 'تقرير كشف حساب شخص', all: 'التقارير العامة' };
       document.getElementById('repModalTitle').innerText = titles[scope] || 'التقارير';
       document.getElementById('repMonthVal').value = getLocalMonthStr();
-
       const pCount = countPendingForScope(scope);
       const warn = document.getElementById('repPendingWarn');
-      if (pCount > 0) {
-        warn.innerText = `⚠️ تنبيه: يوجد ${pCount} عمليات معلّقة لم تُعتمد بعد ولن تظهر في هذا التقرير قبل اعتمادها.`;
-        warn.classList.remove('hidden');
-      } else {
-        warn.classList.add('hidden');
-      }
-
+      if (pCount > 0) { warn.innerText = `⚠️ يوجد ${pCount} عمليات معلّقة لم تُعتمد بعد.`; warn.classList.remove('hidden'); }
+      else warn.classList.add('hidden');
       document.getElementById('reportModal').classList.remove('hidden');
       pushNavState();
     };
 
     window.runReport = async (format) => {
-      let rows = allTxs.filter(t => t.deleted !== true && t.status === 'approved' && t.category !== 'custody');
+      let rows = [];
       let title = 'كشف حساب عام';
       let fileSlug = 'عام';
+      let extraSummary = '';
 
-      if (reportScope === 'account' && currentProjId && currentAccId) {
-        const pName = projects.find(p => p.id === currentProjId)?.name || 'مشروع';
-        const aName = document.getElementById('curAccTitle').innerText || 'عام';
-        rows = rows.filter(t => t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId));
-        title = `كشف حساب - ${aName} (${pName})`;
-        fileSlug = `${pName}-${aName}`;
-      } else if (reportScope === 'worker') {
+      if (reportScope === 'worker') {
         const wid = document.getElementById('workerSelect').value;
         const wName = usersList.find(u => u.id === wid)?.name || '';
         if (!wid) { showToast("اختر شخصاً أولاً", { error: true }); return; }
-        rows = rows.filter(t => t.workerId === wid);
-        title = `كشف حساب - ${wName}`;
-        fileSlug = wName || 'صنايعي';
+        const st = computePersonAccount(wid);
+        rows = st.rows;
+        title = `كشف حساب - ${wName} (${workerMergeMode ? 'مدمج' : 'مفصول'})`;
+        fileSlug = wName || 'حساب';
+        if (st.custodyIn > 0 || st.custodySpent > 0) {
+          extraSummary = `<p style="font-size:12px; margin:6px 0;">صافي الشغل: ${st.workNet.toLocaleString()} ج | صافي العُهدة: ${st.custodyRem.toLocaleString()} ج</p>`;
+        }
+      } else {
+        rows = allTxs.filter(t => t.deleted !== true && t.status === 'approved' && (isProjectCashExpense(t) || (t.type === 'in' && t.category !== 'custody')));
+        if (reportScope === 'account' && currentProjId && currentAccId) {
+          const pName = projects.find(p => p.id === currentProjId)?.name || 'مشروع';
+          const aName = document.getElementById('curAccTitle').innerText || 'عام';
+          rows = rows.filter(t => t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId));
+          title = `كشف حساب - ${aName} (${pName})`;
+          fileSlug = `${pName}-${aName}`;
+        }
       }
 
       const mode = document.querySelector('input[name="repMode"]:checked').value;
@@ -2446,32 +2722,27 @@
         if (m) rows = rows.filter(t => (t.txDate || '').startsWith(m));
       }
       if (document.getElementById('repUseRange').checked) {
-        const f = document.getElementById('repFrom').value;
-        const to = document.getElementById('repTo').value;
+        const f = document.getElementById('repFrom').value, to = document.getElementById('repTo').value;
         if (f) rows = rows.filter(t => (t.txDate || '') >= f);
         if (to) rows = rows.filter(t => (t.txDate || '') <= to);
       }
 
-      /* توحيد منطق حساب الصنايعي في التقارير مع الشاشة 100% */
       const asc = [...rows].sort((a, b) => (a.txDate || '').localeCompare(b.txDate || '') || ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
       let run = 0, totalIn = 0, totalOut = 0;
       const computed = asc.map(t => {
-        const amt = Number(t.amount || 0);
-        const isIn = reportScope === 'worker' ? isWorkerTxLahu(t) : (t.type === 'in');
+        const amt = Number(t._amt ?? t.amount ?? 0);
+        const isIn = reportScope === 'worker' ? (t._side === 'lahu') : (t.type === 'in');
         if (isIn) { run += amt; totalIn += amt; } else { run -= amt; totalOut += amt; }
         return { ...t, amt, isIn, run };
       });
-      const sortDir = document.getElementById('repSort').value;
-      const finalRows = sortDir === 'desc' ? [...computed].reverse() : computed;
+      const finalRows = document.getElementById('repSort').value === 'desc' ? [...computed].reverse() : computed;
       const net = totalIn - totalOut;
       const todayStr = getLocalDateStr();
       const safeSlug = fileSlug.replace(/[^\u0600-\u06FFa-zA-Z0-9_-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'تقرير';
 
       if (format === 'csv') {
         let csv = "\uFEFFالتاريخ,التفاصيل,عليه,له,الرصيد\n";
-        finalRows.forEach(r => {
-          csv += [r.txDate || '', (r.note || catLabels[r.category] || '').replace(/,/g, ' '), r.isIn ? 0 : r.amt, r.isIn ? r.amt : 0, r.run].join(',') + "\n";
-        });
+        finalRows.forEach(r => { csv += [r.txDate || '', (r.note || catLabels[r.category] || '').replace(/,/g, ' '), r.isIn ? 0 : r.amt, r.isIn ? r.amt : 0, r.run].join(',') + "\n"; });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
         a.download = `كشف-حساب-${safeSlug}-${todayStr}.csv`;
@@ -2480,17 +2751,13 @@
       }
 
       if (format === 'wa') {
-        const txt = `${companySettings.nameAr || 'Revise'}\n${title}\nعدد العمليات: ${finalRows.length}\nله: ${totalIn.toLocaleString()} ج\nعليه: ${totalOut.toLocaleString()} ج\nالرصيد (${net >= 0 ? 'له' : 'عليه'}): ${Math.abs(net).toLocaleString()} ج\n(${tafqeet(net)})`;
+        const txt = `${companySettings.nameAr || 'Revise'}\n${title}\nله: ${totalIn.toLocaleString()} ج\nعليه: ${totalOut.toLocaleString()} ج\nالرصيد (${net >= 0 ? 'له' : 'عليه'}): ${Math.abs(net).toLocaleString()} ج\n(${tafqeet(net)})`;
         window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
         return;
       }
 
-      /* توليد ملف PDF حقيقي + فتح قائمة المشاركة في الهاتف */
-      const pdfBtn = document.getElementById('btnRunPdf');
-      await withBusy(pdfBtn, 'جاري تجهيز الـ PDF...', async () => {
-        if (typeof window.html2pdf === 'undefined') {
-          throw new Error('مكتبة إنشاء الـ PDF غير محمّلة حالياً (تحتاج إنترنت في أول مرة)');
-        }
+      await withBusy(document.getElementById('btnRunPdf'), 'جاري تجهيز الـ PDF...', async () => {
+        if (typeof window.html2pdf === 'undefined') throw new Error('مكتبة الـ PDF غير محمّلة حالياً');
         const s = companySettings;
         const trs = finalRows.map(r => `<tr>
           <td>${esc(r.txDate || '')}</td>
@@ -2501,13 +2768,17 @@
         </tr>`).join('');
 
         const stage = document.getElementById('pdfRenderStage');
+        const overlay = document.getElementById('pdfOverlay');
+        overlay.classList.remove('hidden');
+        stage.classList.remove('hidden');
         stage.innerHTML = `
           <div class="pdf-header">
             <div><strong>${esc(s.nameAr || 'شركة ريفايس للمقاولات')}</strong><br><small>${esc(s.phone || '')}<br>${esc(s.email || '')}</small></div>
             ${s.logo ? `<img src="${s.logo}">` : ''}
             <div style="text-align:left;"><strong>${esc(s.nameEn || 'Revise')}</strong><br><small>${esc(s.addressAr || '')}</small></div>
           </div>
-          <h3 style="text-align:center; color:#1d4ed8; margin:6px 0 10px;">${esc(title)}</h3>
+          <h3 style="text-align:center; color:#1d4ed8; margin:6px 0 6px;">${esc(title)}</h3>
+          ${extraSummary}
           <table class="pdf-table">
             <thead><tr><th>التاريخ</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr></thead>
             <tbody>
@@ -2530,49 +2801,50 @@
           </div>` : ''}
           <p style="text-align:left; font-size:11px; color:#64748b; margin-top:14px;">تاريخ التقرير: ${todayStr}</p>`;
 
+        // انتظار تحميل كل الصور قبل التصوير لمنع الصفحة البيضاء على الموبايل
+        await Promise.all([...stage.querySelectorAll('img')].map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })));
+        await new Promise(r => setTimeout(r, 120));
+
         const fileName = `كشف-حساب-${safeSlug}-${todayStr}.pdf`;
         const opt = {
-          margin: [8, 8, 8, 8],
-          filename: fileName,
+          margin: [8, 8, 8, 8], filename: fileName,
           image: { type: 'jpeg', quality: 0.92 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
+          html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0, scrollX: 0 },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
-
-        const pdfBlob = await window.html2pdf().set(opt).from(stage).outputPdf('blob');
-        stage.innerHTML = '';
-        const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-        closeModal('reportModal');
-
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          try {
-            await navigator.share({ files: [pdfFile], title });
-            showToast('✅ تم تجهيز ومشاركة ملف الـ PDF');
-            return;
-          } catch (shareErr) {
-            if (shareErr.name === 'AbortError') return;
+        try {
+          const pdfBlob = await window.html2pdf().set(opt).from(stage).outputPdf('blob');
+          const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+          closeModal('reportModal');
+          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            try { await navigator.share({ files: [pdfFile], title }); showToast('✅ تم مشاركة الـ PDF'); return; }
+            catch (se) { if (se.name === 'AbortError') return; }
           }
+          const url = URL.createObjectURL(pdfBlob);
+          const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          showToast('✅ تم تحميل الـ PDF');
+        } finally {
+          stage.innerHTML = ''; stage.classList.add('hidden'); overlay.classList.add('hidden');
         }
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-        showToast('✅ تم تحميل ملف الـ PDF');
       });
     };
 
-    /* السلة (مع الحذف النهائي الانتقائي وحذف الصور المرفقة) */
-    window.openTrashModal = () => { renderTrash(); document.getElementById('trashModal').classList.remove('hidden'); pushNavState(); };
+    /* السلة والتراجعات العكسية (Redo) */
+    window.switchTrashTab = (tab) => {
+      document.getElementById('segTrashBtn').classList.toggle('active', tab === 'trash');
+      document.getElementById('segRedoBtn').classList.toggle('active', tab === 'redo');
+      document.getElementById('trashTabBody').classList.toggle('hidden', tab !== 'trash');
+      document.getElementById('redoTabBody').classList.toggle('hidden', tab !== 'redo');
+    };
+    window.openTrashModal = () => { renderTrash(); renderRedoList(); switchTrashTab('trash'); document.getElementById('trashModal').classList.remove('hidden'); pushNavState(); };
+
     function renderTrash() {
       const box = document.getElementById('trashList');
-      const bulkBar = document.getElementById('trashBulkBar');
       const trashed = allTxs.filter(t => t.deleted === true);
-      bulkBar.classList.toggle('hidden', !trashed.length);
+      document.getElementById('trashBulkBar').classList.toggle('hidden', !trashed.length);
       document.getElementById('trashSelectAll').checked = false;
-
       box.innerHTML = trashed.length ? trashed.map(t => `
         <div class="tx-item">
           <div class="row" style="flex:1; align-items:flex-start; flex-wrap:nowrap;">
@@ -2580,58 +2852,70 @@
             <div>
               <strong>${esc(t.project || 'عام')}</strong> — ${Number(t.amount || 0).toLocaleString()} ج ${t.receiptId ? '🖼️' : ''}<br>
               <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || '')}</small>
-              ${t.deletedByName ? `<br><small style="color:var(--red)">🗑️ حذفها: ${esc(t.deletedByName)}</small>` : ''}
             </div>
           </div>
           <button onclick="restoreTx('${esc(t.id)}', this)" class="sm green">استعادة</button>
         </div>`).join('') : '<p style="color:var(--muted); text-align:center;">سلة المحذوفات فارغة</p>';
     }
-    window.toggleSelectAllTrash = (checked) => {
-      document.querySelectorAll('.trash-chk').forEach(c => c.checked = checked);
+
+    function renderRedoList() {
+      const box = document.getElementById('redoList');
+      if (!box) return;
+      box.innerHTML = redoSnapshots.length ? redoSnapshots.map(r => {
+        const dt = new Date(r.tsMs || Date.now());
+        return `<div class="tx-item">
+          <div>
+            <strong>↪️ ${esc(r.summary || 'لقطة تراجع')}</strong><br>
+            <small style="color:var(--muted)">${r.count} حركة • ${getLocalDateStr(dt)}</small>
+          </div>
+          <button onclick="execRedoSnapshot('${esc(r.id)}', this)" class="sm gold">إعادة تطبيق</button>
+        </div>`;
+      }).join('') : '<p style="color:var(--muted); text-align:center;">لا توجد تراجعات عكسية محفوظة</p>';
+    }
+
+    window.execRedoSnapshot = async (rid, btn) => {
+      const snap = redoSnapshots.find(x => x.id === rid);
+      if (!snap || !confirm("إعادة تطبيق هذه الحركات (Redo)؟")) return;
+      await withBusy(btn, 'جاري...', async () => {
+        for (const item of [...(snap.items || [])].reverse()) {
+          if (!ALLOWED_TT_COLS.includes(item.collectionName)) continue;
+          const ref = doc(db, item.collectionName, item.docId);
+          if (item.action === 'create' && item.after) {
+            if (item.collectionName === 'transactions') await updateDoc(ref, { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() }).catch(() => {});
+            else if (item.collectionName === 'projects') await updateDoc(ref, { archived: false }).catch(() => {});
+            else await setDoc(ref, { ...item.after, createdAt: serverTimestamp() }).catch(() => {});
+          } else if (item.action === 'update' && item.after) {
+            await updateDoc(ref, pickAllowedRevertFields(item.collectionName, item.after)).catch(() => {});
+          }
+          if (item.logId) await updateDoc(doc(db, "audit_logs", item.logId), { reverted: false }).catch(() => {});
+        }
+        await deleteDoc(doc(db, "redo_snapshots", rid)).catch(() => {});
+        showToast('✅ تم تنفيذ التراجع العكسي (Redo)');
+      });
     };
+
+    window.toggleSelectAllTrash = (checked) => document.querySelectorAll('.trash-chk').forEach(c => c.checked = checked);
     window.restoreTx = async (id, btn) => {
       await withBusy(btn, '...', async () => {
         await updateDoc(doc(db, "transactions", id), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
-        showToast('تمت الاستعادة من السلة');
+        showToast('تمت الاستعادة');
       });
     };
     window.hardDeleteSelectedTrash = async () => {
       const ids = [...document.querySelectorAll('.trash-chk:checked')].map(c => c.value);
-      if (!ids.length) { showToast('حدد عملية واحدة على الأقل للحذف النهائي'); return; }
-      if (!confirm(`حذف ${ids.length} عملية نهائياً مع صور الفواتير المرفقة بها؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
+      if (!ids.length) { showToast('حدد عملية واحدة على الأقل'); return; }
+      if (!confirm(`حذف ${ids.length} عملية نهائياً مع صورها؟`)) return;
       await withBusy(document.getElementById('btnHardDeleteSelected'), 'جاري الحذف...', async () => {
         for (const id of ids) {
           const t = allTxs.find(x => x.id === id);
-          if (t?.receiptId) {
-            await deleteDoc(doc(db, "receipts", t.receiptId)).catch(() => {});
-          }
+          if (t?.receiptId) await deleteDoc(doc(db, "receipts", t.receiptId)).catch(() => {});
           await deleteDoc(doc(db, "transactions", id));
         }
-        showToast(`✅ تم الحذف النهائي لـ ${ids.length} عملية وصورها المرفقة`);
+        showToast(`✅ تم الحذف النهائي لـ ${ids.length} عملية`);
       });
     };
 
-    /* تنظيف العمليات التجريبية (بتأكيد كتابي بكلمة مسح) */
-    window.clearExperimentalData = async () => {
-      if (userRole !== 'admin') return;
-      const trashed = allTxs.filter(t => t.deleted === true);
-      const pendingOrTest = allTxs.filter(t => t.deleted !== true);
-      const ans = prompt(`تنظيف العمليات التجريبية:\nيوجد حالياً ${pendingOrTest.length} عملية نشطة و ${trashed.length} في السلة.\n\nلحذف جميع العمليات التجريبية نهائياً مع صورها والبدء على صفحة بيضاء، اكتب كلمة: مسح`);
-      if (ans?.trim() !== 'مسح') { showToast('تم إلغاء التنظيف'); return; }
-      showToast('جاري التنظيف...');
-      try {
-        for (const t of allTxs) {
-          if (t.deleted !== true) {
-            await updateDoc(doc(db, "transactions", t.id), { deleted: true, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
-          }
-          if (t.receiptId) await deleteDoc(doc(db, "receipts", t.receiptId)).catch(() => {});
-          await deleteDoc(doc(db, "transactions", t.id));
-        }
-        showToast('✅ تم تنظيف العمليات التجريبية بنجاح');
-      } catch (e) { showToast(friendlyError(e), { error: true }); }
-    };
-
-    /* إعدادات الشركة */
+    /* إعدادات الشركة والحساب السري والفواتير والنسخ الاحتياطي */
     window.openSettingsModal = () => {
       document.getElementById('setNameAr').value = companySettings.nameAr || '';
       document.getElementById('setNameEn').value = companySettings.nameEn || '';
@@ -2645,43 +2929,30 @@
       pushNavState();
     };
     document.getElementById('btnSaveSettings').onclick = async () => {
-      const msg = document.getElementById('setMsg');
       await withBusy(document.getElementById('btnSaveSettings'), 'جاري الحفظ...', async () => {
-        try {
-          const fL = document.getElementById('setLogoFile').files[0];
-          const fSt = document.getElementById('setStampFile').files[0];
-          const fSi = document.getElementById('setSigFile').files[0];
-          await setDoc(doc(db, "settings", "company"), {
-            nameAr: document.getElementById('setNameAr').value.trim(),
-            nameEn: document.getElementById('setNameEn').value.trim(),
-            addressAr: document.getElementById('setAddrAr').value.trim(),
-            addressEn: '',
-            phone: document.getElementById('setPhone').value.trim(),
-            email: document.getElementById('setEmail').value.trim(),
-            logo: fL ? await compressImage(fL, 350, 120000) : (companySettings.logo || ''),
-            stamp: fSt ? await compressImage(fSt, 350, 120000) : (companySettings.stamp || ''),
-            signature: fSi ? await compressImage(fSi, 350, 120000) : (companySettings.signature || ''),
-            showStamp: document.getElementById('setShowStamp').checked,
-            showSignature: document.getElementById('setShowSig').checked,
-            updatedAt: serverTimestamp()
-          });
-          closeModal('settingsModal');
-          showToast('✅ تم حفظ بيانات الشركة');
-        } catch (e) { msg.style.color = 'var(--red)'; msg.innerText = friendlyError(e); }
+        const fL = document.getElementById('setLogoFile').files[0], fSt = document.getElementById('setStampFile').files[0], fSi = document.getElementById('setSigFile').files[0];
+        await setDoc(doc(db, "settings", "company"), {
+          nameAr: document.getElementById('setNameAr').value.trim(), nameEn: document.getElementById('setNameEn').value.trim(),
+          addressAr: document.getElementById('setAddrAr').value.trim(), addressEn: '',
+          phone: document.getElementById('setPhone').value.trim(), email: document.getElementById('setEmail').value.trim(),
+          logo: fL ? await compressImage(fL, 350, 120000) : (companySettings.logo || ''),
+          stamp: fSt ? await compressImage(fSt, 350, 120000) : (companySettings.stamp || ''),
+          signature: fSi ? await compressImage(fSi, 350, 120000) : (companySettings.signature || ''),
+          showStamp: document.getElementById('setShowStamp').checked, showSignature: document.getElementById('setShowSig').checked,
+          updatedAt: serverTimestamp()
+        });
+        closeModal('settingsModal'); showToast('✅ تم حفظ بيانات الشركة');
       });
     };
 
-    /* الحساب السري (للمؤسس فقط) */
     window.openPrivateModal = () => { renderPrivate(); document.getElementById('privateModal').classList.remove('hidden'); pushNavState(); };
     function renderPrivate() {
       let inS = 0, outS = 0;
       const html = privateTxs.map(p => {
         const amt = Number(p.amount || 0);
         if (p.type === 'in') inS += amt; else outS += amt;
-        return `<div class="tx-item">
-          <div><strong>${esc(p.note || 'حركة سرية')}</strong><br><small style="color:var(--muted)">${esc(p.txDate || '')}</small></div>
-          <div class="row"><span class="${p.type === 'in' ? 'amt-in' : 'amt-out'}">${amt.toLocaleString()} ج</span><button onclick="delPrivate('${esc(p.id)}')" class="sm secondary" style="color:var(--red);">×</button></div>
-        </div>`;
+        return `<div class="tx-item"><div><strong>${esc(p.note || 'حركة سرية')}</strong><br><small style="color:var(--muted)">${esc(p.txDate || '')}</small></div>
+          <div class="row"><span class="${p.type === 'in' ? 'amt-in' : 'amt-out'}">${amt.toLocaleString()} ج</span><button onclick="delPrivate('${esc(p.id)}')" class="sm secondary" style="color:var(--red);">×</button></div></div>`;
       }).join('');
       document.getElementById('privIn').innerText = inS.toLocaleString() + ' ج';
       document.getElementById('privOut').innerText = outS.toLocaleString() + ' ج';
@@ -2691,74 +2962,51 @@
       const amount = Number(document.getElementById('privAmount').value);
       if (!amount || amount <= 0) { showToast('أدخل مبلغاً صحيحاً', { error: true }); return; }
       await withBusy(document.getElementById('btnAddPrivate'), 'جاري الحفظ...', async () => {
-        await addDoc(collection(db, "private_ledger"), {
-          type: document.getElementById('privType').value, amount, note: document.getElementById('privNote').value.trim(),
-          txDate: getLocalDateStr(), createdAt: serverTimestamp()
-        });
-        document.getElementById('privAmount').value = ''; document.getElementById('privNote').value = '';
-        showToast('تمت الإضافة للحساب السري');
+        await addDoc(collection(db, "private_ledger"), { type: document.getElementById('privType').value, amount, note: document.getElementById('privNote').value.trim(), txDate: getLocalDateStr(), createdAt: serverTimestamp() });
+        document.getElementById('privAmount').value = ''; document.getElementById('privNote').value = ''; showToast('تمت الإضافة');
       });
     };
-    window.delPrivate = async (id) => {
-      if (!confirm("حذف؟")) return;
-      try { await deleteDoc(doc(db, "private_ledger", id)); }
-      catch (e) { showToast(friendlyError(e), { error: true }); }
-    };
+    window.delPrivate = async (id) => { if (confirm("حذف؟")) await deleteDoc(doc(db, "private_ledger", id)).catch(e => showToast(friendlyError(e), { error: true })); };
 
     window.viewReceipt = async (receiptId) => {
-      document.getElementById('receiptModal').classList.remove('hidden');
-      pushNavState();
-      const box = document.getElementById('receiptImgBox');
-      box.innerHTML = 'جاري التحميل...';
+      document.getElementById('receiptModal').classList.remove('hidden'); pushNavState();
+      const box = document.getElementById('receiptImgBox'); box.innerHTML = 'جاري التحميل...';
       try {
         const snap = await getDoc(doc(db, "receipts", receiptId));
         box.innerHTML = snap.exists() ? `<img src="${snap.data().imageData}" style="max-width:100%; border-radius:10px;">` : 'غير موجودة';
       } catch (e) { box.innerHTML = friendlyError(e); }
     };
 
-    /* النسخ الاحتياطي والاسترجاع الكامل (بدون كسر createdAt ومع استرجاع العمليات) */
     window.downloadBackup = () => {
       const data = { date: new Date().toISOString(), companySettings, projects, accounts, users: usersList, transactions: allTxs, privateTxs };
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-      a.download = `revise-backup-${getLocalDateStr()}.json`;
-      a.click();
+      a.download = `revise-backup-${getLocalDateStr()}.json`; a.click();
     };
-
     window.restoreBackup = async (ev) => {
       const file = ev.target.files[0];
       if (!file || userRole !== 'admin') return;
-      if (!confirm("استرجاع التصنيفات والفروع والعمليات من ملف النسخة الاحتياطية؟")) { ev.target.value = ''; return; }
+      if (!confirm("استرجاع النسخة الاحتياطية؟")) { ev.target.value = ''; return; }
       try {
         const data = JSON.parse(await file.text());
         for (const p of (data.projects || [])) {
-          const { id, ...rest } = p;
-          if (!id) continue;
-          const ref = doc(db, "projects", id);
-          const ex = await getDoc(ref);
-          const payload = { name: rest.name || 'تصنيف', category: rest.category || 'active', isFavorite: !!rest.isFavorite, visible: rest.visible !== false, archived: !!rest.archived };
-          if (ex.exists()) await updateDoc(ref, payload);
-          else await setDoc(ref, { ...payload, createdAt: serverTimestamp() });
+          const { id, ...rest } = p; if (!id) continue;
+          const ref = doc(db, "projects", id), ex = await getDoc(ref);
+          const pl = { name: rest.name || 'تصنيف', category: rest.category || 'active', isFavorite: !!rest.isFavorite, visible: rest.visible !== false, archived: !!rest.archived };
+          if (ex.exists()) await updateDoc(ref, pl); else await setDoc(ref, { ...pl, createdAt: serverTimestamp() });
         }
         for (const a of (data.accounts || [])) {
-          const { id, ...rest } = a;
-          if (!id) continue;
-          const ref = doc(db, "accounts", id);
-          const ex = await getDoc(ref);
-          const payload = { name: rest.name || 'فرع', hiddenFromStaff: !!rest.hiddenFromStaff, archived: !!rest.archived };
-          if (ex.exists()) await updateDoc(ref, payload);
-          else await setDoc(ref, { ...payload, projectId: rest.projectId || 'general', createdAt: serverTimestamp() });
+          const { id, ...rest } = a; if (!id) continue;
+          const ref = doc(db, "accounts", id), ex = await getDoc(ref);
+          const pl = { name: rest.name || 'فرع', hiddenFromStaff: !!rest.hiddenFromStaff, archived: !!rest.archived };
+          if (ex.exists()) await updateDoc(ref, pl); else await setDoc(ref, { ...pl, projectId: rest.projectId || 'general', createdAt: serverTimestamp() });
         }
         for (const t of (data.transactions || [])) {
-          const { id, pendingSync, localId, createdAt, updatedAt, ...rest } = t;
-          if (!id) continue;
-          const ref = doc(db, "transactions", id);
-          const ex = await getDoc(ref);
-          if (!ex.exists()) {
-            await setDoc(ref, { ...rest, createdAt: serverTimestamp() });
-          }
+          const { id, pendingSync, localId, createdAt, updatedAt, ...rest } = t; if (!id) continue;
+          const ref = doc(db, "transactions", id), ex = await getDoc(ref);
+          if (!ex.exists()) await setDoc(ref, { ...rest, createdAt: serverTimestamp() });
         }
-        showToast('✅ تم استرجاع النسخة الاحتياطية بنجاح');
+        showToast('✅ تم استرجاع النسخة الاحتياطية');
       } catch (e) { showToast(friendlyError(e), { error: true }); }
       ev.target.value = '';
     };
@@ -2792,8 +3040,7 @@
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         if (!navigator.onLine && localStorage.getItem('revise_uid')) return;
-        clearListeners();
-        localStorage.removeItem('revise_uid'); localStorage.removeItem('revise_role');
+        clearListeners(); localStorage.removeItem('revise_uid'); localStorage.removeItem('revise_role');
         document.getElementById('authScreen').classList.remove('hidden');
         document.getElementById('appScreen').classList.add('hidden');
         return;
