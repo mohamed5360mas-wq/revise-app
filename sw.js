@@ -1,4 +1,4 @@
-const CACHE_NAME = 'revise-cache-v12';
+const CACHE_NAME = 'revise-cache-v13';
 const CORE_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +23,6 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // استراتيجية الشبكة أولاً لملف التطبيق لضمان وصول التحديثات فوراً
   if (req.mode === 'navigate' || url.pathname.endsWith('index.html') || url.pathname === '/') {
     event.respondWith(
       fetch(req)
