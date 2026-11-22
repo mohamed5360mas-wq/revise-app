@@ -6,7 +6,7 @@
   <title>Revise - إدارة المقاولات والحسابات</title>
   <meta name="theme-color" content="#1d4ed8">
   <link rel="manifest" href="manifest.json">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
   <style>
     :root {
       --primary: #1d4ed8; --primary-dark: #1e3a8a; --gold: #eab308;
@@ -160,6 +160,24 @@
     .pdf-table th { background: #e2e8f0; color: #0f172a; font-weight: bold; }
     .pdf-footer { display: flex; justify-content: space-around; align-items: center; margin-top: 22px; padding-top: 10px; border-top: 1px dashed #cbd5e1; text-align: center; page-break-inside: avoid; }
     .pdf-footer img { max-height: 68px; max-width: 120px; object-fit: contain; display: block; margin: 4px auto; }
+
+    /* v13: وقت التسجيل، التعديل، تنبيه التلاعب، العداد السلس، والطباعة */
+    .tx-time-side { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+    .tx-edited-tag { display: block; font-size: 10.5px; color: var(--orange); margin-top: 2px; }
+    .fraud-alert { background: rgba(220,38,38,0.12); border: 1px solid var(--red); color: var(--red); border-radius: 10px; padding: 6px 8px; font-size: 11.5px; font-weight: 700; margin-top: 5px; }
+    .time-picker-box { background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 12px; margin-top: 8px; text-align: center; }
+    .time-picker-preview { font-size: 24px; font-weight: 800; color: var(--primary); margin-bottom: 10px; direction: ltr; }
+    .time-picker-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: center; }
+    .tp-col { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+    .tp-btn { width: 100%; padding: 10px 0; font-size: 20px; font-weight: 800; border-radius: 12px; margin: 0; background: var(--card); color: var(--primary); border: 1.5px solid var(--border); }
+    .tp-sel { width: 100%; text-align: center; font-size: 18px; font-weight: 800; padding: 10px 4px; margin: 0; border-radius: 12px; }
+    .ded-pending-box { background: rgba(217,119,6,0.12); border: 1px dashed var(--orange); border-radius: 10px; padding: 8px; margin-top: 6px; font-size: 12px; }
+    @media print {
+      body * { visibility: hidden !important; }
+      #printArea, #printArea * { visibility: visible !important; }
+      #printArea { position: fixed !important; inset: 0 !important; background: #fff !important; color: #000 !important; padding: 16px !important; z-index: 99999 !important; display: block !important; overflow: visible !important; }
+      .pdf-table th { background: #e2e8f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
   </style>
 </head>
 <body>
@@ -207,7 +225,12 @@
         <!-- رادار المدير / نسخة مصغرة للمحاسب والمهندس / شاشة الصنايعي -->
         <div id="radarCard" class="hero-card hidden"></div>
 
-        <!-- زر فاتورة خامات للصنايعي/المقاول -->
+        <!-- أزرار الحضور وكشف الخميس وفاتورة الخامات -->
+        <div id="homeQuickActions" class="row" style="margin-bottom:10px;">
+          <button id="btnWorkerCheckIn" class="green hidden" style="flex:1; margin:0;" onclick="openAttendanceModal('self')">✅ تسجيل حضوري اليوم</button>
+          <button id="btnStaffAttendance" class="gold hidden" style="flex:1; margin:0;" onclick="openAttendanceModal('staff')">📋 تحضير اليوم</button>
+          <button id="btnThursdayReport" class="secondary hidden" style="flex:1; margin:0;" onclick="openThursdayModal()">🗓️ كشف الخميس</button>
+        </div>
         <button id="btnWorkerMaterial" class="gold hidden" style="margin-bottom:12px;" onclick="openWorkerMaterialModal()">🧾 تسجيل فاتورة خامات للموقع</button>
 
         <!-- الاعتمادات المعلقة -->
@@ -303,7 +326,11 @@
                 <button id="btnAddInAcc" onclick="openTxModalForCurrent()" class="sm gold">+ حركة</button>
               </div>
             </div>
-            <div id="accLedgerBox" style="overflow-x:auto; margin-top:8px;"></div>
+            <div class="between" style="margin-top:8px;">
+              <small style="color:var(--muted);">ترتيب الجدول:</small>
+              <button type="button" id="btnToggleLedgerSort" onclick="toggleLedgerSort()" class="sm secondary">⏱️ وقت التسجيل الفعلي ⇄ التاريخ الظاهر</button>
+            </div>
+            <div id="accLedgerBox" style="overflow-x:auto; margin-top:6px;"></div>
           </div>
           <div id="accSummaryBar" class="hero-card"></div>
         </div>
@@ -371,7 +398,7 @@
       <button class="drawer-item hidden" id="drwTrash" onclick="closeDrawer(); openTrashModal()"><span>🗑️ السلة والتراجعات العكسية</span><span id="drwTrashCount" class="badge hidden">0</span></button>
       <button class="drawer-item hidden" id="drwReports" onclick="closeDrawer(); openReportModal('all')"><span>📊 التقارير العامة (PDF / Excel)</span></button>
       <button class="drawer-item hidden" id="drwStorage" onclick="closeDrawer(); openStorageModal()"><span>💾 حالة المساحة</span><small id="drwStorageMini" style="color:var(--muted);"></small></button>
-      <button class="drawer-item hidden" id="drwBackup" onclick="closeDrawer(); downloadBackup()"><span>⬇️ حفظ نسخة احتياطية (JSON)</span></button>
+      <button class="drawer-item hidden" id="drwBackup" onclick="closeDrawer(); downloadBackup()"><span>⬇️ حفظ نسخة احتياطية (JSON)<br><small style="color:var(--muted); font-weight:normal;">للحسابات فقط (الصور محفوظة على السيرفر)</small></span></button>
       <button class="drawer-item hidden" id="drwRestore" onclick="closeDrawer(); document.getElementById('restoreFile').click()"><span>⬆️ استرجاع نسخة احتياطية (JSON)</span></button>
       <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreBackup(event)">
       <button class="drawer-item" id="drwChangePass" onclick="closeDrawer(); openChangePassModal()"><span>🔑 تغيير كلمة السر</span></button>
@@ -486,6 +513,7 @@
       <div class="row" style="margin-top:12px;">
         <button id="btnSaveTx" class="green" style="flex:1.4;">حفظ</button>
         <button id="btnSaveAndNew" class="gold" style="flex:1.4;">حفظ + جديد</button>
+        <button id="btnSaveAndApprove" class="gold hidden" style="flex:1.6;">✅ حفظ واعتماد</button>
         <button id="btnDeleteTxModal" class="red hidden" style="flex:1;" onclick="deleteCurrentEditingTx()">حذف</button>
       </div>
     </div>
@@ -614,9 +642,16 @@
         <option value="admin">مدير</option>
       </select>
 
+      <div id="uDailyRateBox" style="margin-top:8px;">
+        <input type="number" id="uDailyRate" placeholder="سعر اليومية الافتراضي (للصنايعي - اختياري)" inputmode="numeric">
+      </div>
       <div style="margin-top:10px; background:var(--bg); padding:10px; border-radius:12px;">
         <strong style="font-size:13px; display:block; margin-bottom:4px;">المشاريع والتصنيفات المسموحة:</strong>
         <div id="uProjectsBox"></div>
+      </div>
+      <div id="uAllowedUsersWrap" style="margin-top:10px; background:var(--bg); padding:10px; border-radius:12px;">
+        <strong style="font-size:13px; display:block; margin-bottom:4px;">🔒 الأشخاص المسموح برؤيتهم (افتراضياً: لا أحد):</strong>
+        <div id="uAllowedUsersBox"></div>
       </div>
 
       <div style="margin-top:10px; background:var(--bg); padding:10px; border-radius:12px;">
@@ -654,6 +689,9 @@
       </select>
       <div class="row" style="margin-top:14px;">
         <button id="btnRunPdf" onclick="runReport('pdf')" class="red" style="flex:1;">📄 PDF ومشاركة</button>
+        <button onclick="runReport('print')" class="gold" style="flex:1;">🖨️ طباعة / حفظ PDF</button>
+      </div>
+      <div class="row" style="margin-top:8px;">
         <button onclick="runReport('csv')" class="green" style="flex:1;">📊 Excel</button>
         <button onclick="runReport('wa')" class="secondary" style="flex:1;">💬 واتساب</button>
       </div>
@@ -708,6 +746,14 @@
       <label style="display:block; font-size:12px; color:var(--muted); margin-top:4px;">✍️ صورة التوقيع:</label>
       <input type="file" id="setSigFile" accept="image/*">
       <label class="check-row" style="border:none;"><input type="checkbox" id="setShowSig" checked><span>إظهار التوقيع في الـ PDF</span></label>
+            <div style="margin-top:10px; padding:10px; background:var(--bg); border-radius:12px;">
+        <strong style="font-size:13px; display:block; margin-bottom:6px;">⏰ مواعيد العمل الرسمية وفترة السماح (لحضور الصنايعية):</strong>
+        <div class="row">
+          <div style="flex:1;"><small style="color:var(--muted);">بداية العمل:</small><input type="time" id="setWorkStart" value="09:00" style="margin-top:4px;"></div>
+          <div style="flex:1;"><small style="color:var(--muted);">نهاية العمل:</small><input type="time" id="setWorkEnd" value="17:00" style="margin-top:4px;"></div>
+        </div>
+        <div style="margin-top:6px;"><small style="color:var(--muted);">فترة السماح (دقيقة) — بعدها يُحسب التأخير من بداية العمل:</small><input type="number" id="setGraceMin" value="15" min="0" max="120" style="margin-top:4px;"></div>
+      </div>
       <p id="setMsg" style="font-size:12px; margin:6px 0;"></p>
       <button id="btnSaveSettings" class="green">حفظ بيانات الشركة</button>
     </div>
@@ -746,6 +792,95 @@
     </div>
   </div>
 
+  
+  <!-- نافذة حضور الصنايعية (5 دقائق × 5 دقائق) -->
+  <div id="attendanceModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:8px;">
+        <h3 id="attModalTitle" style="margin:0; color:var(--primary);">📋 تسجيل الحضور</h3>
+        <button onclick="closeModal('attendanceModal')" class="sm secondary">✕</button>
+      </div>
+      <select id="attProject" onchange="renderAttendanceWorkersList()"></select>
+      <div id="attDateWrap"><input type="date" id="attDate" onchange="renderAttendanceWorkersList()"></div>
+      <div id="attSelfInfo" class="hidden" style="background:var(--bg); padding:10px; border-radius:12px; margin-top:8px; font-size:13px;"></div>
+
+      <div id="attStaffWorkersWrap" class="hidden" style="margin-top:8px;">
+        <small style="color:var(--muted); font-weight:bold;">اختر الصنايعي:</small>
+        <select id="attWorkerSel" onchange="checkAttDuplicate()"></select>
+      </div>
+      <div id="attDupWarn" class="warn-box hidden" style="margin-top:8px;">✅ تم تسجيل الحضور لهذا اليوم بالفعل</div>
+
+      <div id="attTimeSection">
+        <div class="time-picker-box">
+          <small style="color:var(--muted); font-weight:bold;">وقت الحضور (قفزات 5 دقائق):</small>
+          <div id="tpInPreview" class="time-picker-preview">09:00 ص</div>
+          <div class="time-picker-grid">
+            <div class="tp-col">
+              <button type="button" class="tp-btn" onclick="stepTp('in','h',1)">+</button>
+              <select id="tpInH" class="tp-sel" onchange="syncTpPreview('in')"></select>
+              <button type="button" class="tp-btn" onclick="stepTp('in','h',-1)">-</button>
+            </div>
+            <div class="tp-col">
+              <button type="button" class="tp-btn" onclick="stepTp('in','m',5)">+</button>
+              <select id="tpInM" class="tp-sel" onchange="syncTpPreview('in')"></select>
+              <button type="button" class="tp-btn" onclick="stepTp('in','m',-5)">-</button>
+            </div>
+            <div class="tp-col">
+              <button type="button" class="tp-btn" onclick="toggleTpAmPm('in')">⇅</button>
+              <select id="tpInP" class="tp-sel" onchange="syncTpPreview('in')"><option value="AM">ص</option><option value="PM">م</option></select>
+              <button type="button" class="tp-btn" onclick="toggleTpAmPm('in')">⇅</button>
+            </div>
+          </div>
+        </div>
+
+        <details id="attOutDetails" style="margin-top:8px; background:var(--bg); padding:8px 10px; border-radius:12px;">
+          <summary style="cursor:pointer; font-size:13px; color:var(--muted); font-weight:bold;">وقت الانصراف (اختياري — الافتراضي نهاية الدوام)</summary>
+          <label class="check-row" style="border:none;"><input type="checkbox" id="attUseCustomOut" onchange="toggleAttOutBox()"><span>تحديد وقت انصراف مبكر</span></label>
+          <div id="attOutPickerWrap" class="time-picker-box hidden">
+            <div id="tpOutPreview" class="time-picker-preview">05:00 م</div>
+            <div class="time-picker-grid">
+              <div class="tp-col">
+                <button type="button" class="tp-btn" onclick="stepTp('out','h',1)">+</button>
+                <select id="tpOutH" class="tp-sel" onchange="syncTpPreview('out')"></select>
+                <button type="button" class="tp-btn" onclick="stepTp('out','h',-1)">-</button>
+              </div>
+              <div class="tp-col">
+                <button type="button" class="tp-btn" onclick="stepTp('out','m',5)">+</button>
+                <select id="tpOutM" class="tp-sel" onchange="syncTpPreview('out')"></select>
+                <button type="button" class="tp-btn" onclick="stepTp('out','m',-5)">-</button>
+              </div>
+              <div class="tp-col">
+                <button type="button" class="tp-btn" onclick="toggleTpAmPm('out')">⇅</button>
+                <select id="tpOutP" class="tp-sel" onchange="syncTpPreview('out')"><option value="AM">ص</option><option value="PM">م</option></select>
+                <button type="button" class="tp-btn" onclick="toggleTpAmPm('out')">⇅</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <input type="text" id="attNote" placeholder="ملاحظة إضافية (اختياري)">
+        <button id="btnSaveAttendance" class="green" style="margin-top:12px;">✅ حفظ الحضور</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة كشف الخميس -->
+  <div id="thursdayModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:8px;">
+        <h3 style="margin:0; color:var(--primary);">🗓️ كشف الخميس (تصفية الصنايعية)</h3>
+        <button onclick="closeModal('thursdayModal')" class="sm secondary">✕</button>
+      </div>
+      <div class="row" style="margin-bottom:10px;">
+        <div style="flex:1;"><small style="color:var(--muted);">من تاريخ:</small><input type="date" id="thuFrom" onchange="renderThursdayReport()" style="margin-top:4px;"></div>
+        <div style="flex:1;"><small style="color:var(--muted);">إلى تاريخ:</small><input type="date" id="thuTo" onchange="renderThursdayReport()" style="margin-top:4px;"></div>
+      </div>
+      <div id="thursdayBody"></div>
+      <button onclick="printThursdayReport()" class="gold" style="margin-top:12px;">🖨️ طباعة / حفظ كشف الخميس PDF</button>
+    </div>
+  </div>
+
+  <div id="printArea" class="hidden"></div>
   <div id="pdfRenderStage" class="hidden"></div>
 
   <script type="module">
@@ -758,17 +893,17 @@
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
-      collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, writeBatch, serverTimestamp
+      collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, writeBatch, serverTimestamp, terminate, clearIndexedDbPersistence
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '12.0';
+    const APP_VER = '13.0';
     const FOUNDER_PHONE = '01000227438';
     const FOUNDER_EMAIL = 'mohamed5360mas@gmail.com';
     const ALLOWED_TT_COLS = ['transactions', 'projects', 'accounts'];
     const ALL_CACHE_KEYS = [
       'revise_cache_projects', 'revise_cache_accounts', 'revise_cache_users', 'revise_cache_txs',
       'revise_offline_queue', 'revise_uid', 'revise_role', 'revise_assigned', 'revise_perms',
-      'revise_can_add', 'revise_uname', 'revise_is_founder', 'revise_company_settings'
+      'revise_can_add', 'revise_uname', 'revise_is_founder', 'revise_company_settings', 'revise_allowed_users'
     ];
 
     try {
@@ -880,8 +1015,27 @@
       finally { btn.disabled = false; btn.innerText = orig; }
     }
 
-    function tafqeet(n) {
-      n = Math.floor(Math.abs(Number(n) || 0));
+    function sanitizeAmount(val, isAttendanceDeduction = false) {
+      const n = Number(val);
+      if (!isFinite(n) || n <= 0) return 0;
+      if (isAttendanceDeduction || n < 101) return Math.floor(n);
+      return Math.round(n * 100) / 100;
+    }
+    function round2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+    function fmtShortTime(ts, fallbackMs) {
+      let d = null;
+      if (ts && ts.seconds) d = new Date(ts.seconds * 1000);
+      else if (fallbackMs) d = new Date(fallbackMs);
+      if (!d) return '';
+      let h = d.getHours(), m = String(d.getMinutes()).padStart(2, '0');
+      const p = h >= 12 ? 'م' : 'ص';
+      h = h % 12 || 12;
+      return `${d.getDate()}/${d.getMonth()+1} ${h}:${m} ${p}`;
+    }
+    function tafqeet(rawN) {
+      const absVal = Math.round(Math.abs(Number(rawN) || 0) * 100) / 100;
+      let n = Math.floor(absVal);
+      const piastres = Math.round((absVal - n) * 100);
       if (n === 0) return 'صفر جنيه مصري';
       const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
       const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
@@ -899,7 +1053,8 @@
       if (m) parts.push(m === 1 ? 'مليون' : m === 2 ? 'مليونان' : (m <= 10 ? sub(m) + ' ملايين' : sub(m) + ' مليون'));
       if (k) parts.push(k === 1 ? 'ألف' : k === 2 ? 'ألفان' : (k <= 10 ? sub(k) + ' آلاف' : sub(k) + ' ألف'));
       if (n) parts.push(sub(n));
-      return 'فقط ' + parts.join(' و') + ' جنيه مصري لا غير';
+      const pTxt = piastres > 0 ? (' و' + sub(piastres) + (piastres <= 10 && piastres >= 3 ? ' قروش' : ' قرشاً')) : '';
+      return 'فقط ' + parts.join(' و') + ' جنيه مصري' + pTxt + ' لا غير';
     }
 
     function compressImage(file, maxW = 800, maxLen = 470000) {
@@ -987,7 +1142,8 @@
     };
 
     let currentUser = null, currentUserName = 'المدير', userRole = 'worker', isFounderUser = false;
-    let myAssignedProjects = [], myCanAdd = true, myPerms = {};
+    let myAssignedProjects = [], myAllowedUsers = [], myCanAdd = true, myPerms = {};
+    let ledgerSortMode = 'created', attMode = 'self';
     let dataLoaded = false, isSyncing = false, searchQuery = '', unsubs = [];
     let editingTxId = null, editingOrigAmount = null, editingUserId = null, txDir = 'out';
     let currentTab = 'Home', projLevel = 1, currentProjId = null, currentAccId = null;
@@ -1009,7 +1165,7 @@
     let companySettings = readJson('revise_company_settings', {
       nameAr: 'شركة ريفايس للمقاولات العامة', nameEn: 'Revise Contracting',
       addressAr: 'القاهرة - جمهورية مصر العربية', phone: FOUNDER_PHONE, email: FOUNDER_EMAIL,
-      logo: '', stamp: '', signature: '', showStamp: true, showSignature: true
+      logo: '', stamp: '', signature: '', showStamp: true, showSignature: true, workStart: '09:00', workEnd: '17:00', graceMinutes: 15
     });
 
     function stripServerFields(obj) {
@@ -1025,6 +1181,7 @@
 
     function addAuditToBatch(batch, action, collectionName, docId, beforeObj, afterObj, summary) {
       if (!currentUser || !ALLOWED_TT_COLS.includes(collectionName)) return;
+      if (userRole !== 'admin' && collectionName !== 'transactions') return;
       const logRef = doc(collection(db, "audit_logs"));
       batch.set(logRef, {
         actorUid: currentUser.uid,
@@ -1032,10 +1189,10 @@
         actorRole: userRole,
         action,
         collectionName,
-        docId,
+        docId: String(docId || '').slice(0, 120),
         before: stripServerFields(beforeObj),
         after: stripServerFields(afterObj),
-        summary,
+        summary: String(summary || '').slice(0, 250),
         tsMs: Date.now(),
         reverted: false,
         createdAt: serverTimestamp()
@@ -1047,7 +1204,7 @@
     pushNavState();
 
     function getOpenModalId() {
-      const ids = ['calcModal', 'txHistoryModal', 'exitModal', 'txModal', 'workerMaterialModal', 'timeTravelModal', 'storageModal', 'changePassModal', 'userModal', 'reportModal', 'trashModal', 'settingsModal', 'privateModal', 'receiptModal'];
+      const ids = ['calcModal', 'txHistoryModal', 'exitModal', 'txModal', 'workerMaterialModal', 'attendanceModal', 'thursdayModal', 'timeTravelModal', 'storageModal', 'changePassModal', 'userModal', 'reportModal', 'trashModal', 'settingsModal', 'privateModal', 'receiptModal'];
       return ids.find(id => !document.getElementById(id).classList.contains('hidden')) || null;
     }
 
@@ -1257,6 +1414,7 @@
       clearListeners();
       ALL_CACHE_KEYS.forEach(k => localStorage.removeItem(k));
       projects = []; accounts = []; usersList = []; allTxs = []; offlineQueue = []; privateTxs = []; auditLogs = []; redoSnapshots = [];
+      try { await terminate(db); await clearIndexedDbPersistence(db); } catch (e) {}
       await signOut(auth);
       location.reload();
     };
@@ -1283,7 +1441,7 @@
       document.getElementById('optCustody').classList.toggle('hidden', !isAdmin);
       document.getElementById('optIncome').classList.toggle('hidden', !isAdmin);
       document.getElementById('navTeam').classList.toggle('hidden', !isAdmin);
-      document.getElementById('navWorkers').classList.toggle('hidden', !isStaff);
+      document.getElementById('navWorkers').classList.toggle('hidden', !(isAdmin || (isStaff && myAllowedUsers.length > 0)));
       document.getElementById('navProjects').classList.toggle('hidden', !isStaff);
       document.getElementById('addProjBox').classList.toggle('hidden', !isAdmin);
       document.getElementById('addAccBox').classList.toggle('hidden', !isAdmin);
@@ -1295,6 +1453,9 @@
       document.getElementById('btnFabAdd').classList.toggle('hidden', !allowAdd);
       document.getElementById('btnAddInAcc').classList.toggle('hidden', !allowAdd);
       document.getElementById('btnWorkerMaterial').classList.toggle('hidden', !isWorker);
+      document.getElementById('btnWorkerCheckIn').classList.toggle('hidden', !isWorker);
+      document.getElementById('btnStaffAttendance').classList.toggle('hidden', !(isAdmin || (isStaff && myCanAdd && myAllowedUsers.length > 0)));
+      document.getElementById('btnThursdayReport').classList.toggle('hidden', !isAdmin);
       document.querySelector('.bottom-nav').classList.toggle('hidden', isWorker);
     }
 
@@ -1358,20 +1519,43 @@
           renderAccounts(); populateAccountSelect();
         }, onErr));
 
-        unsubs.push(onSnapshot(collection(db, "users"), (snap) => {
-          usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
-          renderTeam(); renderCustodySummary(); renderTxs();
-        }, onErr));
+        if (isAdmin) {
+          unsubs.push(onSnapshot(collection(db, "users"), (snap) => {
+            usersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
+            renderTeam(); renderCustodySummary(); renderTxs();
+          }, onErr));
+        } else {
+          const allowedIds = [...new Set([currentUser.uid, ...myAllowedUsers])].slice(0, 30);
+          if (allowedIds.length) {
+            Promise.all(allowedIds.map(id => getDoc(doc(db, "users", id)).catch(() => null))).then(snaps => {
+              usersList = snaps.filter(s => s && s.exists()).map(s => ({ id: s.id, ...s.data() }));
+              localStorage.setItem('revise_cache_users', JSON.stringify(usersList));
+              renderTeam(); renderCustodySummary(); renderTxs();
+            });
+          } else {
+            usersList = []; renderTeam();
+          }
+        }
       }
 
-      if (isAdmin || canApproveNow()) {
+      if (isAdmin) {
         unsubs.push(onSnapshot(collection(db, "transactions"), (snap) => {
           allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
-            .sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+            .sort((a, b) => ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) || ((b.clientTs || 0) - (a.clientTs || 0)));
           localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
           renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger(); renderTrash();
         }, onErr));
+      } else if (canApproveNow()) {
+        const pList = myAssignedProjects.slice(0, 30);
+        if (pList.length) {
+          unsubs.push(onSnapshot(query(collection(db, "transactions"), where("projectId", "in", pList), where("deleted", "==", false)), (snap) => {
+            allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
+              .sort((a, b) => ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) || ((b.clientTs || 0) - (a.clientTs || 0)));
+            localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
+            renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger();
+          }, onErr));
+        } else { allTxs = []; renderTxs(); }
       } else if (isStaff) {
         unsubs.push(onSnapshot(query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid), where("deleted", "==", false)), (snap) => {
           staffOwnTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
@@ -1386,7 +1570,7 @@
           staffOwnTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
           mergeStaffTxs();
         }, onErr));
-        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid), where("category", "==", "material_purchase"), where("deleted", "==", false)), (snap) => {
+        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("createdBy", "==", currentUser.uid), where("deleted", "==", false)), (snap) => {
           workerOwnMatTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }));
           mergeStaffTxs();
         }, onErr));
@@ -1739,7 +1923,7 @@
         const net = projIn - projOut;
         sumBar.classList.remove('hidden');
         sumBar.innerHTML = `
-          <div class="hero-label">ملخص المشروع (الأساس النقدي الفعلي)</div>
+          <div class="hero-label">${userRole === "admin" ? "ملخص المشروع (الأساس النقدي الفعلي)" : "ملخص مصروفاتك أنت"}</div>
           <div class="hero-grid-3">
             <div class="hero-sub"><small>وارد</small><strong style="color:#34d399">${projIn.toLocaleString()} ج</strong></div>
             <div class="hero-sub"><small>مصروف نقدي</small><strong style="color:#f87171">${projOut.toLocaleString()} ج</strong></div>
@@ -1748,6 +1932,7 @@
       } else sumBar.classList.add('hidden');
     }
 
+    window.openAccountLedgerById = (aid) => { const a = accounts.find(x => x.id === aid); openAccountLedger(aid, a ? a.name : 'عام'); };
     window.openAccountLedger = (aid, title) => {
       currentAccId = aid;
       document.getElementById('curAccTitle').innerText = title;
@@ -1776,7 +1961,10 @@
       const sumBar = document.getElementById('accSummaryBar');
 
       const txs = allTxs.filter(t => t.deleted !== true && t.projectId === currentProjId && (currentAccId === '__general__' ? !t.accountId : t.accountId === currentAccId) && (userRole === 'admin' || t.createdBy === currentUser?.uid));
-      const cashAsc = [...txs].filter(t => t.status === 'approved' && (isProjectCashExpense(t) || (t.type === 'in' && t.category !== 'custody'))).sort((a, b) => (a.txDate || '').localeCompare(b.txDate || '') || ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)));
+      const sortAscFn = (a, b) => ledgerSortMode === 'txDate'
+        ? ((a.txDate || '').localeCompare(b.txDate || '') || ((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)))
+        : (((a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)) || ((a.clientTs || 0) - (b.clientTs || 0)));
+      const cashAsc = [...txs].filter(t => t.status === 'approved' && (isProjectCashExpense(t) || (t.type === 'in' && t.category !== 'custody'))).sort(sortAscFn);
 
       let running = 0, inSum = 0, outSum = 0;
       const runMap = new Map();
@@ -1787,7 +1975,9 @@
         runMap.set(t.id, running);
       });
 
-      const rowsDesc = [...txs].sort((a, b) => (b.txDate || '').localeCompare(a.txDate || '') || ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+      const rowsDesc = [...txs].sort((a, b) => sortAscFn(b, a));
+      const sortBtn = document.getElementById('btnToggleLedgerSort');
+      if (sortBtn) sortBtn.innerText = ledgerSortMode === 'created' ? '⏱️ وقت التسجيل الفعلي (اضغط للتاريخ الظاهر)' : '📅 التاريخ الظاهر (اضغط لوقت التسجيل)';
       const trs = rowsDesc.map(t => {
         const amt = Number(t.amount || 0);
         const isIn = t.type === 'in';
@@ -1797,9 +1987,9 @@
         const bal = runMap.get(t.id);
         const balTxt = (canSeeTotals() && bal !== undefined) ? `${Math.abs(bal).toLocaleString()} (${bal >= 0 ? 'له' : 'عليه'})` : '—';
         return `<tr ${canClick ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>
-          <td>${esc(t.txDate || '')}</td>
+          <td>${esc(t.txDate || '')}<br><span class="tx-time-side">${esc(fmtShortTime(t.createdAt, t.clientTs))}</span></td>
           <td class="${isIn ? 'cell-in' : 'cell-out'}">${amt.toLocaleString()}<br><small>${esc(catLabels[t.category] || (isIn ? 'له' : 'عليه'))}</small></td>
-          <td>${esc(t.note || catLabels[t.category] || '')}${byTag} ${stPill}</td>
+          <td>${esc(t.note || catLabels[t.category] || '')}${byTag} ${stPill}${t.editedAt ? `<span class="tx-edited-tag">✏️ عُدّلت ${esc(fmtShortTime(t.editedAt))}</span>` : ''}</td>
           <td>${balTxt}</td>
         </tr>`;
       }).join('');
@@ -1809,7 +1999,7 @@
         const net = inSum - outSum;
         sumBar.classList.remove('hidden');
         sumBar.innerHTML = `
-          <div class="hero-label">ملخص الفرع (نقدي)</div>
+          <div class="hero-label">${userRole === "admin" ? "ملخص الفرع (نقدي)" : "ملخص مصروفاتك أنت"}</div>
           <div class="hero-grid-3">
             <div class="hero-sub"><small>وارد</small><strong style="color:#34d399">${inSum.toLocaleString()} ج</strong></div>
             <div class="hero-sub"><small>مصروف نقدي</small><strong style="color:#f87171">${outSum.toLocaleString()} ج</strong></div>
@@ -1850,8 +2040,30 @@
       if (userRole === 'admin') return true;
       if (!canApproveNow()) return false;
       if (t.createdBy === currentUser?.uid) return false;
-      const creator = usersList.find(u => u.id === t.createdBy);
-      return creator && (creator.role === 'engineer' || creator.role === 'worker');
+      if (!myAssignedProjects.includes(t.projectId)) return false;
+      const r = t.createdByRole || usersList.find(u => u.id === t.createdBy)?.role || '';
+      return r === 'engineer' || r === 'worker';
+    }
+    function isSecretWageForMe(t) {
+      if (userRole === 'admin') return false;
+      if (userRole === 'worker' && t.workerId === currentUser?.uid) return false;
+      return t.category === 'daily' || t.isLateDeduction === true;
+    }
+    function buildFraudAlertHtml(t) {
+      if (userRole === 'worker' || !t.isAttendance || !t.checkInTime) return '';
+      const srvSec = t.createdAt?.seconds;
+      const cliMs = t.clientTs;
+      const refMs = srvSec ? srvSec * 1000 : cliMs;
+      if (!refMs || !t.txDate) return '';
+      const [hh, mm] = String(t.checkInTime).split(':').map(Number);
+      const [yy, mo, dd] = String(t.txDate).split('-').map(Number);
+      const claimed = new Date(yy, mo - 1, dd, hh || 0, mm || 0).getTime();
+      const diffMin = Math.abs(Math.round((refMs - claimed) / 60000));
+      if (diffMin <= 30) return '';
+      if (cliMs && srvSec && Math.abs(srvSec * 1000 - cliMs) > 5 * 60000) {
+        return `<div class="fraud-alert">📡 سُجّل أوفلاين الساعة ${esc(fmtShortTime(null, cliMs))} ووصل السيرفر ${esc(fmtShortTime(t.createdAt))}</div>`;
+      }
+      return `<div class="fraud-alert">⚠️ تنبيه فرق وقت: كتب ${esc(formatTime12(t.checkInTime))} — لكنه سجّل فعلياً ${esc(fmtShortTime(t.createdAt, cliMs))}</div>`;
     }
 
     function renderRadarCard(pendingCount) {
@@ -1929,13 +2141,17 @@
           const accTxt = t.accountName ? ' • ' + t.accountName : '';
           const byTxt = t.createdByName ? '✍️ ' + esc(t.createdByName) : '';
           const rBtn = t.receiptId ? `<button onclick="viewReceipt('${esc(t.receiptId)}')" class="sm secondary">🖼️</button>` : '';
+          const hideWage = isSecretWageForMe(t);
+          const amtTxt = hideWage ? (t.isLateDeduction ? `⚠️ تأخير ${t.lateMinutes || 0} د` : '🔒 سري') : `${amt.toLocaleString()} ج`;
+          const fraudHtml = buildFraudAlertHtml(t);
+          const edHtml = t.editedAt ? `<span class="tx-edited-tag">✏️ عُدّلت ${esc(fmtShortTime(t.editedAt))}</span>` : '';
           return `<div class="tx-item">
             <div class="tx-clickable" onclick="editTx('${esc(t.id)}')">
               <strong>${esc(pName)}${esc(accTxt)}</strong> <span class="pill pill-cat">${esc(catLabels[t.category] || 'عام')}</span><br>
-              <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || catLabels[t.category] || '')}<br>${byTxt}</small>
+              <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(hideWage && t.isLateDeduction ? 'خصم تأخير معلّق لدى المدير' : (t.note || catLabels[t.category] || ''))}<br>${byTxt} <span class="tx-time-side">• ⏱️ ${esc(fmtShortTime(t.createdAt, t.clientTs))}</span></small>${edHtml}${fraudHtml}
             </div>
             <div style="text-align:left;">
-              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${amt.toLocaleString()} ج</div>
+              <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}">${amtTxt}</div>
               <div class="row" style="margin-top:4px; justify-content:flex-end;">
                 ${rBtn}
                 <button onclick="approveTx('${esc(t.id)}', this)" class="sm green">اعتماد</button>
@@ -1964,13 +2180,16 @@
         const stPill = t.status === 'pending' ? '<span class="pill pill-pending">معلق</span>' : (t.status === 'rejected' ? '<span class="pill pill-rejected">مرفوض</span>' : (!isAdmin ? '<span class="pill pill-approved">معتمد</span>' : ''));
         const catPill = t.category && t.category !== 'general' ? `<span class="pill pill-cat">${esc(catLabels[t.category] || '')}</span>` : '';
         const canEdit = (isAdmin && !t.localId) || (!isAdmin && userRole !== 'worker' && !t.localId && t.status === 'pending' && t.createdBy === currentUser?.uid && myCanAdd);
+        const hideWage = isSecretWageForMe(t);
+        const amtTxt = hideWage ? (t.isLateDeduction ? `⚠️ تأخير ${t.lateMinutes || 0} د` : '🔒 سري') : `${amt.toLocaleString()} ج`;
+        const edHtml = t.editedAt ? `<span class="tx-edited-tag">✏️ عُدّلت ${esc(fmtShortTime(t.editedAt))}</span>` : '';
         return `<div class="tx-item">
           <div ${canEdit ? `class="tx-clickable" onclick="editTx('${esc(t.id)}')"` : ''}>
             <strong>${esc(pName)}${esc(accTxt)}</strong> ${catPill}${stPill}<br>
-            <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(t.note || catLabels[t.category] || '')}${byTxt}</small>${rejectTag}
+            <small style="color:var(--muted)">${esc(t.txDate || '')} • ${esc(hideWage && t.isLateDeduction ? 'خصم تأخير معلّق لدى المدير' : (t.note || catLabels[t.category] || ''))}${byTxt} <span class="tx-time-side">• ⏱️ ${esc(fmtShortTime(t.createdAt, t.clientTs))}</span></small>${edHtml}${rejectTag}
           </div>
           <div style="text-align:left;">
-            <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}" ${canEdit ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>${amt.toLocaleString()} ج</div>
+            <div class="${t.type === 'in' ? 'amt-in' : 'amt-out'}" ${canEdit ? `style="cursor:pointer" onclick="editTx('${esc(t.id)}')"` : ''}>${amtTxt}</div>
             <small style="color:var(--muted);">${esc(catLabels[t.category] || (t.type === 'in' ? 'وارد' : 'مصروف'))}</small>
           </div>
         </div>`;
@@ -2063,6 +2282,7 @@
       document.getElementById('txModalTitle').innerText = 'تسجيل عملية جديدة';
       document.getElementById('btnSaveTx').innerText = 'حفظ';
       document.getElementById('btnSaveAndNew').classList.remove('hidden');
+      document.getElementById('btnSaveAndApprove').classList.add('hidden');
       document.getElementById('btnDeleteTxModal').classList.add('hidden');
       document.getElementById('btnTxHistory').classList.add('hidden');
       setTxDir('out');
@@ -2121,6 +2341,7 @@
       document.getElementById('txModalTitle').innerText = 'تعديل العملية';
       document.getElementById('btnSaveTx').innerText = 'حفظ التعديل';
       document.getElementById('btnSaveAndNew').classList.add('hidden');
+      document.getElementById('btnSaveAndApprove').classList.toggle('hidden', !(userRole === 'admin' && t.status === 'pending'));
       document.getElementById('btnDeleteTxModal').classList.remove('hidden');
       document.getElementById('btnTxHistory').classList.toggle('hidden', userRole !== 'admin');
       setTxDir(t.type === 'in' ? 'in' : 'out');
@@ -2192,7 +2413,7 @@
       });
     };
 
-    async function saveTransaction(keepOpenForNew = false) {
+    async function saveTransaction(keepOpenForNew = false, alsoApprove = false) {
       const btn = keepOpenForNew ? document.getElementById('btnSaveAndNew') : document.getElementById('btnSaveTx');
       const category = document.getElementById('txCategory').value;
       const type = userRole === 'admin' ? txDir : 'out';
@@ -2203,12 +2424,14 @@
       const workerId = document.getElementById('txWorker').value;
       const workerObj = usersList.find(u => u.id === workerId);
       const txDate = document.getElementById('txDate').value || getLocalDateStr();
-      const amount = Number(document.getElementById('txAmount').value);
+      const rawAmt = Number(document.getElementById('txAmount').value);
+      const amount = sanitizeAmount(rawAmt, category === 'deduction');
       const note = document.getElementById('txNote').value.trim();
       const paidNow = document.getElementById('txPaidNow').checked && !editingTxId && userRole === 'admin' && (category === 'daily' || category === 'meters' || category === 'lump_sum');
       const file = document.getElementById('txReceipt').files[0];
 
-      if (!amount || amount <= 0) { document.getElementById('txAmount').focus(); showToast("أدخل مبلغاً صحيحاً", { error: true }); return; }
+      if (!amount || amount <= 0) { document.getElementById('txAmount').focus(); showToast("أقل مبلغ مسموح به هو 1 جنيه", { error: true }); return; }
+      if (alsoApprove && ['daily','meters','lump_sum','advance','deduction'].includes(category) && !workerId) { showToast('⚠️ لا يمكن اعتماد هذا البند بدون ربطه بشخص أولاً', { error: true }); return; }
       if (note.length > 500) { showToast("التفاصيل طويلة جداً", { error: true }); return; }
       if (category === 'custody' && !workerId) { showToast("اختر المهندس المستلم للعُهدة", { error: true }); return; }
 
@@ -2226,9 +2449,9 @@
             category, projectId, project: pObj ? pObj.name : 'عام',
             accountId, accountName: aObj ? aObj.name : '',
             workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
-            txDate, amount, note, updatedBy: currentUser.uid, updatedAt: serverTimestamp()
+            txDate, amount, note, updatedBy: currentUser.uid, updatedAt: serverTimestamp(), editedAt: serverTimestamp()
           };
-          if (userRole === 'admin') updateData.type = type;
+          if (userRole === 'admin') { updateData.type = type; if (alsoApprove) { updateData.status = 'approved'; updateData.approvedBy = currentUser.uid; updateData.approvedByName = currentUserName; } }
           else { updateData.editedByStaff = true; updateData.prevAmount = editingOrigAmount; }
           if (receiptData) {
             const rRef = await addDoc(collection(db, "receipts"), { imageData: receiptData, createdBy: currentUser.uid, workerId: workerId || null, createdAt: serverTimestamp() });
@@ -2247,11 +2470,17 @@
             workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
             txDate, amount, note, deleted: false,
             status: userRole === 'admin' ? 'approved' : 'pending',
-            createdBy: currentUser.uid, createdByName: currentUserName
+            createdBy: currentUser.uid, createdByName: currentUserName, createdByRole: userRole, clientTs: Date.now()
           };
           if (!navigator.onLine || !auth.currentUser) {
             offlineQueue.unshift({ ...payload, receiptData, localId: Date.now(), pendingSync: true });
-            localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
+            try {
+              localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue));
+            } catch (qe) {
+              offlineQueue[0].receiptData = null;
+              try { localStorage.setItem('revise_offline_queue', JSON.stringify(offlineQueue)); } catch (e2) {}
+              showToast('⚠️ مساحة الأوفلاين ممتلئة — تم حفظ العملية بدون الصورة مؤقتاً', { error: true });
+            }
             renderTxs();
           } else {
             let receiptId = null;
@@ -2292,7 +2521,8 @@
       });
     }
     document.getElementById('btnSaveTx').onclick = () => saveTransaction(false);
-    document.getElementById('btnSaveAndNew').onclick = () => saveTransaction(true);
+    document.getElementById('btnSaveAndNew').onclick = () => saveTransaction(true, false);
+    document.getElementById('btnSaveAndApprove').onclick = () => saveTransaction(false, true);
 
     /* تسجيل فاتورة خامات من شاشة الصنايعي/المقاول */
     window.openWorkerMaterialModal = () => {
@@ -2329,7 +2559,7 @@
           type: 'out', category: 'material_purchase', projectId, project: pObj ? pObj.name : 'عام',
           accountId: null, accountName: '', workerId: currentUser.uid, workerName: currentUserName,
           txDate, amount, note, deleted: false, status: 'pending',
-          createdBy: currentUser.uid, createdByName: currentUserName,
+          createdBy: currentUser.uid, createdByName: currentUserName, createdByRole: userRole, clientTs: Date.now(),
           receiptId, hasReceipt: !!receiptId, createdAt: serverTimestamp()
         };
         batch.set(txRef, payload);
@@ -2342,13 +2572,32 @@
 
     window.approveTx = async (id, btn) => {
       const beforeObj = allTxs.find(x => x.id === id);
+      if (!beforeObj) return;
+      if (['daily','meters','lump_sum','advance','deduction'].includes(beforeObj.category) && !beforeObj.workerId) {
+        showToast('⚠️ اربط العملية بشخص أولاً (اضغط على العملية لتعديلها)', { error: true });
+        return;
+      }
+      let finalAmount = Number(beforeObj.amount || 0);
+      if (beforeObj.category === 'daily' && finalAmount <= 0) {
+        const w = usersList.find(u => u.id === beforeObj.workerId);
+        const defRate = w?.defaultDailyRate || '';
+        const entered = prompt(`أدخل مبلغ يومية ${beforeObj.workerName || 'الصنايعي'} للاعتماد:`, defRate);
+        if (entered === null) return;
+        finalAmount = sanitizeAmount(entered, false);
+        if (finalAmount <= 0) { showToast('مبلغ اليومية يجب أن يكون أكبر من صفر', { error: true }); return; }
+      }
       await withBusy(btn, 'جاري...', async () => {
         const batch = writeBatch(db);
-        batch.update(doc(db, "transactions", id), {
+        const upd = {
           status: 'approved', approvedBy: currentUser.uid, approvedByName: currentUserName,
           updatedBy: currentUser.uid, updatedAt: serverTimestamp()
-        });
-        addAuditToBatch(batch, 'update', 'transactions', id, beforeObj, { ...beforeObj, status: 'approved' }, `اعتماد عملية: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        };
+        if (finalAmount !== Number(beforeObj.amount || 0)) upd.amount = finalAmount;
+        batch.update(doc(db, "transactions", id), upd);
+        addAuditToBatch(batch, 'update', 'transactions', id, beforeObj, { ...beforeObj, ...upd }, `اعتماد عملية: ${finalAmount.toLocaleString()} ج`);
+        if (userRole === 'admin' && beforeObj.category === 'daily' && beforeObj.workerId && finalAmount > 0) {
+          batch.update(doc(db, "users", beforeObj.workerId), { defaultDailyRate: finalAmount });
+        }
         await batch.commit();
         showToast('✅ تم الاعتماد');
       });
@@ -2517,6 +2766,12 @@
       document.getElementById('uPin').value = '';
       document.getElementById('uPin').classList.toggle('hidden', !!u);
       document.getElementById('uRole').value = u?.role || 'engineer';
+      document.getElementById('uDailyRate').value = u?.defaultDailyRate || '';
+      const allowedU = u?.allowedUsers || [];
+      const otherUsers = usersList.filter(x => x.id !== uid);
+      document.getElementById('uAllowedUsersBox').innerHTML = otherUsers.length
+        ? otherUsers.map(x => `<label class="check-row"><input type="checkbox" value="${esc(x.id)}" ${allowedU.includes(x.id) ? 'checked' : ''}><span>${esc(x.name)} (${esc(roleLabels[x.role] || x.role)})</span></label>`).join('')
+        : '<small style="color:var(--muted)">لا يوجد مستخدمون آخرون بعد</small>';
       const perms = u?.permissions || {};
       document.getElementById('permAdd').checked = u ? u.canAddExpenses !== false : true;
       document.getElementById('permCustody').checked = perms.canSeeCustody !== false;
@@ -2547,13 +2802,15 @@
         canSeeTotals: document.getElementById('permTotals').checked
       };
       const assignedProjects = [...document.querySelectorAll('#uProjectsBox input:checked')].map(i => i.value);
+      const allowedUsers = [...document.querySelectorAll('#uAllowedUsersBox input:checked')].map(i => i.value);
+      const defaultDailyRate = sanitizeAmount(document.getElementById('uDailyRate').value, false);
       const msg = document.getElementById('userModalMsg');
       if (!name || !phone) { msg.style.color = 'var(--red)'; msg.innerText = 'أدخل الاسم ورقم الموبايل'; return; }
 
       await withBusy(document.getElementById('btnSaveUser'), 'جاري الحفظ...', async () => {
         try {
           if (editingUserId) {
-            await updateDoc(doc(db, "users", editingUserId), { name, phone, role, canAddExpenses, assignedProjects, permissions });
+            await updateDoc(doc(db, "users", editingUserId), { name, phone, role, canAddExpenses, assignedProjects, allowedUsers, defaultDailyRate, permissions });
             closeModal('userModal');
             showToast('✅ تم تحديث البيانات والصلاحيات');
           } else {
@@ -2631,20 +2888,24 @@
       if (!ttPendingLogs.length) return;
       await withBusy(document.getElementById('btnExecTimeTravel'), 'جاري التراجع...', async () => {
         const redoItems = [];
+        let okCount = 0, failCount = 0;
         for (const log of ttPendingLogs) {
           if (!ALLOWED_TT_COLS.includes(log.collectionName)) continue;
-          const ref = doc(db, log.collectionName, log.docId);
-          if (log.action === 'create') {
-            if (log.collectionName === 'transactions') await updateDoc(ref, { deleted: true, deletedByName: 'تراجع زمني', updatedBy: currentUser.uid, updatedAt: serverTimestamp() }).catch(() => {});
-            else if (log.collectionName === 'accounts') await deleteDoc(ref).catch(() => {});
-            else if (log.collectionName === 'projects') await updateDoc(ref, { archived: true, isFavorite: false }).catch(() => {});
-          } else if (log.action === 'update' && log.before) {
-            await updateDoc(ref, pickAllowedRevertFields(log.collectionName, log.before)).catch(() => {});
-          } else if (log.action === 'delete' && log.before) {
-            await setDoc(ref, { ...log.before, createdAt: serverTimestamp() }).catch(() => {});
-          }
-          await updateDoc(doc(db, "audit_logs", log.id), { reverted: true }).catch(() => {});
-          redoItems.push({ logId: log.id, collectionName: log.collectionName, docId: log.docId, action: log.action, after: log.after || null, summary: log.summary || '' });
+          try {
+            const ref = doc(db, log.collectionName, log.docId);
+            if (log.action === 'create') {
+              if (log.collectionName === 'transactions') await updateDoc(ref, { deleted: true, deletedByName: 'تراجع زمني', updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+              else if (log.collectionName === 'accounts') await deleteDoc(ref);
+              else if (log.collectionName === 'projects') await updateDoc(ref, { archived: true, isFavorite: false });
+            } else if (log.action === 'update' && log.before) {
+              await updateDoc(ref, pickAllowedRevertFields(log.collectionName, log.before));
+            } else if (log.action === 'delete' && log.before) {
+              await setDoc(ref, { ...log.before, createdAt: serverTimestamp() });
+            }
+            await updateDoc(doc(db, "audit_logs", log.id), { reverted: true });
+            redoItems.push({ logId: log.id, collectionName: log.collectionName, docId: log.docId, action: log.action, after: log.after || null, summary: log.summary || '' });
+            okCount++;
+          } catch (e) { failCount++; }
         }
         if (redoItems.length) {
           await addDoc(collection(db, "redo_snapshots"), {
@@ -2658,7 +2919,7 @@
         }
         ttPendingLogs = [];
         closeModal('timeTravelModal');
-        showToast('✅ تم التراجع الزمني وحفظ لقطة Redo');
+        showToast(`✅ التراجع الزمني: نجح ${okCount} وفشل ${failCount}`);
       });
     };
 
@@ -2756,65 +3017,70 @@
         return;
       }
 
-      await withBusy(document.getElementById('btnRunPdf'), 'جاري تجهيز الـ PDF...', async () => {
-        if (typeof window.html2pdf === 'undefined') throw new Error('مكتبة الـ PDF غير محمّلة حالياً');
-        const s = companySettings;
-        const trs = finalRows.map(r => `<tr>
-          <td>${esc(r.txDate || '')}</td>
-          <td style="text-align:right;">${esc(r.note || catLabels[r.category] || '')}</td>
-          <td>${r.isIn ? 0 : r.amt.toLocaleString()}</td>
-          <td>${r.isIn ? r.amt.toLocaleString() : 0}</td>
-          <td style="color:${r.run < 0 ? '#dc2626' : '#059669'}; font-weight:bold;">${Math.abs(r.run).toLocaleString()}</td>
-        </tr>`).join('');
+      const s = companySettings;
+      const safeImg = (src) => (src && src.startsWith('data:image/')) ? `<img src="${src}" onerror="this.remove()">` : '';
+      const trs = finalRows.map(r => `<tr>
+        <td>${esc(r.txDate || '')}</td>
+        <td style="text-align:right;">${esc(r.note || catLabels[r.category] || '')}</td>
+        <td>${r.isIn ? 0 : r.amt.toLocaleString()}</td>
+        <td>${r.isIn ? r.amt.toLocaleString() : 0}</td>
+        <td style="color:${r.run < 0 ? '#dc2626' : '#059669'}; font-weight:bold;">${Math.abs(r.run).toLocaleString()}</td>
+      </tr>`).join('');
 
-        const stage = document.getElementById('pdfRenderStage');
+      const reportHtml = `<div dir="rtl" style="background:#fff; color:#0f172a; padding:18px; font-family:system-ui,-apple-system,sans-serif; width:100%;">
+        <div class="pdf-header">
+          <div><strong>${esc(s.nameAr || 'شركة ريفايس للمقاولات')}</strong><br><small>${esc(s.phone || '')}<br>${esc(s.email || '')}</small></div>
+          ${safeImg(s.logo)}
+          <div style="text-align:left;"><strong>${esc(s.nameEn || 'Revise')}</strong><br><small>${esc(s.addressAr || '')}</small></div>
+        </div>
+        <h3 style="text-align:center; color:#1d4ed8; margin:6px 0 6px;">${esc(title)}</h3>
+        ${extraSummary}
+        <table class="pdf-table">
+          <thead><tr><th>التاريخ</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr></thead>
+          <tbody>
+            ${trs || '<tr><td colspan="5">لا توجد عمليات</td></tr>'}
+            <tr style="font-weight:bold; background:#f1f5f9;">
+              <td colspan="2">إجمالي العمليات</td>
+              <td style="color:#dc2626;">${totalOut.toLocaleString()}</td>
+              <td style="color:#059669;">${totalIn.toLocaleString()}</td>
+              <td></td>
+            </tr>
+            <tr style="font-weight:bold;">
+              <td colspan="2">الرصيد الإجمالي - ${net >= 0 ? 'له' : 'عليه'}</td>
+              <td colspan="3" style="background:${net >= 0 ? '#dcfce7' : '#fee2e2'}; color:${net >= 0 ? '#166534' : '#991b1b'}; font-size:14px;">${Math.abs(net).toLocaleString()} ج (${esc(tafqeet(net))})</td>
+            </tr>
+          </tbody>
+        </table>
+        ${(s.showStamp || s.showSignature) ? `<div class="pdf-footer">
+          ${s.showSignature ? `<div><small>التوقيع</small>${safeImg(s.signature) || '<br>________'}</div>` : ''}
+          ${s.showStamp ? `<div><small>ختم الشركة</small>${safeImg(s.stamp) || '<br>________'}</div>` : ''}
+        </div>` : ''}
+        <p style="text-align:left; font-size:11px; color:#64748b; margin-top:14px;">تاريخ التقرير: ${todayStr}</p>
+      </div>`;
+
+      if (format === 'print') {
+        const pa = document.getElementById('printArea');
+        pa.innerHTML = reportHtml;
+        pa.classList.remove('hidden');
+        closeModal('reportModal');
+        setTimeout(() => { window.print(); pa.classList.add('hidden'); pa.innerHTML = ''; }, 150);
+        return;
+      }
+
+      await withBusy(document.getElementById('btnRunPdf'), 'جاري تجهيز الـ PDF...', async () => {
+        if (typeof window.html2pdf === 'undefined') throw new Error('مكتبة الـ PDF غير محمّلة حالياً — استخدم زر الطباعة');
         const overlay = document.getElementById('pdfOverlay');
         overlay.classList.remove('hidden');
-        stage.classList.remove('hidden');
-        stage.innerHTML = `
-          <div class="pdf-header">
-            <div><strong>${esc(s.nameAr || 'شركة ريفايس للمقاولات')}</strong><br><small>${esc(s.phone || '')}<br>${esc(s.email || '')}</small></div>
-            ${s.logo ? `<img src="${s.logo}">` : ''}
-            <div style="text-align:left;"><strong>${esc(s.nameEn || 'Revise')}</strong><br><small>${esc(s.addressAr || '')}</small></div>
-          </div>
-          <h3 style="text-align:center; color:#1d4ed8; margin:6px 0 6px;">${esc(title)}</h3>
-          ${extraSummary}
-          <table class="pdf-table">
-            <thead><tr><th>التاريخ</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr></thead>
-            <tbody>
-              ${trs || '<tr><td colspan="5">لا توجد عمليات</td></tr>'}
-              <tr style="font-weight:bold; background:#f1f5f9;">
-                <td colspan="2">إجمالي العمليات</td>
-                <td style="color:#dc2626;">${totalOut.toLocaleString()}</td>
-                <td style="color:#059669;">${totalIn.toLocaleString()}</td>
-                <td></td>
-              </tr>
-              <tr style="font-weight:bold;">
-                <td colspan="2">الرصيد الإجمالي - ${net >= 0 ? 'له' : 'عليه'}</td>
-                <td colspan="3" style="background:${net >= 0 ? '#dcfce7' : '#fee2e2'}; color:${net >= 0 ? '#166534' : '#991b1b'}; font-size:14px;">${Math.abs(net).toLocaleString()} ج (${esc(tafqeet(net))})</td>
-              </tr>
-            </tbody>
-          </table>
-          ${(s.showStamp || s.showSignature) ? `<div class="pdf-footer">
-            ${s.showSignature ? `<div><small>التوقيع</small>${s.signature ? `<img src="${s.signature}">` : '<br>________'}</div>` : ''}
-            ${s.showStamp ? `<div><small>ختم الشركة</small>${s.stamp ? `<img src="${s.stamp}">` : '<br>________'}</div>` : ''}
-          </div>` : ''}
-          <p style="text-align:left; font-size:11px; color:#64748b; margin-top:14px;">تاريخ التقرير: ${todayStr}</p>`;
-
-        // انتظار تحميل كل الصور قبل التصوير لمنع الصفحة البيضاء على الموبايل
-        await Promise.all([...stage.querySelectorAll('img')].map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })));
-        await new Promise(r => setTimeout(r, 120));
-
         const fileName = `كشف-حساب-${safeSlug}-${todayStr}.pdf`;
         const opt = {
           margin: [8, 8, 8, 8], filename: fileName,
           image: { type: 'jpeg', quality: 0.92 },
-          html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0, scrollX: 0 },
+          html2canvas: { scale: 1.5, useCORS: true, logging: false, windowWidth: 794, backgroundColor: '#ffffff' },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
         try {
-          const pdfBlob = await window.html2pdf().set(opt).from(stage).outputPdf('blob');
+          const pdfBlob = await window.html2pdf().set(opt).from(reportHtml, 'string').outputPdf('blob');
           const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
           closeModal('reportModal');
           if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
@@ -2826,7 +3092,7 @@
           setTimeout(() => URL.revokeObjectURL(url), 5000);
           showToast('✅ تم تحميل الـ PDF');
         } finally {
-          stage.innerHTML = ''; stage.classList.add('hidden'); overlay.classList.add('hidden');
+          overlay.classList.add('hidden');
         }
       });
     };
@@ -2896,8 +3162,12 @@
 
     window.toggleSelectAllTrash = (checked) => document.querySelectorAll('.trash-chk').forEach(c => c.checked = checked);
     window.restoreTx = async (id, btn) => {
+      const beforeObj = allTxs.find(x => x.id === id);
       await withBusy(btn, '...', async () => {
-        await updateDoc(doc(db, "transactions", id), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+        const batch = writeBatch(db);
+        batch.update(doc(db, "transactions", id), { deleted: false, updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+        addAuditToBatch(batch, 'update', 'transactions', id, beforeObj, { ...beforeObj, deleted: false }, `استعادة من السلة: ${Number(beforeObj?.amount || 0).toLocaleString()} ج`);
+        await batch.commit();
         showToast('تمت الاستعادة');
       });
     };
@@ -2906,11 +3176,14 @@
       if (!ids.length) { showToast('حدد عملية واحدة على الأقل'); return; }
       if (!confirm(`حذف ${ids.length} عملية نهائياً مع صورها؟`)) return;
       await withBusy(document.getElementById('btnHardDeleteSelected'), 'جاري الحذف...', async () => {
+        const batch = writeBatch(db);
         for (const id of ids) {
           const t = allTxs.find(x => x.id === id);
-          if (t?.receiptId) await deleteDoc(doc(db, "receipts", t.receiptId)).catch(() => {});
-          await deleteDoc(doc(db, "transactions", id));
+          if (t?.receiptId) batch.delete(doc(db, "receipts", t.receiptId));
+          batch.delete(doc(db, "transactions", id));
+          addAuditToBatch(batch, 'delete', 'transactions', id, t, null, `حذف نهائي من السلة: ${Number(t?.amount || 0).toLocaleString()} ج`);
         }
+        await batch.commit();
         showToast(`✅ تم الحذف النهائي لـ ${ids.length} عملية`);
       });
     };
@@ -2924,6 +3197,9 @@
       document.getElementById('setEmail').value = companySettings.email || '';
       document.getElementById('setShowStamp').checked = companySettings.showStamp !== false;
       document.getElementById('setShowSig').checked = companySettings.showSignature !== false;
+      document.getElementById('setWorkStart').value = companySettings.workStart || '09:00';
+      document.getElementById('setWorkEnd').value = companySettings.workEnd || '17:00';
+      document.getElementById('setGraceMin').value = companySettings.graceMinutes ?? 15;
       document.getElementById('setMsg').innerText = '';
       document.getElementById('settingsModal').classList.remove('hidden');
       pushNavState();
@@ -2939,6 +3215,9 @@
           stamp: fSt ? await compressImage(fSt, 350, 120000) : (companySettings.stamp || ''),
           signature: fSi ? await compressImage(fSi, 350, 120000) : (companySettings.signature || ''),
           showStamp: document.getElementById('setShowStamp').checked, showSignature: document.getElementById('setShowSig').checked,
+          workStart: document.getElementById('setWorkStart').value || '09:00',
+          workEnd: document.getElementById('setWorkEnd').value || '17:00',
+          graceMinutes: Math.max(0, parseInt(document.getElementById('setGraceMin').value || '15', 10) || 0),
           updatedAt: serverTimestamp()
         });
         closeModal('settingsModal'); showToast('✅ تم حفظ بيانات الشركة');
@@ -3011,6 +3290,269 @@
       ev.target.value = '';
     };
 
+
+    /* v13: تبديل ترتيب الجدول */
+    window.toggleLedgerSort = () => {
+      ledgerSortMode = ledgerSortMode === 'created' ? 'txDate' : 'created';
+      renderLedger();
+    };
+
+    /* v13: منظومة الحضور (عدّاد 5 دقائق × 5 دقائق) + خصم التأخير + كشف الخميس */
+    function formatTime12(hhmm) {
+      if (!hhmm) return '';
+      let [h, m] = String(hhmm).split(':').map(Number);
+      const p = h >= 12 ? 'م' : 'ص';
+      h = h % 12 || 12;
+      return `${String(h).padStart(2,'0')}:${String(m || 0).padStart(2,'0')} ${p}`;
+    }
+    function initTimePickerSelects(prefix, default24) {
+      const selH = document.getElementById(prefix === 'in' ? 'tpInH' : 'tpOutH');
+      const selM = document.getElementById(prefix === 'in' ? 'tpInM' : 'tpOutM');
+      const selP = document.getElementById(prefix === 'in' ? 'tpInP' : 'tpOutP');
+      selH.innerHTML = Array.from({length: 12}, (_, i) => `<option value="${i+1}">${String(i+1).padStart(2,'0')}</option>`).join('');
+      selM.innerHTML = Array.from({length: 12}, (_, i) => `<option value="${i*5}">${String(i*5).padStart(2,'0')}</option>`).join('');
+      let [h, m] = String(default24 || '09:00').split(':').map(Number);
+      const p = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      m = Math.floor((m || 0) / 5) * 5;
+      selH.value = String(h); selM.value = String(m); selP.value = p;
+      syncTpPreview(prefix);
+    }
+    window.syncTpPreview = (prefix) => {
+      const h = document.getElementById(prefix === 'in' ? 'tpInH' : 'tpOutH').value;
+      const m = document.getElementById(prefix === 'in' ? 'tpInM' : 'tpOutM').value;
+      const p = document.getElementById(prefix === 'in' ? 'tpInP' : 'tpOutP').value;
+      document.getElementById(prefix === 'in' ? 'tpInPreview' : 'tpOutPreview').innerText =
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${p === 'AM' ? 'ص' : 'م'}`;
+    };
+    window.stepTp = (prefix, field, delta) => {
+      const el = document.getElementById(prefix === 'in' ? (field === 'h' ? 'tpInH' : 'tpInM') : (field === 'h' ? 'tpOutH' : 'tpOutM'));
+      let v = parseInt(el.value, 10) + delta;
+      if (field === 'h') { if (v > 12) v = 1; if (v < 1) v = 12; }
+      else { if (v >= 60) v = 0; if (v < 0) v = 55; }
+      el.value = String(v);
+      syncTpPreview(prefix);
+    };
+    window.toggleTpAmPm = (prefix) => {
+      const el = document.getElementById(prefix === 'in' ? 'tpInP' : 'tpOutP');
+      el.value = el.value === 'AM' ? 'PM' : 'AM';
+      syncTpPreview(prefix);
+    };
+    function getTp24(prefix) {
+      let h = parseInt(document.getElementById(prefix === 'in' ? 'tpInH' : 'tpOutH').value, 10);
+      const m = parseInt(document.getElementById(prefix === 'in' ? 'tpInM' : 'tpOutM').value, 10);
+      const p = document.getElementById(prefix === 'in' ? 'tpInP' : 'tpOutP').value;
+      if (p === 'PM' && h !== 12) h += 12;
+      if (p === 'AM' && h === 12) h = 0;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+    function toMinutes(hhmm) {
+      const [h, m] = String(hhmm || '09:00').split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    }
+    window.toggleAttOutBox = () => {
+      document.getElementById('attOutPickerWrap').classList.toggle('hidden', !document.getElementById('attUseCustomOut').checked);
+    };
+
+    window.openAttendanceModal = (mode) => {
+      attMode = mode;
+      const visProjs = getVisibleProjects().filter(p => !p.archived);
+      const pSel = document.getElementById('attProject');
+      pSel.innerHTML = visProjs.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+      if (!visProjs.length) { showToast('لا توجد مشاريع نشطة متاحة لك', { error: true }); return; }
+
+      document.getElementById('attModalTitle').innerText = mode === 'self' ? '✅ تسجيل حضوري اليوم' : '📋 تحضير الصنايعية اليومي';
+      document.getElementById('attDate').value = getLocalDateStr();
+      document.getElementById('attDateWrap').classList.toggle('hidden', mode === 'self');
+      document.getElementById('attSelfInfo').classList.toggle('hidden', mode !== 'self');
+      document.getElementById('attStaffWorkersWrap').classList.toggle('hidden', mode === 'self');
+      if (mode === 'self') {
+        document.getElementById('attSelfInfo').innerText = `📅 اليوم: ${getLocalDateStr()} • الدوام الرسمي: ${formatTime12(companySettings.workStart || '09:00')} – ${formatTime12(companySettings.workEnd || '17:00')}`;
+      }
+      document.getElementById('attUseCustomOut').checked = false;
+      document.getElementById('attOutPickerWrap').classList.add('hidden');
+      document.getElementById('attNote').value = '';
+      initTimePickerSelects('in', companySettings.workStart || '09:00');
+      initTimePickerSelects('out', companySettings.workEnd || '17:00');
+      renderAttendanceWorkersList();
+      document.getElementById('attendanceModal').classList.remove('hidden');
+      pushNavState();
+    };
+
+    window.renderAttendanceWorkersList = () => {
+      if (attMode === 'staff') {
+        const wSel = document.getElementById('attWorkerSel');
+        const workers = usersList.filter(u => u.role === 'worker' && u.active !== false && (userRole === 'admin' || myAllowedUsers.includes(u.id)));
+        wSel.innerHTML = workers.length
+          ? workers.map(w => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')
+          : '<option value="">لا يوجد صنايعية متاحون لك</option>';
+      }
+      checkAttDuplicate();
+    };
+
+    window.checkAttDuplicate = () => {
+      const wid = attMode === 'self' ? currentUser?.uid : document.getElementById('attWorkerSel').value;
+      const dt = attMode === 'self' ? getLocalDateStr() : (document.getElementById('attDate').value || getLocalDateStr());
+      const exists = [...offlineQueue, ...allTxs].some(t =>
+        t.deleted !== true && t.status !== 'rejected' && t.category === 'daily' && t.workerId === wid && t.txDate === dt
+      );
+      document.getElementById('attDupWarn').classList.toggle('hidden', !exists);
+      document.getElementById('attTimeSection').classList.toggle('hidden', exists || !wid);
+    };
+
+    document.getElementById('btnSaveAttendance').onclick = async () => {
+      const projectId = document.getElementById('attProject').value;
+      const pObj = projects.find(p => p.id === projectId);
+      const txDate = attMode === 'self' ? getLocalDateStr() : (document.getElementById('attDate').value || getLocalDateStr());
+      const wid = attMode === 'self' ? currentUser?.uid : document.getElementById('attWorkerSel').value;
+      const wObj = usersList.find(u => u.id === wid);
+      const wName = attMode === 'self' ? currentUserName : (wObj?.name || 'صنايعي');
+      if (!wid || !projectId) { showToast('تحقق من المشروع والصنايعي', { error: true }); return; }
+
+      const checkInTime = getTp24('in');
+      const useOut = document.getElementById('attUseCustomOut').checked;
+      const checkOutTime = useOut ? getTp24('out') : (companySettings.workEnd || '17:00');
+      const extraNote = document.getElementById('attNote').value.trim();
+
+      const startM = toMinutes(companySettings.workStart || '09:00');
+      const endM = toMinutes(companySettings.workEnd || '17:00');
+      const graceM = Number(companySettings.graceMinutes ?? 15);
+      const inM = toMinutes(checkInTime);
+      const outM = toMinutes(checkOutTime);
+      const workMins = Math.max(60, endM - startM);
+
+      let lateMin = 0;
+      if (inM > startM + graceM) lateMin += (inM - startM); // بعد السماح يُحسب من 9:00 بالكامل
+      if (useOut && outM < endM) lateMin += (endM - outM);
+
+      await withBusy(document.getElementById('btnSaveAttendance'), 'جاري الحفظ...', async () => {
+        const batch = writeBatch(db);
+        const dailyRef = doc(collection(db, "transactions"));
+        const dailyAmt = (userRole === 'admin' && wObj?.defaultDailyRate > 0) ? sanitizeAmount(wObj.defaultDailyRate, false) : 0;
+        const dailyStatus = (userRole === 'admin' && dailyAmt > 0) ? 'approved' : 'pending';
+        const dailyNote = `حضور ${formatTime12(checkInTime)}${useOut ? ' - انصراف ' + formatTime12(checkOutTime) : ''}${extraNote ? ' • ' + extraNote : ''}`;
+        const dailyPayload = {
+          type: 'out', category: 'daily', projectId, project: pObj ? pObj.name : 'عام',
+          accountId: null, accountName: '', workerId: wid, workerName: wName,
+          txDate, amount: dailyAmt, note: dailyNote, deleted: false, status: dailyStatus,
+          isAttendance: true, checkInTime, checkOutTime, lateMinutes: lateMin,
+          createdBy: currentUser.uid, createdByName: currentUserName, createdByRole: userRole,
+          clientTs: Date.now(), receiptId: null, hasReceipt: false, createdAt: serverTimestamp()
+        };
+        batch.set(dailyRef, dailyPayload);
+        addAuditToBatch(batch, 'create', 'transactions', dailyRef.id, null, dailyPayload, `حضور ${wName} (${txDate})`);
+
+        if (lateMin > 0) {
+          const rate = Number(wObj?.defaultDailyRate || 0);
+          const dedAmt = rate > 0 ? sanitizeAmount((rate / (workMins / 60)) * (lateMin / 60), true) : 0;
+          const hrsTxt = lateMin >= 60 ? `${Math.floor(lateMin/60)} ساعة${lateMin%60 ? ' و'+(lateMin%60)+' د' : ''}` : `${lateMin} دقيقة`;
+          const dedNote = dedAmt > 0
+            ? `مخصوم منك ${dedAmt} ج علشان اتأخرت ${hrsTxt} (حضر ${formatTime12(checkInTime)} بدلاً من ${formatTime12(companySettings.workStart || '09:00')})`
+            : `تأخير ${hrsTxt} (حضر ${formatTime12(checkInTime)} بدلاً من ${formatTime12(companySettings.workStart || '09:00')}) — خصم معلّق`;
+          const dedRef = doc(collection(db, "transactions"));
+          const dedPayload = {
+            type: 'out', category: 'deduction', projectId, project: pObj ? pObj.name : 'عام',
+            accountId: null, accountName: '', workerId: wid, workerName: wName,
+            txDate, amount: dedAmt, note: dedNote, deleted: false, status: 'pending',
+            isLateDeduction: true, lateMinutes: lateMin,
+            createdBy: currentUser.uid, createdByName: currentUserName, createdByRole: userRole,
+            clientTs: Date.now(), receiptId: null, hasReceipt: false, createdAt: serverTimestamp()
+          };
+          batch.set(dedRef, dedPayload);
+          addAuditToBatch(batch, 'create', 'transactions', dedRef.id, null, dedPayload, `خصم تأخير معلّق لـ ${wName}: ${dedAmt} ج`);
+        }
+
+        await batch.commit();
+        closeModal('attendanceModal');
+        showToast(lateMin > 0 ? '✅ تم تسجيل الحضور + تنبيه خصم تأخير معلّق' : '✅ تم تسجيل الحضور بنجاح');
+      });
+    };
+
+    /* كشف الخميس */
+    window.openThursdayModal = () => {
+      const today = new Date();
+      const weekAgo = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+      document.getElementById('thuFrom').value = getLocalDateStr(weekAgo);
+      document.getElementById('thuTo').value = getLocalDateStr(today);
+      renderThursdayReport();
+      document.getElementById('thursdayModal').classList.remove('hidden');
+      pushNavState();
+    };
+
+    window.renderThursdayReport = () => {
+      const from = document.getElementById('thuFrom').value;
+      const to = document.getElementById('thuTo').value;
+      const box = document.getElementById('thursdayBody');
+      const workers = usersList.filter(u => u.role === 'worker');
+      if (!workers.length) { box.innerHTML = '<p style="color:var(--muted); text-align:center;">لا يوجد صنايعية مسجلون</p>'; return; }
+
+      let grandNet = 0;
+      const cards = workers.map(w => {
+        const txs = allTxs.filter(t =>
+          t.deleted !== true && t.status !== 'rejected' && t.workerId === w.id &&
+          (!from || (t.txDate || '') >= from) && (!to || (t.txDate || '') <= to)
+        );
+        const approved = txs.filter(t => t.status === 'approved');
+        const pendingDeds = txs.filter(t => t.status === 'pending' && t.category === 'deduction');
+        let days = 0, lahu = 0, alayh = 0;
+        approved.forEach(t => {
+          const a = Number(t.amount || 0);
+          if (t.category === 'daily') { days++; lahu += a; }
+          else if (t.category === 'meters' || t.category === 'lump_sum' || t.category === 'material_purchase' || t.type === 'in') lahu += a;
+          else if (t.category === 'advance' || t.category === 'deduction' || t.type === 'out') alayh += a;
+        });
+        const net = round2(lahu - alayh);
+        if (net > 0) grandNet += net;
+        if (!approved.length && !pendingDeds.length) return '';
+
+        const pendHtml = pendingDeds.map(d => `
+          <div class="ded-pending-box">
+            <div style="color:var(--orange); font-weight:bold;">⚠️ ${esc(d.note || 'خصم تأخير معلّق')} (${Number(d.amount||0).toLocaleString()} ج)</div>
+            <div class="row" style="margin-top:6px;">
+              <button onclick="approveTx('${esc(d.id)}', this)" class="sm red" style="flex:1;">✅ خصم فعلي</button>
+              <button onclick="forgiveDeduction('${esc(d.id)}', this)" class="sm green" style="flex:1;">🗑️ عفو وحذف</button>
+            </div>
+          </div>`).join('');
+
+        return `<div class="card" style="margin-bottom:8px; padding:12px;">
+          <div class="between">
+            <strong>👷 ${esc(w.name)}</strong>
+            <strong style="color:${net >= 0 ? 'var(--green)' : 'var(--red)'}; font-size:15px;">${net >= 0 ? 'له ' : 'عليه '}${Math.abs(net).toLocaleString()} ج</strong>
+          </div>
+          <small style="color:var(--muted);">أيام: ${days} • له: ${lahu.toLocaleString()} ج • سلف/خصم: ${alayh.toLocaleString()} ج</small>
+          ${pendHtml}
+          ${net > 0 ? `<button onclick="closeModal('thursdayModal'); openSettleWorker('${esc(w.id)}', ${net})" class="sm gold" style="margin-top:8px; width:100%;">💸 تسديد (${net.toLocaleString()} ج)</button>` : ''}
+        </div>`;
+      }).filter(Boolean).join('');
+
+      box.innerHTML = (cards ? `<div class="hero-card" style="padding:10px; margin-bottom:10px;"><div class="between"><span>إجمالي المطلوب تسليمه:</span><strong style="color:#facc15; font-size:18px;">${grandNet.toLocaleString()} ج</strong></div></div>` + cards : '<p style="color:var(--muted); text-align:center;">لا توجد حركات في هذه الفترة</p>');
+    };
+
+    window.forgiveDeduction = async (id, btn) => {
+      const beforeObj = allTxs.find(x => x.id === id);
+      await withBusy(btn, '...', async () => {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "transactions", id), { deleted: true, deletedByName: 'عفو من المدير', updatedBy: currentUser.uid, updatedAt: serverTimestamp() });
+        addAuditToBatch(batch, 'update', 'transactions', id, beforeObj, { ...beforeObj, deleted: true }, `عفو وحذف خصم تأخير لـ ${beforeObj?.workerName || ''}`);
+        await batch.commit();
+        showToast('✅ تم العفو وحذف الخصم');
+        renderThursdayReport();
+      });
+    };
+
+    window.printThursdayReport = () => {
+      const from = document.getElementById('thuFrom').value, to = document.getElementById('thuTo').value;
+      const pa = document.getElementById('printArea');
+      pa.innerHTML = `<div dir="rtl" style="padding:16px; font-family:system-ui;">
+        <h2 style="text-align:center; color:#1d4ed8;">${esc(companySettings.nameAr || 'Revise')} — كشف الخميس</h2>
+        <p style="text-align:center; font-size:12px;">الفترة من ${esc(from)} إلى ${esc(to)}</p>
+        ${document.getElementById('thursdayBody').innerHTML}
+      </div>`;
+      pa.classList.remove('hidden');
+      closeModal('thursdayModal');
+      setTimeout(() => { window.print(); pa.classList.add('hidden'); pa.innerHTML = ''; }, 150);
+    };
+
     window.switchTab = (tab, push = true) => {
       currentTab = tab;
       ['Home', 'Projects', 'Workers', 'Team'].forEach(t => {
@@ -3028,6 +3570,7 @@
         userRole = localStorage.getItem('revise_role') || 'worker';
         isFounderUser = localStorage.getItem('revise_is_founder') === '1';
         myAssignedProjects = readJson('revise_assigned', []);
+        myAllowedUsers = readJson('revise_allowed_users', []);
         myPerms = readJson('revise_perms', {});
         myCanAdd = localStorage.getItem('revise_can_add') !== '0';
         currentUserName = localStorage.getItem('revise_uname') || roleLabels[userRole] || 'مستخدم';
@@ -3057,6 +3600,7 @@
         const ud = uDoc.data();
         userRole = ud.role || 'worker';
         myAssignedProjects = ud.assignedProjects || [];
+        myAllowedUsers = ud.allowedUsers || [];
         myCanAdd = ud.canAddExpenses !== false;
         myPerms = ud.permissions || {};
         currentUserName = ud.name || roleLabels[userRole] || 'مستخدم';
@@ -3066,6 +3610,7 @@
         userRole = localStorage.getItem('revise_role') || 'worker';
         isFounderUser = localStorage.getItem('revise_is_founder') === '1';
         myAssignedProjects = readJson('revise_assigned', []);
+        myAllowedUsers = readJson('revise_allowed_users', []);
         myPerms = readJson('revise_perms', {});
         myCanAdd = localStorage.getItem('revise_can_add') !== '0';
         currentUserName = localStorage.getItem('revise_uname') || roleLabels[userRole] || 'مستخدم';
@@ -3073,6 +3618,7 @@
       localStorage.setItem('revise_role', userRole);
       localStorage.setItem('revise_is_founder', isFounderUser ? '1' : '0');
       localStorage.setItem('revise_assigned', JSON.stringify(myAssignedProjects));
+      localStorage.setItem('revise_allowed_users', JSON.stringify(myAllowedUsers));
       localStorage.setItem('revise_perms', JSON.stringify(myPerms));
       localStorage.setItem('revise_can_add', myCanAdd ? '1' : '0');
       localStorage.setItem('revise_uname', currentUserName);
