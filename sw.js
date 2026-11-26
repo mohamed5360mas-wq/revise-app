@@ -1,10 +1,18 @@
-const CACHE_NAME = 'revise-cache-v13';
+const CACHE_NAME = 'revise-cache-v14';
 const CORE_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS).catch(() => {}))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        CORE_ASSETS.map((asset) =>
+          fetch(asset, { cache: 'reload' })
+            .then((res) => (res && res.ok ? cache.put(asset, res) : null))
+            .catch(() => {})
+        )
+      )
+    )
   );
 });
 
