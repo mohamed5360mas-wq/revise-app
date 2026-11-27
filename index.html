@@ -221,7 +221,8 @@
   <div id="authScreen" class="container" style="margin-top: 45px;">
     <div class="card" style="text-align:center;">
       <h2 style="color:var(--primary); margin-bottom:4px;">REVISE</h2>
-      <p style="color:var(--muted); margin-top:0; font-size:13px;">شركة ريفايس للمقاولات العامة والتشطيبات</p>
+      <p style="color:var(--muted); margin-top:0; font-size:13px;">شركة ريفايس للمقاولات العامة والتشطيبات <span class="pill pill-cat" id="loginVerPill">v15.0.1</span></p>
+      <p id="bootStatusMsg" style="color:var(--muted); font-size:11.5px; margin:2px 0 6px;">⏳ جاري تشغيل النظام...</p>
       <div style="text-align:right; margin-top:8px;">
         <div class="between" style="margin-bottom:2px;">
           <small style="color:var(--muted); font-weight:bold;">رقم الموبايل أو البريد الإلكتروني</small>
@@ -1117,6 +1118,29 @@
   <div id="printArea" class="hidden"></div>
   <div id="pdfRenderHost" class="hidden"></div>
 
+  <script>
+    window.__reviseBooted = false;
+    (function () {
+      function showBootErr(msg) {
+        var el = document.getElementById('authMsg');
+        var st = document.getElementById('bootStatusMsg');
+        if (st) { st.style.color = '#dc2626'; st.innerText = '❌ تعثّر تشغيل النظام — صوّر هذه الرسالة:'; }
+        if (el) { el.style.color = '#dc2626'; el.innerText = String(msg || 'خطأ غير معروف'); }
+      }
+      window.addEventListener('error', function (ev) {
+        if (!window.__reviseBooted) showBootErr((ev.message || 'Script Error') + (ev.lineno ? ' (سطر ' + ev.lineno + ')' : ''));
+      });
+      window.addEventListener('unhandledrejection', function (ev) {
+        if (!window.__reviseBooted) showBootErr(ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason || 'Promise Error'));
+      });
+      setTimeout(function () {
+        if (!window.__reviseBooted) {
+          showBootErr('لم يكتمل تحميل ملفات التشغيل (تأكد من الاتصال بالإنترنت أو امسح كاش المتصفح).');
+        }
+      }, 6000);
+    })();
+  </script>
+
   <script type="module">
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
@@ -1130,7 +1154,7 @@
       collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, writeBatch, serverTimestamp, terminate, clearIndexedDbPersistence
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '15.0';
+    const APP_VER = '15.0.1';
     const FOUNDER_PHONE = '01000227438';
     const FOUNDER_EMAIL = 'mohamed5360mas@gmail.com';
     const ALLOWED_TT_COLS = ['transactions', 'projects', 'accounts'];
@@ -1627,6 +1651,10 @@
       });
     };
 
+    window.__reviseBooted = true;
+    const __bsEl = document.getElementById('bootStatusMsg');
+    if (__bsEl) { __bsEl.style.color = 'var(--green)'; __bsEl.innerText = '✅ النظام جاهز للدخول (v15.0.1)'; }
+
     document.getElementById('btnForgotPass').onclick = async () => {
       const btn = document.getElementById('btnForgotPass');
       const msg = document.getElementById('authMsg');
@@ -1854,11 +1882,8 @@
       pushNavState();
     };
     window.copyErrorLogReport = async () => {
-      const txt = `Revise v${APP_VER} | role=${userRole} | contracts=${!!erpContractsMod} | site=${!!erpSiteMod} | offline=${offlineQueue.length}
-Errors (${clientErrorLogs.length}):
-`
-        + (clientErrorLogs.map((x) => `[${x.ts}] ${x.src}: ${x.msg}`).join('
-') || 'None');
+      const txt = `Revise v${APP_VER} | role=${userRole} | contracts=${!!erpContractsMod} | site=${!!erpSiteMod} | offline=${offlineQueue.length}\nErrors (${clientErrorLogs.length}):\n`
+        + (clientErrorLogs.map((x) => `[${x.ts}] ${x.src}: ${x.msg}`).join('\n') || 'None');
       try { await navigator.clipboard.writeText(txt); showToast('✅ تم نسخ تقرير التشخيص'); }
       catch (e) { prompt('انسخ التقرير يدوياً:', txt); }
     };
