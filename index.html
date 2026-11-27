@@ -6,6 +6,7 @@
   <title>Revise - إدارة المقاولات والحسابات</title>
   <meta name="theme-color" content="#1d4ed8">
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="erp-v15.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
   <style>
     :root {
@@ -181,6 +182,15 @@
     .mode-switch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
     .mode-chip { padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); font-size: 13px; font-weight: 700; margin: 0; }
     .mode-chip.active { border-color: var(--primary); background: rgba(29,78,216,0.12); color: var(--primary); }
+    /* v15: شريط تصنيف التكلفة السريع بضغطة واحدة + تشخيص الأخطاء */
+    .cg-wrap { margin-top: 8px; }
+    .cg-label { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+    .cg-bar { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: none; }
+    .cg-bar::-webkit-scrollbar { display: none; }
+    .cg-chip { width: auto; margin: 0; padding: 6px 10px; border-radius: 18px; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .cg-chip.active { border-color: var(--primary); background: rgba(29,78,216,0.14); color: var(--primary); }
+    .proj-erp-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .proj-erp-bar button { flex: 1; min-width: 110px; }
 
     /* v13: وقت التسجيل، التعديل، تنبيه التلاعب، العداد السلس، والطباعة */
     .tx-time-side { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
@@ -257,6 +267,9 @@
         </div>
         <button id="btnWorkerMaterial" class="gold hidden" style="margin-bottom:12px;" onclick="openWorkerMaterialModal()">🧾 تسجيل فاتورة خامات للموقع</button>
 
+        <!-- v15: التنبيهات الذكية الحقيقية (للمدير وERP فقط) -->
+        <div id="erpSmartAlertsBox" class="hidden"></div>
+
         <!-- الاعتمادات المعلقة -->
         <div id="approvalsCard" class="card hidden" style="border-right:4px solid var(--gold);">
           <div class="between" style="cursor:pointer;" onclick="toggleApprovalsBody()">
@@ -318,6 +331,12 @@
             </div>
 
             <button id="btnProjShortcut" class="shortcut-btn hidden" onclick="createProjectShortcut()">📌 إنشاء اختصار على الشاشة الرئيسية لهذا المشروع</button>
+            <div id="projErpBar" class="proj-erp-bar hidden">
+              <button type="button" id="btnProjErpContract" class="sm secondary hidden" onclick="openCurrentProjErp('contracts')">📑 العقد والمقايسة</button>
+              <button type="button" id="btnProjErpBudget" class="sm secondary hidden" onclick="openCurrentProjErp('budget')">📊 الميزانية</button>
+              <button type="button" id="btnProjErpQty" class="sm secondary hidden" onclick="openCurrentProjErp('site_quantities')">📐 كميات الموقع</button>
+              <button type="button" id="btnProjErpDaily" class="sm secondary hidden" onclick="openCurrentProjErp('daily_reports')">📋 التقرير اليومي</button>
+            </div>
 
             <div id="addAccBox" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
               <input type="text" id="accName" placeholder="إضافة فرع جديد (مقاول، معرض، مصاريف، ذهب...)">
@@ -391,6 +410,18 @@
           <div id="teamList"></div>
         </div>
       </div>
+
+      <!-- v15: شاشة شاشات ERP والموقع -->
+      <div id="tabErp" class="hidden">
+        <div class="card" style="padding:10px 12px; margin-bottom:10px;">
+          <div class="between">
+            <button type="button" onclick="goBackStep()" class="sm secondary">← رجوع</button>
+            <strong id="erpHeaderTitle" style="color:var(--primary); font-size:14.5px;">إدارة المشاريع</strong>
+            <button type="button" onclick="switchTab('Home', false)" class="sm secondary">🏠</button>
+          </div>
+        </div>
+        <div id="erpViewHost"></div>
+      </div>
     </div>
 
     <button class="fab" id="btnFabAdd" title="إضافة ذكية">+</button>
@@ -416,6 +447,18 @@
         <select id="defaultQuickProjSel" onchange="saveDefaultQuickProj()" style="margin-top:6px;"></select>
       </div>
 
+      <div id="drwSiteGroup" class="erp-drawer-group hidden">📐 الموقع والتنفيذ</div>
+      <button class="drawer-item hidden" id="drwSiteQty" onclick="closeDrawer(); openErpView('site_quantities')"><span>📐 كميات التنفيذ بالموقع <span class="erp-new-tag">v15</span></span><span id="drwQtyPendCount" class="badge hidden">0</span></button>
+      <button class="drawer-item hidden" id="drwDailyRep" onclick="closeDrawer(); openErpView('daily_reports')"><span>📋 التقرير اليومي للموقع</span></button>
+
+      <div id="drwErpGroup" class="erp-drawer-group hidden">📑 العقود والمستخلصات والميزانية (سري)</div>
+      <button class="drawer-item hidden" id="drwContracts" onclick="closeDrawer(); openErpView('contracts')"><span>📑 العقود والمقايسات والتغييرية <span class="erp-new-tag">v15</span></span></button>
+      <button class="drawer-item hidden" id="drwStatements" onclick="closeDrawer(); openErpView('statements')"><span>🧾 المستخلصات التراكمية</span></button>
+      <button class="drawer-item hidden" id="drwClients" onclick="closeDrawer(); openErpView('clients')"><span>🤝 العملاء وحجز الضمان</span></button>
+      <button class="drawer-item hidden" id="drwBudget" onclick="closeDrawer(); openErpView('budget')"><span>📊 الميزانية والربحية (لحظي)</span></button>
+      <button class="drawer-item hidden" id="drwGuarantees" onclick="closeDrawer(); openErpView('guarantees')"><span>🛡️ خطابات الضمان البنكية</span></button>
+
+      <div class="erp-drawer-group">⚙️ الإدارة والإعدادات</div>
       <button class="drawer-item hidden" id="drwSettings" onclick="closeDrawer(); openSettingsModal()"><span>🏢 بيانات الشركة وترويسة الـ PDF</span></button>
       <button class="drawer-item hidden" id="drwPrivate" onclick="closeDrawer(); openPrivateModal()"><span>🔒 الحساب السري للمدير</span></button>
       <button class="drawer-item hidden" id="drwTimeTravel" onclick="closeDrawer(); openTimeTravelModal()"><span>⏪ التراجع الزمني (آلة الزمن)</span></button>
@@ -425,6 +468,7 @@
       <button class="drawer-item hidden" id="drwBackup" onclick="closeDrawer(); downloadBackup()"><span>⬇️ حفظ نسخة احتياطية (JSON)<br><small style="color:var(--muted); font-weight:normal;">للحسابات فقط (الصور محفوظة على السيرفر)</small></span></button>
       <button class="drawer-item hidden" id="drwRestore" onclick="closeDrawer(); document.getElementById('restoreFile').click()"><span>⬆️ استرجاع نسخة احتياطية (JSON)</span></button>
       <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreBackup(event)">
+      <button class="drawer-item hidden" id="drwDiagnostics" onclick="closeDrawer(); openErrorLogModal()"><span>🩺 فحص الأخطاء والتشخيص (v15)</span><span id="drwErrCount" class="badge hidden">0</span></button>
       <button class="drawer-item" id="drwChangePass" onclick="closeDrawer(); openChangePassModal()"><span>🔑 تغيير كلمة السر</span></button>
       <button class="drawer-item" id="drwTheme" onclick="toggleTheme()"><span>🌙 تبديل الوضع الليلي / النهاري</span></button>
       <button class="drawer-item" style="color:var(--red);" onclick="doLogout()"><span>🚪 تسجيل الخروج</span></button>
@@ -506,6 +550,17 @@
       <select id="txAccount"><option value="">عام (داخل التصنيف)</option></select>
       <input type="date" id="txDate" onchange="checkTxDateWarning()">
       <textarea id="txNote" placeholder="التفاصيل (مثلاً: أسمنت، يومية، بعت 5 جرام...)"></textarea>
+
+      <div id="txCostGroupWrap" class="cg-wrap">
+        <div class="cg-label"><span>📊 بند الميزانية (تلقائي — اضغط للتغيير):</span><span id="txCostGroupTxt" style="color:var(--primary);">مصاريف موقع</span></div>
+        <div class="cg-bar" id="txCostGroupBar">
+          <button type="button" class="cg-chip" data-cg="خامات" onclick="setTxCostGroup('خامات', true)">🧱 خامات</button>
+          <button type="button" class="cg-chip" data-cg="عمالة" onclick="setTxCostGroup('عمالة', true)">👷 عمالة</button>
+          <button type="button" class="cg-chip" data-cg="مقاولين باطن" onclick="setTxCostGroup('مقاولين باطن', true)">🔧 باطن</button>
+          <button type="button" class="cg-chip" data-cg="معدات" onclick="setTxCostGroup('معدات', true)">🏗️ معدات</button>
+          <button type="button" class="cg-chip active" data-cg="مصاريف موقع" onclick="setTxCostGroup('مصاريف موقع', true)">📌 موقع</button>
+        </div>
+      </div>
 
       <div id="txArchiveWarn" class="warn-box hidden" style="margin-top:8px; border-color:var(--red); color:var(--red); background:rgba(220,38,38,0.1);">⚠️ تحذير: هذه الحركة داخل فترة مغلقة مؤرشفة — تعديلها أو حذفها قد يغيّر التطابق مع الرصيد المرحّل!</div>
       <div id="txNegCustodyWarn" class="warn-box hidden" style="margin-top:8px;"></div>
@@ -707,6 +762,7 @@
         <label class="check-row"><input type="checkbox" id="permAdd" checked><span>تسجيل مصروفات</span></label>
         <label class="check-row"><input type="checkbox" id="permCustody" checked><span>عرض رصيد العُهدة</span></label>
         <label class="check-row"><input type="checkbox" id="permTotals"><span>عرض إجمالي مصروفات المشروع</span></label>
+        <label id="permErpRow" class="check-row"><input type="checkbox" id="permErp"><span>🔓 فتح العقود والمستخلصات والميزانية (للمحاسب الموثوق فقط — يرى أسعار العقود)</span></label>
         <div id="uApprovalModeWrap" style="margin-top:8px;">
           <small style="color:var(--muted); font-weight:bold; display:block;">🛡️ صلاحية الاعتماد (للمهندس / المحاسب):</small>
           <select id="uApprovalMode" style="margin-top:4px;">
@@ -1031,6 +1087,33 @@
     </div>
   </div>
 
+  <!-- v15: نافذة نماذج ERP الموحدة -->
+  <div id="erpSheetModal" class="modal hidden" style="z-index:48;">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:8px;">
+        <h3 id="erpSheetTitle" style="margin:0; color:var(--primary);">نموذج</h3>
+        <button type="button" onclick="closeModal('erpSheetModal')" class="sm secondary">✕</button>
+      </div>
+      <div id="erpSheetBody"></div>
+    </div>
+  </div>
+
+  <!-- v15: شاشة فحص الأخطاء والتشخيص (بديل F12 للموبايل) -->
+  <div id="errorLogModal" class="modal hidden" style="z-index:52;">
+    <div class="modal-content">
+      <div class="between" style="margin-bottom:8px;">
+        <h3 style="margin:0; color:var(--primary);">🩺 فحص الأخطاء والتشخيص (v15)</h3>
+        <button type="button" onclick="closeModal('errorLogModal')" class="sm secondary">✕</button>
+      </div>
+      <div id="errDiagSummary" class="erp-sumbox" style="margin-top:0; margin-bottom:10px; font-size:12px;"></div>
+      <div id="errLogList" style="max-height:260px; overflow-y:auto; font-size:12px;"></div>
+      <div class="row" style="margin-top:12px;">
+        <button type="button" onclick="copyErrorLogReport()" class="gold" style="flex:1.4;">📋 نسخ التقرير لإرساله</button>
+        <button type="button" onclick="clearErrorLogReport()" class="secondary" style="flex:1;">🗑️ مسح السجل</button>
+      </div>
+    </div>
+  </div>
+
   <div id="printArea" class="hidden"></div>
   <div id="pdfRenderHost" class="hidden"></div>
 
@@ -1047,10 +1130,11 @@
       collection, addDoc, setDoc, deleteDoc, onSnapshot, query, where, doc, updateDoc, getDoc, writeBatch, serverTimestamp, terminate, clearIndexedDbPersistence
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const APP_VER = '14.0';
+    const APP_VER = '15.0';
     const FOUNDER_PHONE = '01000227438';
     const FOUNDER_EMAIL = 'mohamed5360mas@gmail.com';
     const ALLOWED_TT_COLS = ['transactions', 'projects', 'accounts'];
+    const ALLOWED_AUDIT_COLS = ['transactions', 'projects', 'accounts', 'project_contracts', 'project_statements'];
     const ALL_CACHE_KEYS = [
       'revise_cache_projects', 'revise_cache_accounts', 'revise_cache_users', 'revise_cache_txs',
       'revise_offline_queue', 'revise_uid', 'revise_role', 'revise_assigned', 'revise_perms',
@@ -1305,6 +1389,20 @@
     let userPayModeForm = 'daily', pendingPeriodCloseCtx = null, custodyActionCtx = null, approveAmtCtx = null, salaryTargetUid = null;
     let workerArchiveExpanded = false;
     let staffApprovedOrProjTxs = [], staffSelfWorkerTxs = [];
+    let selectedCostGroup = 'مصاريف موقع', costGroupManual = false;
+    let currentErpView = null, currentErpOpts = {}, erpPrevTab = 'Home';
+    let erpContractsMod = null, erpSiteMod = null, erpLoadingLock = false;
+    const clientErrorLogs = [];
+    function logClientError(src, err) {
+      const msg = err?.message || err?.reason?.message || String(err || 'خطأ غير معروف');
+      const code = err?.code ? `[${err.code}] ` : '';
+      clientErrorLogs.unshift({ ts: new Date().toLocaleTimeString('en-GB'), src: String(src || 'app'), msg: code + msg });
+      if (clientErrorLogs.length > 40) clientErrorLogs.pop();
+      const b = document.getElementById('drwErrCount');
+      if (b) { b.innerText = clientErrorLogs.length; b.classList.toggle('hidden', !clientErrorLogs.length); }
+    }
+    window.addEventListener('error', (ev) => logClientError(ev.filename ? ev.filename.split('/').pop() + ':' + ev.lineno : 'window', ev.error || ev.message));
+    window.addEventListener('unhandledrejection', (ev) => logClientError('promise', ev.reason));
     let dataLoaded = false, isSyncing = false, searchQuery = '', unsubs = [];
     let editingTxId = null, editingOrigAmount = null, editingUserId = null, txDir = 'out';
     let currentTab = 'Home', projLevel = 1, currentProjId = null, currentAccId = null;
@@ -1341,7 +1439,7 @@
     }
 
     function addAuditToBatch(batch, action, collectionName, docId, beforeObj, afterObj, summary) {
-      if (!currentUser || !ALLOWED_TT_COLS.includes(collectionName)) return;
+      if (!currentUser || !ALLOWED_AUDIT_COLS.includes(collectionName)) return;
       if (userRole !== 'admin' && collectionName !== 'transactions') return;
       const logRef = doc(collection(db, "audit_logs"));
       batch.set(logRef, {
@@ -1365,7 +1463,7 @@
     pushNavState();
 
     function getOpenModalId() {
-      const ids = ['calcModal', 'approveAmountModal', 'txHistoryModal', 'custodyActionModal', 'salaryModal', 'periodCloseModal', 'exitModal', 'txModal', 'workerMaterialModal', 'attendanceModal', 'thursdayModal', 'timeTravelModal', 'storageModal', 'changePassModal', 'userModal', 'reportModal', 'trashModal', 'settingsModal', 'privateModal', 'receiptModal'];
+      const ids = ['calcModal', 'errorLogModal', 'erpSheetModal', 'approveAmountModal', 'txHistoryModal', 'custodyActionModal', 'salaryModal', 'periodCloseModal', 'exitModal', 'txModal', 'workerMaterialModal', 'attendanceModal', 'thursdayModal', 'timeTravelModal', 'storageModal', 'changePassModal', 'userModal', 'reportModal', 'trashModal', 'settingsModal', 'privateModal', 'receiptModal'];
       return ids.find(id => !document.getElementById(id).classList.contains('hidden')) || null;
     }
 
@@ -1381,6 +1479,7 @@
       if (!document.getElementById('drawerBackdrop').classList.contains('hidden')) { closeDrawer(); return true; }
       if (currentTab === 'Projects' && projLevel === 3) { currentAccId = null; setProjLevel(2); renderAccounts(); return true; }
       if (currentTab === 'Projects' && projLevel === 2) { currentProjId = null; currentAccId = null; setProjLevel(1); renderProjects(); return true; }
+      if (currentTab === 'Erp') { const ret = erpPrevTab === 'Projects' && currentProjId ? 'Projects' : 'Home'; if (ret === 'Projects') { document.getElementById('tabErp').classList.add('hidden'); document.getElementById('tabProjects').classList.remove('hidden'); currentTab = 'Projects'; document.getElementById('navProjects')?.classList.add('active'); } else { switchTab('Home', false); } return true; }
       if (currentTab !== 'Home') { switchTab('Home', false); return true; }
       return false;
     };
@@ -1459,7 +1558,7 @@
       renderTxs(); renderProjects(); renderAccounts();
     };
 
-    const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch (e) {} }); unsubs = []; dataLoaded = false; };
+    const clearListeners = () => { unsubs.forEach(u => { try { u && u(); } catch (e) {} }); unsubs = []; dataLoaded = false; try { erpContractsMod?.dispose?.(); erpSiteMod?.dispose?.(); } catch (e) {} };
 
     async function syncOfflineQueue() {
       if (!navigator.onLine || isSyncing || !offlineQueue.length || !auth.currentUser) return;
@@ -1602,16 +1701,200 @@
     function myApprovalModeNow() { return getUserApprovalMode({ role: userRole, approvalMode: myProfile?.approvalMode, permissions: myPerms }); }
     function isFullApproverNow() { return myApprovalModeNow() === 'full'; }
     function isReviewerNow() { return myApprovalModeNow() === 'review'; }
-    function canSeeTotals() { return userRole === 'admin' || !!myPerms.canSeeTotals; }
+    function canAccessErpNow() { return userRole === 'admin' || ((userRole === 'engineer' || userRole === 'accountant') && myPerms?.canAccessErp === true); }
+    function canSeeTotals() { return userRole === 'admin' || canAccessErpNow() || !!myPerms.canSeeTotals; }
     function canApproveNow() { return userRole === 'admin' || isReviewerNow() || isFullApproverNow(); }
+
+    const ERP_VIEW_TITLES = {
+      contracts: '📑 العقود والمقايسات والتغييرية',
+      statements: '🧾 المستخلصات التراكمية',
+      clients: '🤝 العملاء وحجز الضمان',
+      guarantees: '🛡️ خطابات الضمان البنكية',
+      budget: '📊 الميزانية والربحية (لحظي)',
+      site_quantities: '📐 كميات التنفيذ بالموقع',
+      daily_reports: '📋 التقرير اليومي للموقع'
+    };
+
+    const ReviseCore = {
+      get db() { return db; },
+      fs: { collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, query, where, onSnapshot, writeBatch, serverTimestamp },
+      isAdmin: () => userRole === 'admin',
+      isStaff: () => userRole === 'admin' || userRole === 'engineer' || userRole === 'accountant',
+      canAccessErp: () => canAccessErpNow(),
+      canAdd: () => userRole === 'admin' || ((userRole === 'engineer' || userRole === 'accountant') && myCanAdd),
+      getUser: () => currentUser,
+      getUserName: () => currentUserName,
+      getUserRole: () => userRole,
+      getAssignedProjects: () => myAssignedProjects,
+      getProjects: () => projects,
+      getVisibleProjects: () => getVisibleProjects(),
+      getUsers: () => usersList,
+      getAllTxs: () => allTxs,
+      getCompanySettings: () => companySettings,
+      getCustodyMapByProject: (uid) => getCustodyMapByProject(uid),
+      getProjectUnpaidCustodyDiff: (pid) => getProjectUnpaidCustodyDiff(pid),
+      isProjectCashExpense: (t) => isProjectCashExpense(t),
+      isProjectCashIncome: (t) => isProjectCashIncome(t),
+      esc, round2, sanitizeAmount, tafqeet, getLocalDateStr, compressImage, friendlyError,
+      showToast, withBusy, pushNavState,
+      closeModal: (id) => window.closeModal(id),
+      addAuditToBatch,
+      logClientError,
+      openErpView: (viewName, opts = {}) => window.openErpView(viewName, opts),
+      refreshErpView: () => renderActiveErpView(),
+      onErpDataChanged: () => onErpDataChanged()
+    };
+    window.ReviseCore = ReviseCore;
+
+    async function ensureErpModulesLoaded() {
+      const isStaff = ReviseCore.isStaff();
+      if (!isStaff) return;
+      if (erpLoadingLock) return;
+      erpLoadingLock = true;
+      try {
+        if (!erpSiteMod) {
+          const mSite = await import('./erp-site.js');
+          erpSiteMod = mSite.default || mSite;
+        }
+        erpSiteMod.init(ReviseCore);
+
+        if (canAccessErpNow()) {
+          if (!erpContractsMod) {
+            const mCont = await import('./erp-contracts.js');
+            erpContractsMod = mCont.default || mCont;
+          }
+          erpContractsMod.init(ReviseCore);
+        } else if (erpContractsMod) {
+          erpContractsMod.dispose();
+        }
+        onErpDataChanged();
+      } catch (e) {
+        logClientError('erp-loader', e);
+      } finally {
+        erpLoadingLock = false;
+      }
+    }
+
+    function onErpDataChanged() {
+      try {
+        if (erpSiteMod) {
+          erpSiteMod.renderHomeAlertsCard();
+          const pQty = erpSiteMod.getPendingQtyRequests ? erpSiteMod.getPendingQtyRequests().length : 0;
+          const b = document.getElementById('drwQtyPendCount');
+          if (b) { b.innerText = pQty; b.classList.toggle('hidden', !pQty); }
+        }
+        if (currentTab === 'Erp' && currentErpView) renderActiveErpView();
+      } catch (e) {
+        logClientError('erp-refresh', e);
+      }
+    }
+
+    function renderActiveErpView() {
+      const host = document.getElementById('erpViewHost');
+      if (!host || !currentErpView) return;
+      const isContractView = ['contracts', 'statements', 'clients', 'guarantees'].includes(currentErpView);
+      const mod = isContractView ? erpContractsMod : erpSiteMod;
+      if (!mod) {
+        host.innerHTML = '<div class="card"><p style="color:var(--muted); text-align:center;">⏳ جاري تحميل وحدة الإدارة...</p></div>';
+        return;
+      }
+      try {
+        host.innerHTML = mod.renderView(currentErpView, currentErpOpts || {});
+      } catch (e) {
+        logClientError('erp-render:' + currentErpView, e);
+        host.innerHTML = `<div class="card"><p style="color:var(--red);">حدث خطأ أثناء عرض الشاشة: ${esc(e?.message || e)}</p></div>`;
+      }
+    }
+
+    window.openErpView = async (viewName, opts = {}) => {
+      const isContractView = ['contracts', 'statements', 'clients', 'guarantees'].includes(viewName);
+      if ((isContractView || viewName === 'budget') && !canAccessErpNow()) {
+        showToast('🔒 هذه الشاشة مخصصة للمدير أو المحاسب الموثوق فقط', { error: true });
+        return;
+      }
+      if (!ReviseCore.isStaff()) {
+        showToast('🔒 هذه الشاشة غير متاحة لحسابك', { error: true });
+        return;
+      }
+      if (currentTab !== 'Erp') erpPrevTab = currentTab;
+      currentTab = 'Erp';
+      currentErpView = viewName;
+      currentErpOpts = opts || {};
+      ['Home', 'Projects', 'Workers', 'Team'].forEach(t => {
+        document.getElementById('tab' + t).classList.add('hidden');
+        document.getElementById('nav' + t)?.classList.remove('active');
+      });
+      document.getElementById('tabErp').classList.remove('hidden');
+      document.getElementById('erpHeaderTitle').innerText = ERP_VIEW_TITLES[viewName] || 'إدارة المشاريع';
+      pushNavState();
+      await ensureErpModulesLoaded();
+      renderActiveErpView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.openCurrentProjErp = (viewName) => {
+      if (!currentProjId) return;
+      window.openErpView(viewName, { projectId: currentProjId });
+    };
+
+    window.openErrorLogModal = () => {
+      const sum = document.getElementById('errDiagSummary');
+      const list = document.getElementById('errLogList');
+      const swState = ('serviceWorker' in navigator && navigator.serviceWorker.controller) ? 'نشط ✅' : 'غير مفعّل';
+      sum.innerHTML = `
+        <div class="erp-sumline"><span>إصدار التطبيق</span><strong>v${APP_VER}</strong></div>
+        <div class="erp-sumline"><span>الحساب والدور</span><strong>${esc(currentUserName)} (${esc(userRole)})</strong></div>
+        <div class="erp-sumline"><span>وحدة العقود (erp-contracts.js)</span><strong>${erpContractsMod ? 'محمّلة ✅' : (canAccessErpNow() ? 'غير محمّلة ❌' : 'غير مطلوبة')}</strong></div>
+        <div class="erp-sumline"><span>وحدة الموقع (erp-site.js)</span><strong>${erpSiteMod ? 'محمّلة ✅' : (ReviseCore.isStaff() ? 'غير محمّلة ❌' : 'غير مطلوبة')}</strong></div>
+        <div class="erp-sumline"><span>Service Worker / أوفلاين</span><strong>${swState} • قائمة انتظار: ${offlineQueue.length}</strong></div>`;
+      list.innerHTML = clientErrorLogs.length
+        ? clientErrorLogs.map((x) => `<div class="tx-item" style="display:block; padding:7px 0;"><strong>⚠️ [${esc(x.ts)}] ${esc(x.src)}</strong><div style="color:var(--red); word-break:break-word;">${esc(x.msg)}</div></div>`).join('')
+        : '<p style="color:var(--green); text-align:center; font-weight:bold;">✅ لا توجد أي أخطاء مسجلة منذ فتح التطبيق!</p>';
+      document.getElementById('errorLogModal').classList.remove('hidden');
+      pushNavState();
+    };
+    window.copyErrorLogReport = async () => {
+      const txt = `Revise v${APP_VER} | role=${userRole} | contracts=${!!erpContractsMod} | site=${!!erpSiteMod} | offline=${offlineQueue.length}
+Errors (${clientErrorLogs.length}):
+`
+        + (clientErrorLogs.map((x) => `[${x.ts}] ${x.src}: ${x.msg}`).join('
+') || 'None');
+      try { await navigator.clipboard.writeText(txt); showToast('✅ تم نسخ تقرير التشخيص'); }
+      catch (e) { prompt('انسخ التقرير يدوياً:', txt); }
+    };
+    window.clearErrorLogReport = () => {
+      clientErrorLogs.length = 0;
+      const b = document.getElementById('drwErrCount');
+      if (b) b.classList.add('hidden');
+      window.openErrorLogModal();
+    };
 
     function setupUIForRole() {
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
       const isWorker = userRole === 'worker';
+      const canErp = canAccessErpNow();
       const allowAdd = isAdmin || (isStaff && myCanAdd);
       const myAttOn = getUserAttendanceEnabled({ role: userRole, payMode: myProfile?.payMode, attendanceEnabled: myProfile?.attendanceEnabled });
       document.getElementById('roleBadge').innerText = roleLabels[userRole] || userRole;
+
+      // قوائم v15 في الدرج وداخل صفحة المشروع
+      document.getElementById('drwSiteGroup').classList.toggle('hidden', !isStaff);
+      document.getElementById('drwSiteQty').classList.toggle('hidden', !isStaff);
+      document.getElementById('drwDailyRep').classList.toggle('hidden', !isStaff);
+      document.getElementById('drwErpGroup').classList.toggle('hidden', !canErp);
+      document.getElementById('drwContracts').classList.toggle('hidden', !canErp);
+      document.getElementById('drwStatements').classList.toggle('hidden', !canErp);
+      document.getElementById('drwClients').classList.toggle('hidden', !canErp);
+      document.getElementById('drwBudget').classList.toggle('hidden', !canErp);
+      document.getElementById('drwGuarantees').classList.toggle('hidden', !canErp);
+      document.getElementById('drwDiagnostics').classList.toggle('hidden', !isAdmin);
+      document.getElementById('projErpBar').classList.toggle('hidden', !isStaff);
+      document.getElementById('btnProjErpContract').classList.toggle('hidden', !canErp);
+      document.getElementById('btnProjErpBudget').classList.toggle('hidden', !canErp);
+      document.getElementById('btnProjErpQty').classList.toggle('hidden', !isStaff);
+      document.getElementById('btnProjErpDaily').classList.toggle('hidden', !isStaff);
+
       document.getElementById('drwSettings').classList.toggle('hidden', !isAdmin);
       document.getElementById('drwPrivate').classList.toggle('hidden', !isFounderUser);
       document.getElementById('drwTimeTravel').classList.toggle('hidden', !isAdmin);
@@ -1649,7 +1932,7 @@
       [...staffOwnTxs, ...staffCustodyTxs, ...workerOwnMatTxs, ...staffApprovedOrProjTxs, ...staffSelfWorkerTxs].forEach(t => { if (t && t.id) map.set(t.id, t); });
       allTxs = [...map.values()].sort((a, b) => ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) || ((b.clientTs || 0) - (a.clientTs || 0)));
       localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
-      renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger();
+      renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger(); onErpDataChanged();
     }
 
     function loadData() {
@@ -1657,7 +1940,7 @@
       dataLoaded = true;
       const isAdmin = userRole === 'admin';
       const isStaff = isAdmin || userRole === 'engineer' || userRole === 'accountant';
-      const onErr = (err) => { console.warn("Firestore:", err.message); showToast(friendlyError(err), { error: true }); };
+      const onErr = (err) => { console.warn("Firestore:", err.message); logClientError("firestore", err); showToast(friendlyError(err), { error: true }); };
 
       unsubs.push(onSnapshot(doc(db, "settings", "company"), (snap) => {
         if (snap.exists()) {
@@ -1693,11 +1976,11 @@
       unsubs.push(onSnapshot(collection(db, "projects"), (snap) => {
         projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         localStorage.setItem('revise_cache_projects', JSON.stringify(projects));
-        renderProjects(); renderCustodySummary(); checkShortcutLaunch();
+        renderProjects(); renderCustodySummary(); checkShortcutLaunch(); onErpDataChanged();
       }, onErr));
 
       if (isStaff) {
-        const accQuery = isAdmin ? collection(db, "accounts") : query(collection(db, "accounts"), where("hiddenFromStaff", "==", false));
+        const accQuery = (isAdmin || canAccessErpNow()) ? collection(db, "accounts") : query(collection(db, "accounts"), where("hiddenFromStaff", "==", false));
         unsubs.push(onSnapshot(accQuery, (snap) => {
           accounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           localStorage.setItem('revise_cache_accounts', JSON.stringify(accounts));
@@ -1745,7 +2028,14 @@
           allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
             .sort((a, b) => ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) || ((b.clientTs || 0) - (a.clientTs || 0)));
           localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
-          renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger(); renderTrash();
+          renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger(); renderTrash(); onErpDataChanged();
+        }, onErr));
+      } else if (canAccessErpNow()) {
+        unsubs.push(onSnapshot(query(collection(db, "transactions"), where("deleted", "==", false)), (snap) => {
+          allTxs = snap.docs.map(d => ({ id: d.id, pendingSync: d.metadata.hasPendingWrites, ...d.data() }))
+            .sort((a, b) => ((b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) || ((b.clientTs || 0) - (a.clientTs || 0)));
+          localStorage.setItem('revise_cache_txs', JSON.stringify(allTxs));
+          renderTxs(); renderWorkerLedger(); renderAccounts(); renderLedger(); onErpDataChanged();
         }, onErr));
       } else if (canApproveNow()) {
         const pList = myAssignedProjects.slice(0, 30);
@@ -1783,6 +2073,7 @@
           mergeStaffTxs();
         }, onErr));
       }
+      if (isStaff) ensureErpModulesLoaded();
     }
 
     function checkShortcutLaunch() {
@@ -2681,10 +2972,35 @@
     }
 
     /* نافذة الإضافة والتعديل */
+    function defaultCostGroupForCat(cat) {
+      if (cat === 'material_purchase') return 'خامات';
+      if (cat === 'advance') return 'عمالة';
+      if (cat === 'meters' || cat === 'lump_sum') return 'مقاولين باطن';
+      return 'مصاريف موقع';
+    }
+    window.setTxCostGroup = (group, isManual = false) => {
+      selectedCostGroup = group || 'مصاريف موقع';
+      if (isManual) costGroupManual = true;
+      const lbl = document.getElementById('txCostGroupTxt');
+      if (lbl) lbl.innerText = selectedCostGroup;
+      document.querySelectorAll('#txCostGroupBar .cg-chip').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.cg === selectedCostGroup);
+      });
+    };
+    function syncCostGroupVisibility() {
+      const wrap = document.getElementById('txCostGroupWrap');
+      if (!wrap) return;
+      const c = document.getElementById('txCategory').value;
+      const isOut = userRole !== 'admin' || txDir === 'out';
+      const show = isOut && ['general', 'material_purchase', 'advance', 'meters', 'lump_sum'].includes(c);
+      wrap.classList.toggle('hidden', !show);
+      if (show && !costGroupManual) window.setTxCostGroup(defaultCostGroupForCat(c), false);
+    }
     window.setTxDir = (dir) => {
       txDir = dir;
       document.getElementById('btnDirOut').classList.toggle('active', dir === 'out');
       document.getElementById('btnDirIn').classList.toggle('active', dir === 'in');
+      syncCostGroupVisibility();
     };
     window.updateLiveTafqeet = () => {
       const v = Number(document.getElementById('txAmount').value || 0);
@@ -2737,6 +3053,7 @@
         else if (c === 'advance' || c === 'deduction' || c === 'custody' || c === 'material_purchase' || c === 'overtime') setTxDir('out');
       }
       checkNegCustodyNotice();
+      syncCostGroupVisibility();
     };
 
     window.openQuickOvertime = (uid, pid, dt) => {
@@ -2754,7 +3071,7 @@
 
     const openTxModal = (preProjId = null, preAccId = '', preWorkerId = '', preCategory = 'general', preAmount = '') => {
       if (userRole !== 'admin' && !myCanAdd) { showToast("تم إيقاف صلاحية الإضافة", { error: true }); return; }
-      editingTxId = null; editingOrigAmount = null;
+      editingTxId = null; editingOrigAmount = null; costGroupManual = false;
       document.getElementById('txModalTitle').innerText = 'تسجيل عملية جديدة';
       document.getElementById('btnSaveTx').innerText = 'حفظ';
       document.getElementById('btnSaveAndNew').classList.remove('hidden');
@@ -2824,6 +3141,7 @@
       document.getElementById('btnTxHistory').classList.toggle('hidden', userRole !== 'admin');
       setTxDir(t.type === 'in' ? 'in' : 'out');
       document.getElementById('txCategory').value = t.category || 'general';
+      if (t.costGroup) { costGroupManual = true; window.setTxCostGroup(t.costGroup, true); } else { costGroupManual = false; window.setTxCostGroup(defaultCostGroupForCat(t.category || 'general'), false); }
       const selP = document.getElementById('txProject');
       if ([...selP.options].some(o => o.value === (t.projectId || 'general'))) selP.value = t.projectId || 'general';
       populateAccountSelect(t.accountId || '');
@@ -2940,6 +3258,8 @@
       const workerObj = usersList.find(u => u.id === workerId);
       const txDate = document.getElementById('txDate').value || getLocalDateStr();
       const rawAmt = Number(document.getElementById('txAmount').value);
+      const includeCostGroup = (type === 'out') && ['general', 'material_purchase', 'advance', 'meters', 'lump_sum'].includes(category);
+      const costGroupVal = includeCostGroup ? (selectedCostGroup || defaultCostGroupForCat(category)) : null;
       const amount = sanitizeAmount(rawAmt, category === 'deduction');
       let note = document.getElementById('txNote').value.trim();
       const paidNow = document.getElementById('txPaidNow').checked && !editingTxId && userRole === 'admin' && ['daily', 'overtime', 'meters', 'lump_sum'].includes(category);
@@ -2969,7 +3289,7 @@
             category, projectId, project: pObj ? pObj.name : 'عام',
             accountId, accountName: aObj ? aObj.name : '',
             workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
-            txDate, amount, note, updatedBy: currentUser.uid, updatedAt: serverTimestamp(), editedAt: serverTimestamp()
+            txDate, amount, note, ...(costGroupVal ? { costGroup: costGroupVal } : {}), updatedBy: currentUser.uid, updatedAt: serverTimestamp(), editedAt: serverTimestamp()
           };
           if (userRole === 'admin') {
             updateData.type = type;
@@ -2990,7 +3310,7 @@
         } else {
           const isForgiveCreate = saveAsForgiven && userRole === 'admin' && category === 'deduction';
           const payload = {
-            type, category, projectId, project: pObj ? pObj.name : 'عام',
+            type, category, ...(costGroupVal ? { costGroup: costGroupVal } : {}), projectId, project: pObj ? pObj.name : 'عام',
             accountId, accountName: aObj ? aObj.name : '',
             workerId: workerId || null, workerName: workerObj ? workerObj.name : '',
             txDate,
@@ -3096,7 +3416,7 @@
         const batch = writeBatch(db);
         const txRef = doc(collection(db, "transactions"));
         const payload = {
-          type: 'out', category: 'material_purchase', projectId, project: pObj ? pObj.name : 'عام',
+          type: 'out', category: 'material_purchase', costGroup: 'خامات', projectId, project: pObj ? pObj.name : 'عام',
           accountId: null, accountName: '', workerId: currentUser.uid, workerName: currentUserName,
           txDate, amount, note, deleted: false, status: 'pending',
           createdBy: currentUser.uid, createdByName: currentUserName, createdByRole: userRole, clientTs: Date.now(),
@@ -3909,6 +4229,7 @@
       const r = document.getElementById('uRole').value;
       const isStaff = (r === 'engineer' || r === 'accountant');
       document.getElementById('uApprovalModeWrap').classList.toggle('hidden', !isStaff);
+      document.getElementById('permErpRow').classList.toggle('hidden', !isStaff);
       if (!editingUserId) {
         setUserPayModeUI(r === 'worker' ? 'daily' : 'monthly', true);
       }
@@ -3931,7 +4252,7 @@
           const pCount = (u.assignedProjects || []).length;
           const pm = getUserPayMode(u);
           const am = getUserApprovalMode(u);
-          const amTxt = am === 'full' ? ' • 🛡️ اعتماد نهائي' : (am === 'review' ? ' • 👁️ مراجعة مبدئية' : '');
+          const amTxt = (am === 'full' ? ' • 🛡️ اعتماد نهائي' : (am === 'review' ? ' • 👁️ مراجعة مبدئية' : '')) + (u.permissions?.canAccessErp ? ' • 📑 ERP' : '');
           const payTxt = pm === 'monthly' ? '🗓️ شهري' : '📅 يومية';
           const custBtn = (u.role === 'engineer' || u.role === 'accountant')
             ? `<button onclick="quickAddCustody('${esc(u.id)}')" class="sm gold" title="إضافة عُهدة">💰 عُهدة</button>` : '';
@@ -3999,9 +4320,12 @@
       document.getElementById('permAdd').checked = u ? u.canAddExpenses !== false : true;
       document.getElementById('permCustody').checked = perms.canSeeCustody !== false;
       document.getElementById('permTotals').checked = !!perms.canSeeTotals;
+      document.getElementById('permErp').checked = !!perms.canAccessErp;
 
       const curRole = u?.role || 'engineer';
-      document.getElementById('uApprovalModeWrap').classList.toggle('hidden', !(curRole === 'engineer' || curRole === 'accountant'));
+      const isStaffRoleInit = (curRole === 'engineer' || curRole === 'accountant');
+      document.getElementById('uApprovalModeWrap').classList.toggle('hidden', !isStaffRoleInit);
+      document.getElementById('permErpRow').classList.toggle('hidden', !isStaffRoleInit);
       document.getElementById('uApprovalMode').value = u ? getUserApprovalMode(u) : 'none';
 
       const assigned = u?.assignedProjects || [];
@@ -4031,7 +4355,8 @@
       const permissions = {
         canSeeCustody: document.getElementById('permCustody').checked,
         canApprove: approvalMode !== 'none',
-        canSeeTotals: document.getElementById('permTotals').checked
+        canSeeTotals: document.getElementById('permTotals').checked,
+        canAccessErp: isStaffRole && document.getElementById('permErp').checked
       };
       const assignedProjects = [...document.querySelectorAll('#uProjectsBox input:checked')].map(i => i.value);
       const allowedUsers = [...document.querySelectorAll('#uAllowedUsersBox input:checked')].map(i => i.value);
@@ -4856,6 +5181,7 @@
 
     window.switchTab = (tab, push = true) => {
       currentTab = tab;
+      document.getElementById('tabErp').classList.add('hidden');
       ['Home', 'Projects', 'Workers', 'Team'].forEach(t => {
         document.getElementById('tab' + t).classList.toggle('hidden', t !== tab);
         const nb = document.getElementById('nav' + t);
@@ -4930,7 +5256,7 @@
       setupUIForRole();
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
-      loadData(); syncOfflineQueue();
+      loadData(); ensureErpModulesLoaded(); syncOfflineQueue();
     });
   </script>
 
